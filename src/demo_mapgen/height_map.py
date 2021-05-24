@@ -14,12 +14,12 @@ class HeightMap(object):
         self._steps = size.bit_length() - 1  # log2 w/o math.log2
         self._size = 1 << self._steps
 
-        self.roughness = roughness
-        self.height = height
+        self._roughness = roughness
+        self._height = height
         self._bit_length = bit_length >> 1 << 1  # make it even
 
-        self.offset_x = offset_x
-        self.offset_y = offset_y
+        self._offset_x = offset_x
+        self._offset_y = offset_y
 
         self._seed = safe_seed(seed, bit_length)
 
@@ -58,12 +58,12 @@ class HeightMap(object):
         return value
 
     def generate(self):
-        cx = self.offset_x * self._size
-        cy = self.offset_y * self._size
+        cx = self._offset_x * self._size
+        cy = self._offset_y * self._size
 
         sub_size = self.size
 
-        height = self.height * 127 - 1
+        height = self._height * 127 - 1
 
         length = 2
         image = Image.frombytes('L', (length, length),
@@ -75,7 +75,7 @@ class HeightMap(object):
         k_cross = ImageFilter.Kernel((3, 3), [0, 1, 0, 1, 0, 1, 0, 1, 0])
 
         for step in range(self._steps):
-            height *= self.roughness
+            height *= self._roughness
 
             # square step
             length += length - 1
