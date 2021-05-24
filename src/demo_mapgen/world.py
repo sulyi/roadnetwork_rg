@@ -1,11 +1,10 @@
-import bisect
 from dataclasses import dataclass, field
 from importlib import resources
 
 from PIL import Image, ImageDraw, ImageStat
 
 from . import data
-from .common import safe_seed, SeedType
+from .common import safe_seed, SeedType, PointType
 from .height_map import HeightMap
 from .intensity import AdaptivePotentialFunction, ExponentialZCompositeFunction, \
     MarkovChainMonteCarloIntensityFunction
@@ -22,9 +21,7 @@ class WorldConfig:
     city_sizes: int = 1
     bit_length: int = 64
 
-    # TODO make potential function, composite function and simulation method (intensity function) configurable
-
-    def sanity_check(self):
+    def check(self):
         HeightMap.check(self.chunk_size, self.height, self.roughness)
         WorldChunk.check(self.city_rate, self.city_sizes)
 
@@ -55,7 +52,7 @@ class WorldChunkData:
     x: int
     y: int
     height_map: Image = field(compare=False)
-    cities: list = field(compare=False)
+    cities: list[PointType, ...] = field(compare=False)
     potential_map: Image = field(compare=False)
     pixel_paths: list[PixelPath, ...] = field(compare=False)
 
@@ -63,9 +60,9 @@ class WorldChunkData:
 class WorldGenerator:
 
     def __init__(self, config: WorldConfig = default_world_config, seed: SeedType = None) -> None:
-        config.sanity_check()
+        config.check()
         self.config = config
-        self._chunks = []
+        self._chunks: list[WorldChunkData, ...] = []
 
         self._seed = seed
         self._safe_seed = safe_seed(seed, self.config.bit_length)
@@ -74,16 +71,16 @@ class WorldGenerator:
     def seed(self):
         return self._seed if self._seed is not None else self._safe_seed
 
+    @staticmethod
+    def clear_potential_cache():
+        AdaptivePotentialFunction.clear_cache()
+
     def add_chunk(self, chunk_x: int, chunk_y: int):
         chunk = WorldChunk(chunk_x, chunk_y, self.config.chunk_size, self.config.height, self.config.roughness,
                            self.config.city_rate, self.config.city_sizes,
                            seed=self._safe_seed, bit_length=self.config.bit_length)
         chunk_data = chunk.generate()
-        bisect.insort_right(self._chunks, chunk_data)
-
-    @staticmethod
-    def clear_potential_cache():
-        AdaptivePotentialFunction.clear_cache()
+        self._chunks.append(chunk_data)
 
     def render(self, *, options: WorldRenderOptions = default_render_options):
         if not self._chunks:
@@ -132,8 +129,8 @@ class WorldGenerator:
             if options.show_cities:
                 # place cities
                 for x, y, z in chunk.cities:
-                    draw.ellipse(((cx + x - city_r - z, cy + y - city_r - z),
-                                  (cx + x + city_r + z, cy + y + city_r + z)),
+                    draw.ellipse((cx + x - city_r - z, cy + y - city_r - z,
+                                  cx + x + city_r + z, cy + y + city_r + z),
                                  fill=city_colour, outline=city_border, width=1)
 
             if options.show_debug:
@@ -215,7 +212,6 @@ class WorldChunk:
         for i, source in enumerate(cities[:-1], 1):
             paths.update(find_shortest_paths(height_map_image, source, cities[i:]))
 
-        # TODO: filter paths according heuristic
         selected_path = [max(paths.values(), key=lambda path: path.cost)]
 
         world_data = WorldChunkData(

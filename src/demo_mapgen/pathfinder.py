@@ -46,7 +46,7 @@ def find_shortest_paths(graph: Image, source: PointType, targets: Iterable[Point
 
     graph = list(graph.tobytes())
 
-    d_cost = 2 ** .5
+    d = 2 ** .5
 
     while new_nodes:
         u = new_nodes.pop(0)
@@ -54,9 +54,9 @@ def find_shortest_paths(graph: Image, source: PointType, targets: Iterable[Point
         u.open = False
 
         u_value = graph[u.x + sx * u.y]
-        for dx, dy, h_cost in ((-1, -1, d_cost), (0, -1, 1.), (1, -1, d_cost),
+        for dx, dy, h_cost in ((-1, -1, d), (0, -1, 1.), (1, -1, d),
                                (-1, 0, 1.), (1, 0, 1.),
-                               (-1, 1, d_cost), (0, 1, 1.), (1, 1, d_cost)):
+                               (-1, 1, d), (0, 1, 1.), (1, 1, d)):
             nx, ny = u.x + dx, u.y + dy
             if 0 <= nx < sx and 0 <= ny < sy:
                 neighbour = nodes[nx, ny]
