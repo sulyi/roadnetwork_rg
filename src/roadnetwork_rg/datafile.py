@@ -135,6 +135,7 @@ class Datafile:
                             type(world.seed).__name__)
         seed = seed[:255]  # first 255 bytes (if larger)
         try:
+            # FIXME: functions from `intensity`, use names only
             config = pickle.dumps([*world.config.__dict__.values()])
         except pickle.PicklingError as err:
             raise DatafileEncodingError("Failed to encode config") from err

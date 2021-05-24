@@ -223,6 +223,7 @@ class WorldGenerator:
                            bit_length=self._config.bit_length)
         chunk_data = chunk.generate()
 
+        # TODO: add heuristic to config
         self._selected_paths[chunk_x, chunk_y] = filter_roads(chunk_data.cities,
                                                               chunk_data.pixel_paths)
 
@@ -365,6 +366,7 @@ class WorldChunk:
         """
         height_map_image = self._height_map.generate()
 
+        # TODO: add intensity function to config
         intensity_function = AdaptivePotentialFunction(self.config.chunk_size,
                                                        self.config.city_sizes)
         cities = [
