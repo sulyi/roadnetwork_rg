@@ -76,6 +76,16 @@ class WorldGenerator:
     def clear_potential_cache():
         AdaptivePotentialFunction.clear_cache()
 
+    # TODO: implement i/o methods
+    # using following file format:
+    # - magic number followed by data offset,
+    # - header containing: version number and signature (see bellow) ... other things maybe
+    # - data to be serialized:
+    #      self._seed, self._safe_seed
+    #      config (including: used functions from `intensity`, possibly names only)
+    #      chunks (including: cities, cost and pixels of pixel_paths, height_map and potential_map images)
+    # - data needs to be signed (validated)
+
     def add_chunk(self, chunk_x: int, chunk_y: int):
         chunk = WorldChunk(chunk_x, chunk_y, self.config.chunk_size, self.config.height, self.config.roughness,
                            self.config.city_rate, self.config.city_sizes,
