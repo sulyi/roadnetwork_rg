@@ -94,16 +94,18 @@ class WorldGenerator:
 
         width = (x_max - x_min + 1) * self.config.chunk_size
         height = (y_max - y_min + 1) * self.config.chunk_size
-        r = 2
-        colour = (255, 0, 0)
-        border = (0, 0, 0)
+
+        city_r = 2
+        height_map_palette = resources.open_binary(data.__name__, 'colourmap.palette').read()
+        city_colour = (255, 0, 0)
+        city_border = (0, 0, 0)
+        text_color = (0, 0, 0)
 
         atlas_im = Image.new('RGBA', (width, height))
         draw_im = Image.new('RGBA', (width, height))
-        potential_im = Image.new('L', (width, height))
 
         draw = ImageDraw.Draw(draw_im)
-        palette = resources.open_binary(data.__name__, 'colourmap.palette').read()
+
         for chunk in self._chunks:
             cx = (chunk.x - x_min) * self.config.chunk_size
             cy = (chunk.y - y_min) * self.config.chunk_size
@@ -111,17 +113,20 @@ class WorldGenerator:
             if options.show_height_map:
                 # concatenate heightmaps
                 im = chunk.height_map.convert('P')
-                im.putpalette(palette)
+                im.putpalette(height_map_palette)
                 atlas_im.paste(im, (cx, cy))
+
             if options.show_potential_map:
-                potential_im.paste(chunk.potential_map, (cx, cy))
+                alpha = Image.new('RGBA', (self.config.chunk_size, self.config.chunk_size), 0)
+                alpha.putalpha(chunk.potential_map)
+                atlas_im.alpha_composite(alpha, (cx, cy))
 
             if options.show_cities:
                 # place cities
                 for x, y, z in chunk.cities:
-                    draw.ellipse(((cx + x - r - z, cy + y - r - z),
-                                  (cx + x + r + z, cy + y + r + z)),
-                                 fill=colour, outline=border, width=1)
+                    draw.ellipse(((cx + x - city_r - z, cy + y - city_r - z),
+                                  (cx + x + city_r + z, cy + y + city_r + z)),
+                                 fill=city_colour, outline=city_border, width=1)
 
             if options.show_debug:
                 msg = '\n'.join((
@@ -130,14 +135,9 @@ class WorldGenerator:
                     f"mean: {(255 - ImageStat.Stat(chunk.height_map).mean.pop()) / 255:.3f}",
                     f"sizes: {self.config.city_sizes}")
                 )
-                draw.multiline_text((cx, cy), msg, fill=(0, 0, 0))
-            atlas_im.paste(draw_im, mask=draw_im)
+                draw.multiline_text((cx, cy), msg, fill=text_color)
 
-        if options.show_potential_map:
-            alpha = Image.new('RGBA', (width, height), 0)
-            alpha.putalpha(potential_im)
-            atlas_im.alpha_composite(alpha)
-
+        atlas_im.paste(draw_im, mask=draw_im)
         return atlas_im
 
 
