@@ -47,7 +47,7 @@ class WorldRenderOptions:
 
 
 default_world_config = WorldConfig(chunk_size=256, height=1., roughness=.5, city_rate=32, city_sizes=8)
-default_render_options = WorldRenderOptions()
+default_render_options = WorldRenderOptions(False, True, True, False)
 
 
 @dataclass(order=True, frozen=True)
@@ -110,7 +110,7 @@ class WorldGenerator:
         draw_im = Image.new('RGBA', (width, height))
 
         draw = ImageDraw.Draw(draw_im)
-        palette = resources.open_binary(data.__name__, 'colourmap.palette').read()
+
         for chunk in self._chunks:
             cx = (chunk.x - x_min) * self.config.chunk_size
             cy = (chunk.y - y_min) * self.config.chunk_size
