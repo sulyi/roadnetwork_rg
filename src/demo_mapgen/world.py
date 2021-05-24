@@ -47,7 +47,7 @@ class WorldRenderOptions:
 
 
 default_world_config = WorldConfig(chunk_size=256, height=1., roughness=.5, city_rate=32, city_sizes=8)
-default_render_options = WorldRenderOptions(False, True, True, False)
+default_render_options = WorldRenderOptions()
 
 
 @dataclass(order=True, frozen=True)
