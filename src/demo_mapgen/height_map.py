@@ -61,7 +61,7 @@ class HeightMap(object):
         cx = self._offset_x * self._size
         cy = self._offset_y * self._size
 
-        sub_size = self.size
+        sub_size = self._size
 
         height = self._height * 127 - 1
 
@@ -124,4 +124,4 @@ class HeightMap(object):
             fim = ImageChops.add(fim, Image.frombytes('L', (length, length), bytes(r)), offset=-127)
             image.paste(fim, mask=Image.frombytes('L', (length, length), bytes(mask)))
 
-        return image
+        return image.crop((0, 0, self._size, self._size))

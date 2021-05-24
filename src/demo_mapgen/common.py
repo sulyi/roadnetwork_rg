@@ -3,6 +3,7 @@ import random
 from typing import Union, Any
 
 SeedType = Union[None, int, str, bytes, bytearray]
+PointType = tuple[int, int, int]
 
 
 def safe_seed(seed: Any, bit_length: int) -> int:

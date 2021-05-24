@@ -1,5 +1,5 @@
 import bisect
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, field
 from importlib import resources
 
 from PIL import Image, ImageDraw, ImageStat
@@ -9,6 +9,7 @@ from .common import safe_seed, SeedType
 from .height_map import HeightMap
 from .intensity import AdaptivePotentialFunction, ExponentialZCompositeFunction, \
     MarkovChainMonteCarloIntensityFunction
+from .pathfinder import find_shortest_paths, PixelPath
 from .point_process import MarkovChainMonteCarlo
 
 
@@ -37,14 +38,16 @@ class WorldConfig:
 
 @dataclass(frozen=True)
 class WorldRenderOptions:
-    show_debug: bool
-    show_height_map: bool
-    show_cities: bool
-    show_potential_map: bool
+    show_debug: bool = False
+    show_height_map: bool = True
+    colour_height_map: bool = True
+    show_cities: bool = True
+    show_roads: bool = True
+    show_potential_map: bool = False
 
 
 default_world_config = WorldConfig(chunk_size=256, height=1., roughness=.5, city_rate=32, city_sizes=8)
-default_render_options = WorldRenderOptions(False, True, True, False)
+default_render_options = WorldRenderOptions()
 
 
 @dataclass(order=True, frozen=True)
@@ -54,6 +57,7 @@ class WorldChunkData:
     height_map: Image = field(compare=False)
     cities: list = field(compare=False)
     potential_map: Image = field(compare=False)
+    pixel_paths: list[PixelPath, ...] = field(compare=False)
 
 
 class WorldGenerator:
@@ -84,8 +88,9 @@ class WorldGenerator:
     def render(self, *, options: WorldRenderOptions = default_render_options):
         if not self._chunks:
             raise IndexError("There are no chunks added to render")
-        if not any(getattr(options, f.name) for f in fields(options)):
-            raise ValueError("Argument 'option' sets nothing to render")
+        if not any((options.show_debug, options.show_height_map, options.show_cities, options.show_roads,
+                    options.show_potential_map)):
+            raise ValueError("Nothing to render with given 'option' argument")
 
         x_max = max(self._chunks, key=lambda item: item.x).x
         x_min = min(self._chunks, key=lambda item: item.x).x
@@ -105,15 +110,18 @@ class WorldGenerator:
         draw_im = Image.new('RGBA', (width, height))
 
         draw = ImageDraw.Draw(draw_im)
-
+        palette = resources.open_binary(data.__name__, 'colourmap.palette').read()
         for chunk in self._chunks:
             cx = (chunk.x - x_min) * self.config.chunk_size
             cy = (chunk.y - y_min) * self.config.chunk_size
 
             if options.show_height_map:
                 # concatenate heightmaps
-                im = chunk.height_map.convert('P')
-                im.putpalette(height_map_palette)
+                if options.colour_height_map:
+                    im = chunk.height_map.convert('P')
+                    im.putpalette(height_map_palette)
+                else:
+                    im = chunk.height_map
                 atlas_im.paste(im, (cx, cy))
 
             if options.show_potential_map:
@@ -136,6 +144,16 @@ class WorldGenerator:
                     f"sizes: {self.config.city_sizes}")
                 )
                 draw.multiline_text((cx, cy), msg, fill=text_color)
+
+            if options.show_roads:
+                # XXX: avoiding `Image.putpixel`
+                path_data = [0] * (self.config.chunk_size * self.config.chunk_size)
+                for path in chunk.pixel_paths:
+                    for point_x, point_y in path.pixels:
+                        path_data[point_x + point_y * self.config.chunk_size] = 255
+                im = Image.new('RGBA', (self.config.chunk_size, self.config.chunk_size), 0)
+                im.putalpha(Image.frombytes('L', (self.config.chunk_size, self.config.chunk_size), bytes(path_data)))
+                draw_im.paste(im, (cx, cy), mask=im)
 
         atlas_im.paste(draw_im, mask=draw_im)
         return atlas_im
@@ -193,9 +211,14 @@ class WorldChunk:
         mcmc = MarkovChainMonteCarlo(intensity_function, volume, self._local_seed)
         cities = [point for point in mcmc]
 
-        # TODO: implement pathfinding
+        paths = {}
+        for i, source in enumerate(cities[:-1], 1):
+            paths.update(find_shortest_paths(height_map_image, source, cities[i:]))
+
+        # TODO: filter paths according heuristic
+        selected_path = [max(paths.values(), key=lambda path: path.cost)]
 
         world_data = WorldChunkData(
-            self._chunk_x, self._chunk_y, height_map_image, cities, potential_function.potential_map
+            self._chunk_x, self._chunk_y, height_map_image, cities, potential_function.potential_map, selected_path
         )
         return world_data
