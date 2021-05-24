@@ -93,8 +93,9 @@ class Datafile:
      -- 1 byte --   -- separator -- (if not last)
     ============== =================
     """
+    # TODO: add backward compatibility if needed
 
-    __version = (0, 1, 0)
+    __version = (0, 1, 1)
     __compatible_versions = ()
     __magic = '#D-MG#WG-D'.encode('ascii')
     __header_checksum_length = 64  # from `hashlib` `sha512` method `digest_size`

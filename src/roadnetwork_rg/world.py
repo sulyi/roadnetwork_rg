@@ -7,70 +7,60 @@ from typing import Dict, List, Set, Tuple, Union
 
 from PIL import Image, ImageDraw, ImageStat
 
-from .common import (HeightMapConfig, PixelPath, PointType, SeedType, WorldChunkData, WorldConfig,
+from .common import (HeightMapConfig, PointType, SeedType, WorldChunkData, WorldConfig,
                      WorldData, WorldRenderOptions, get_safe_seed)
 from .data import colour_palette
 from .datafile import Datafile
 from .height_map import HeightMap
+from .heuristic import greedy
 from .intensity import (AdaptivePotentialFunction, ExponentialZCompositeFunction,
+                        MarkovChainMonteCarloPotentialFunction,
                         MarkovChainMonteCarloIntensityFunction)
 from .pathfinder import Pathfinder
-from .point_process import MarkovChainMonteCarlo
+from .point_process import IntensityFunction, MarkovChainMonteCarlo, PointProcess
 
-default_world_config = WorldConfig(chunk_size=256, height=1., roughness=.5,
-                                   city_rate=32, city_sizes=8)
+default_world_config = WorldConfig(
+    chunk_size=256, height=1., roughness=.5, city_rate=32,
+    intensity_function=MarkovChainMonteCarloIntensityFunction.__name__,
+    potential_function=AdaptivePotentialFunction.__name__,
+    point_process=MarkovChainMonteCarlo.__name__,
+    filter=greedy.__name__,
+    city_sizes=8
+)
 """It is the default configuration for :class:`WorldGenerator` initialization."""
 default_render_options = WorldRenderOptions()
 """It is the default render options for :meth:`WorldGenerator.render` method."""
 
 
-def filter_roads(targets: List[PointType, ...], paths: Dict[Tuple[PointType, PointType], PixelPath]
-                 ) -> Set[Tuple[PointType, PointType], ...]:
-    """Selects cheapest road until all target are connected.
+def config_factory(
+        chunk_size: int = None,
+        height: float = None,
+        roughness: float = None,
+        city_rate: int = None,
+        intensity_function: str = None,
+        potential_function: str = None,
+        point_process: str = None,
+        heuristic: str = None,
+        city_sizes: int = None,
+        bit_length: int = None
+) -> WorldConfig:
+    chunk_size = chunk_size if chunk_size is not None else default_world_config.chunk_size
+    height = height if height is not None else default_world_config.height
+    roughness = roughness if roughness is not None else default_world_config.roughness
+    city_rate = city_rate if city_rate is not None else default_world_config.city_rate
+    intensity_function = intensity_function if intensity_function is not None \
+        else default_world_config.intensity_function
+    potential_function = potential_function if potential_function is not None \
+        else default_world_config.potential_function
+    point_process = point_process if point_process is not None \
+        else default_world_config.point_process
+    city_sizes = city_sizes if city_sizes is not None else default_world_config.city_sizes
+    heuristic = heuristic if heuristic is not None else default_world_config.filter
+    bit_length = bit_length if bit_length is not None else default_world_config.bit_length
 
-    :param targets: It is a list of points to be connected.
-    :type targets: :class:`list` [:data:`.PointType`, ...]
-    :param paths: It is a dictionary of available paths.
-    :type paths: :class:`dict` [:class:`tuple` [:data:`.PointType`, :data:`.PointType`],
-        :class:`.PixelPath`]
-    :return: It is a set of keys corresponding to selected paths.
-    :rtype: :class:`set` [:class:`tuple` [:data:`.PointType`, :data:`.PointType`], ...]
-    """
-    sorted_paths = sorted(paths, key=lambda path: paths[path].cost, reverse=True)
-    lookup = {key: 0 for key in targets}
-    available = 1
-    q = {0: targets.copy()}
-    result = set()
-    while True:
-        cheapest = sorted_paths.pop()
-        result.add(cheapest)
-        if lookup[cheapest[0]] == 0 and lookup[cheapest[1]] == 0:
-            q[available] = [*cheapest]
-            q[0].remove(cheapest[0])
-            q[0].remove(cheapest[1])
-            lookup[cheapest[0]] = available
-            lookup[cheapest[1]] = available
-            available += 1
-            if not q[0]:
-                q.pop(0)
-        elif lookup[cheapest[0]] == 0 or lookup[cheapest[1]] == 0:
-            source, target = cheapest if lookup[cheapest[0]] == 0 else reversed(cheapest)
-            q[0].remove(source)
-            q[lookup[target]].append(source)
-            lookup[source] = lookup[target]
-            if not q[0]:
-                q.pop(0)
-        elif lookup[cheapest[0]] != lookup[cheapest[1]]:
-            target, source = sorted(cheapest, key=lookup.get)
-            q_index = lookup[source]
-            q[lookup[target]].extend(q[lookup[source]])
-            for city in q[lookup[source]]:
-                lookup[city] = lookup[target]
-            q.pop(q_index)
-
-        if len(q) == 1:
-            break
-    return result
+    return WorldConfig(chunk_size, height, roughness, city_rate,
+                       intensity_function, potential_function, point_process,
+                       heuristic, city_sizes, bit_length)
 
 
 class WorldDataInconsistencyError(Exception):
@@ -181,9 +171,14 @@ class WorldGenerator:
 
         self._config = config
         self._chunks = {(chunk.offset_x, chunk.offset_y): chunk for chunk in data.chunks}
+
+        filter_function = globals().get(self.config.filter)
+        # FIXME: type check
+        if filter_function is None:
+            raise ValueError("Unknown name, '%s', for potential function"
+                             % self.config.filter)
         self._selected_paths = {
-            (chunk.offset_x, chunk.offset_y): filter_roads(chunk.cities,
-                                                           chunk.pixel_paths)
+            (chunk.offset_x, chunk.offset_y): filter_function(chunk.cities, chunk.pixel_paths)
             for chunk in data.chunks
         }
 
@@ -223,9 +218,14 @@ class WorldGenerator:
                            bit_length=self._config.bit_length)
         chunk_data = chunk.generate()
 
-        # TODO: add heuristic to config
-        self._selected_paths[chunk_x, chunk_y] = filter_roads(chunk_data.cities,
-                                                              chunk_data.pixel_paths)
+        filter_function = globals().get(self.config.filter)
+        # FIXME: type check
+        if filter_function is None:
+            raise ValueError("Unknown name, '%s', for potential function"
+                             % self.config.filter)
+
+        self._selected_paths[chunk_x, chunk_y] = filter_function(chunk_data.cities,
+                                                                 chunk_data.pixel_paths)
 
         self._chunks[chunk_x, chunk_y] = chunk_data
 
@@ -315,11 +315,6 @@ class WorldGenerator:
                                        bytes(path_data)))
         return image
 
-    @staticmethod
-    def clear_potential_cache() -> None:
-        """Empties monopole cache of :class:`.AdaptivePotentialFunction` (see: there)."""
-        AdaptivePotentialFunction.clear_cache()
-
 
 class WorldChunk:
     """It is a handler to generate a new chunk."""
@@ -366,15 +361,35 @@ class WorldChunk:
         """
         height_map_image = self._height_map.generate()
 
-        # TODO: add intensity function to config
-        intensity_function = AdaptivePotentialFunction(self.config.chunk_size,
-                                                       self.config.city_sizes)
+        intensity_function_class: IntensityFunction.__class__
+        potential_function_class: MarkovChainMonteCarloPotentialFunction.__class__
+        point_process_class: PointProcess.__class__
+
+        intensity_function_class, potential_function_class, point_process_class = (
+            globals().get(self.config.intensity_function),
+            globals().get(self.config.potential_function),
+            globals().get(self.config.point_process)
+        )
+
+        # FIXME: type check
+        if potential_function_class is None:
+            raise ValueError("Unknown name, '%s', for potential function"
+                             % self.config.potential_function)
+        if intensity_function_class is None:
+            raise ValueError("Unknown name, '%s', for intensity function"
+                             % self.config.intensity_function)
+        if point_process_class is None:
+            raise ValueError("Unknown name, '%s', for point process"
+                             % self.config.point_process)
+
+        potential_function = potential_function_class(self.config.chunk_size,
+                                                      self.config.city_sizes)
         cities = [
-            *MarkovChainMonteCarlo(
-                MarkovChainMonteCarloIntensityFunction(
+            *point_process_class(
+                intensity_function_class(
                     self.config.city_rate,
                     height_map_image,
-                    intensity_function,
+                    potential_function,
                     ExponentialZCompositeFunction()
                 ),
                 (
@@ -395,7 +410,7 @@ class WorldChunk:
             self._chunk_y,
             height_map_image,
             cities,
-            intensity_function.potential_map,
+            potential_function.potential_map,
             paths
         )
         return world_data

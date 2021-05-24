@@ -67,11 +67,16 @@ class WorldConfig:
         (see: :class:`.HeightMap`).
     :type bit_length: :class:`int`
     """
+    # FIXME: update doc, update check
 
     chunk_size: int
     height: float
     roughness: float
     city_rate: int
+    intensity_function: str
+    potential_function: str
+    point_process: str
+    filter: str
     city_sizes: int = 1
     bit_length: int = 64
 
