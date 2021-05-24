@@ -20,7 +20,7 @@ class PointProcess(object):
         if any(dim <= 0 for dim in size):
             raise ValueError("Argument 'size' should be positive")
         if not isinstance(rate, (int, float, IntensityFunction)):
-            raise TypeError("Argument 'rate' should be number or %s, not '%s'" % (
+            raise TypeError("Argument 'rate' should be a number or %s, not '%s'" % (
                 IntensityFunction.__name__, type(rate).__name__))
         if ((isinstance(rate, (int, float)) and rate <= 0) or
                 (isinstance(rate, IntensityFunction) and rate.rate <= 0)):

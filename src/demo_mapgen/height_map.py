@@ -31,12 +31,12 @@ class HeightMap(object):
             raise ValueError("Argument 'size' should be positive")
 
         if not isinstance(height, (float, int)):
-            raise TypeError("Argument 'height' should be number, not '%s'" % type(height).__name__)
+            raise TypeError("Argument 'height' should be a number, not '%s'" % type(height).__name__)
         if not 0 <= height <= 1:
             raise ValueError("Argument 'height' should be in [0, 1] inclusive range")
 
         if not isinstance(roughness, (float, int)):
-            raise TypeError("Argument 'roughness' should be number, not '%s'" % type(roughness).__name__)
+            raise TypeError("Argument 'roughness' should be a number, not '%s'" % type(roughness).__name__)
         if not 0 <= roughness <= 1:
             raise ValueError("Argument 'roughness' should be in [0, 1] inclusive range")
 
@@ -90,7 +90,7 @@ class HeightMap(object):
                 for j in range(1, length, 2):
                     value = self._get_random_value(i * sub_size + cx, j * sub_size + cy)
                     pixel = int(height * value) + 127
-                    # fail safe
+                    # fail-safe
                     if 0 < pixel < 255:
                         r[i + j * length] = pixel
                     elif pixel > 255:
@@ -112,7 +112,7 @@ class HeightMap(object):
                 for q in range(min(p + 1, length) - 1, max(0, p - length + 1) - 1, - 1):
                     value = self._get_random_value(q * sub_size + cx, (p - q) * sub_size + cy)
                     pixel = int(height * value) + 127
-                    # fail safe
+                    # fail-safe
                     if 0 < pixel < 255:
                         r[q + (p - q) * length] = pixel
                     elif pixel > 255:
