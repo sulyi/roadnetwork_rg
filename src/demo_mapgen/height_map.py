@@ -2,7 +2,7 @@ import hashlib
 
 from PIL import Image, ImageFilter, ImageChops
 
-from .common import safe_seed, SeedType
+from .common import get_safe_seed, SeedType
 
 
 class HeightMap(object):
@@ -21,7 +21,7 @@ class HeightMap(object):
         self._offset_x = offset_x
         self._offset_y = offset_y
 
-        self._seed = safe_seed(seed, bit_length)
+        self._seed = get_safe_seed(seed, bit_length)
 
     @staticmethod
     def check(size, height, roughness):

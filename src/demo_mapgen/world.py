@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 
 from PIL import Image, ImageDraw, ImageStat
 
-from .common import safe_seed, SeedType, PointType
+from .common import get_safe_seed, SeedType, PointType
 from .data import colour_palette
 from .height_map import HeightMap
 from .intensity import AdaptivePotentialFunction, ExponentialZCompositeFunction, \
@@ -64,7 +64,7 @@ class WorldGenerator:
         self._chunks: list[WorldChunkData, ...] = []
 
         self._seed = seed
-        self._safe_seed = safe_seed(seed, self.config.bit_length)
+        self._safe_seed = get_safe_seed(seed, self.config.bit_length)
 
     @property
     def seed(self):
@@ -173,7 +173,7 @@ class WorldChunk:
         self.city_sizes = city_sizes
         self.city_rate = city_rate
 
-        self._seed = safe_seed(seed, bit_length)
+        self._seed = get_safe_seed(seed, bit_length)
         x = self._chunk_x * self._size
         y = self._chunk_y * self._size
         seed = (x ^ y << (bit_length >> 1)) ^ self._seed
