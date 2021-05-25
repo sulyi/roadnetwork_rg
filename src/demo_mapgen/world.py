@@ -1,10 +1,9 @@
 from dataclasses import dataclass, field
-from importlib import resources
 
 from PIL import Image, ImageDraw, ImageStat
 
-from . import data
 from .common import safe_seed, SeedType, PointType
+from .data import colour_palette
 from .height_map import HeightMap
 from .intensity import AdaptivePotentialFunction, ExponentialZCompositeFunction, \
     MarkovChainMonteCarloIntensityFunction
@@ -98,7 +97,6 @@ class WorldGenerator:
         height = (y_max - y_min + 1) * self.config.chunk_size
 
         city_r = 2
-        height_map_palette = resources.open_binary(data.__name__, 'colourmap.palette').read()
         city_colour = (255, 0, 0)
         city_border = (0, 0, 0)
         text_color = (0, 0, 0)
@@ -116,7 +114,7 @@ class WorldGenerator:
                 # concatenate heightmaps
                 if options.colour_height_map:
                     im = chunk.height_map.convert('P')
-                    im.putpalette(height_map_palette)
+                    im.putpalette(colour_palette)
                 else:
                     im = chunk.height_map
                 atlas_im.paste(im, (cx, cy))
