@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 
 from PIL import Image, ImageDraw, ImageStat
 
+from . import __version_info__ as package_version
 from .common import get_safe_seed, SeedType, PointType
 from .data import colour_palette
 from .height_map import HeightMap
@@ -56,6 +57,48 @@ class WorldChunkData:
 
 default_world_config = WorldConfig(chunk_size=256, height=1., roughness=.5, city_rate=32, city_sizes=8)
 default_render_options = WorldRenderOptions()
+
+
+class WorldGeneratorDatafile:
+    # TODO: implement file format:
+    # [x] * 10 bytes * magic number
+    # [x] *  2 bytes * data offset
+    # [ ] header checksum
+    # --- header ---
+    # [x] *  3 bytes * version number
+    # [x] *  4 bytes * content length
+    # [ ] signature (see bellow)
+    # [ ] ... other things, maybe
+    # --- data ---
+    # [ ] self._seed
+    # [ ] self._safe_seed
+    # [ ] config (including: used functions from `intensity`, possibly names only)
+    # [ ] chunks (including: cities, cost and pixels of pixel_paths, height_map and potential_map images)
+
+    __magic = '#D-MG#WG-D'.encode('ascii')
+
+    def __init__(self):
+        self._data = None
+
+    # TODO: implement method for data to be signed and validated
+
+    def add_data(self, seed: SeedType, safe_seed: int, config: WorldConfig, chunks: list[WorldChunkData, ...]):
+        pass
+
+    def save(self, filename):
+        with open(filename, 'wb') as f:
+            data = bytes() if self._data is None else self._data
+            content_length = 0
+            header = b''.join((
+                b''.join(x.to_bytes(1, 'little') for x in package_version),  # 3 byte
+                content_length.to_bytes(4, 'little')  # 4 byte
+            ))
+            f.write(b''.join((
+                self.__magic,  # 10 byte
+                len(header).to_bytes(2, 'little'),  # 2 byte
+                header,
+                data
+            )))
 
 
 class WorldGenerator:
