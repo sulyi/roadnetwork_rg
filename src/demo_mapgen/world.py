@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import struct
 from dataclasses import dataclass, field
 
 from PIL import Image, ImageDraw, ImageStat
@@ -64,14 +65,16 @@ class WorldGeneratorDatafile:
     # [x] * 10 bytes * magic number
     # [x] *  2 bytes * data offset
     # [ ] header checksum
-    # --- header ---
+    # --- *  1 byte  * header pad ---
     # [x] *  3 bytes * version number
     # [x] *  4 bytes * content length
     # [ ] signature (see bellow)
     # [ ] ... other things, maybe
-    # --- data ---
-    # [ ] self._seed
-    # [ ] self._safe_seed
+    # --- *  1 byte  * data pad ---
+    # [x] *  1 bit   * is seed a string
+    # [x] *  1 byte  * length of seed
+    # [x] *  varied  * self._seed
+    # [x] *  8 bytes * self._safe_seed
     # [ ] config (including: used functions from `intensity`, possibly names only)
     # [ ] chunks (including: cities, cost and pixels of pixel_paths, height_map and potential_map images)
 
@@ -83,22 +86,42 @@ class WorldGeneratorDatafile:
     # TODO: implement method for data to be signed and validated
 
     def add_data(self, seed: SeedType, safe_seed: int, config: WorldConfig, chunks: list[WorldChunkData, ...]):
-        pass
+        if isinstance(seed, int):
+            is_seed_str = False
+            seed = seed.to_bytes((seed.bit_length() + 7) // 8, byteorder='little')
+        elif isinstance(seed, str):
+            is_seed_str = True
+            seed = seed.encode()
+        else:
+            is_seed_str = False
+        seed = seed[:255]  # first 255 bytes (if larger)
+
+        self._data = struct.pack(
+            '<?B%dcQ' % len(seed),
+            is_seed_str,
+            len(seed),
+            *(seed[i:i + 1] for i in range(len(seed))),
+            safe_seed
+        )
 
     def save(self, filename):
         with open(filename, 'wb') as f:
-            data = bytes() if self._data is None else self._data
+            data = bytes()  # if self._data is None else self._data
             content_length = 0
-            header = b''.join((
-                b''.join(x.to_bytes(1, 'little') for x in package_version),  # 3 byte
-                content_length.to_bytes(4, 'little')  # 4 byte
-            ))
-            f.write(b''.join((
+            header = struct.pack(
+                '<x3BLx',
+                *package_version,  # 3 byte
+                content_length  # 4 byte
+                # pad 1 byte
+            )
+            f.write(struct.pack(
+                '<10sH',
                 self.__magic,  # 10 byte
-                len(header).to_bytes(2, 'little'),  # 2 byte
-                header,
-                data
-            )))
+                len(header)  # 2 byte
+                # pad 1 byte
+            ))
+            f.write(header)
+            f.write(data)
 
 
 class WorldGenerator:
@@ -108,7 +131,7 @@ class WorldGenerator:
         self.config = config
         self._chunks: list[WorldChunkData, ...] = []
 
-        self._seed = seed
+        self._seed = seed if isinstance(seed, int) else seed[:255]  # for i/o compatibility
         self._safe_seed = get_safe_seed(seed, self.config.bit_length)
 
     @property
