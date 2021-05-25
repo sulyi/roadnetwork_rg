@@ -1,3 +1,5 @@
+# TODO: document dev_utils.create_palette
+
 import os
 
 from itertools import chain, repeat
@@ -22,6 +24,7 @@ def get_palette(gradient):
     ]
     palette = bytes(
         chain(*chain(
+            # TODO: Add possibility to create smooth palette
             *(repeat(c, 8)
               for i in range(8) for c in _interpolate(rgb_colours[i], rgb_colours[i + 1], 4)
               )
