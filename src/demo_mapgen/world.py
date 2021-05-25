@@ -110,8 +110,8 @@ class WorldGenerator:
             cx = (chunk.x - x_min) * self.config.chunk_size
             cy = (chunk.y - y_min) * self.config.chunk_size
 
+            # concatenate height maps
             if options.show_height_map:
-                # concatenate heightmaps
                 if options.colour_height_map:
                     im = chunk.height_map.convert('P')
                     im.putpalette(colour_palette)
@@ -119,18 +119,20 @@ class WorldGenerator:
                     im = chunk.height_map
                 atlas_im.paste(im, (cx, cy))
 
+            # overlay potential field
             if options.show_potential_map:
                 alpha = Image.new('RGBA', (self.config.chunk_size, self.config.chunk_size), 0)
                 alpha.putalpha(chunk.potential_map)
                 atlas_im.alpha_composite(alpha, (cx, cy))
 
+            # place cities
             if options.show_cities:
-                # place cities
                 for x, y, z in chunk.cities:
                     draw.ellipse((cx + x - city_r - z, cy + y - city_r - z,
                                   cx + x + city_r + z, cy + y + city_r + z),
                                  fill=city_colour, outline=city_border, width=1)
 
+            # put message in top left corner
             if options.show_debug:
                 msg = '\n'.join((
                     f"count: {len(chunk.cities)}",
@@ -140,6 +142,7 @@ class WorldGenerator:
                 )
                 draw.multiline_text((cx, cy), msg, fill=text_color)
 
+            # draw roads
             if options.show_roads:
                 # XXX: avoiding `Image.putpixel`
                 path_data = [0] * (self.config.chunk_size * self.config.chunk_size)
