@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import pickle
 import struct
 from dataclasses import dataclass, field
 from typing import Union
@@ -68,19 +69,22 @@ class WorldGeneratorDatafile:
     # [x] * 10 bytes * magic number
     # [x] *  2 bytes * data offset
     # [ ] header checksum
-    # --- *  1 byte  * header pad ---
+    # --- *  1 byte  * pad ---
+    # header:
     # [x] *  3 bytes * version number
     # [x] *  4 bytes * content length
     # [x] * 64 bytes * signature (see bellow)
     # [ ] ... other things, maybe
-    # --- *  1 byte  * data pad ---
+    # --- *  1 byte  * pad ---
+    # data:
     # [x] *  1 bit   * is seed a string
     # [x] *  1 byte  * length of seed
     # [x] *  varied  * self._seed
-    # --- *  1 byte  * seed pad ---
+    # --- *  1 byte  * pad ---
     # [x] *  8 bytes * self._safe_seed
-    # --- *  1 byre  * safe_seed pad ---
-    # [ ] config (including: used functions from `intensity`, possibly names only)
+    # --- *  1 byte  * pad ---
+    # [x] *  1 byte  * length of config (future proof, currently 43)
+    # [x] *  varied  * config (including: used functions from `intensity`, possibly names only)
     # [ ] chunks (including: cities, cost and pixels of pixel_paths, height_map and potential_map images)
 
     __magic = '#D-MG#WG-D'.encode('ascii')
@@ -100,13 +104,18 @@ class WorldGeneratorDatafile:
         else:
             is_seed_str = False
         seed = seed[:255]  # first 255 bytes (if larger)
+        config = pickle.dumps(list(config.__dict__.values()))
 
         self._data = struct.pack(
-            '<?B%dcxQx' % len(seed),
-            is_seed_str,
-            len(seed),
-            *(seed[i:i + 1] for i in range(len(seed))),
-            safe_seed
+            '<?B%dsxQxB%ds' % (len(seed), len(config)),
+            is_seed_str,  # 1 bit
+            len(seed),  # 1 byte
+            seed,  # varied
+            # pad 1 byte
+            safe_seed,  # 8 bytes
+            # pad 1 byte
+            len(config),  # 1 byte
+            config  # 43 bytes
         )
 
     def save(self, filename: Union[str, bytes], key: bytes):
@@ -115,15 +124,15 @@ class WorldGeneratorDatafile:
             content_length = 0
             header = struct.pack(
                 '<x3BL%dsx' % len(signature),  # expected 64 (hmac digest_size with sha512 method)
-                *package_version,  # 3 byte
-                content_length,  # 4 byte
+                *package_version,  # 3 bytes
+                content_length,  # 4 bytes
                 signature,  # 64 bytes
                 # pad 1 byte
             )
             f.write(struct.pack(
                 '<10sH',
-                self.__magic,  # 10 byte
-                len(header)  # 2 byte
+                self.__magic,  # 10 bytes
+                len(header)  # 2 bytes
                 # pad 1 byte
             ))
             f.write(header)
