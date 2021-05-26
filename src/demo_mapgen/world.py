@@ -70,12 +70,12 @@ class WorldGeneratorDatafile:
     # [x] *  3 bytes * version number
     # [x] * 64 bytes * header checksum
     # [x] *  2 bytes * data offset
-    # --- *  1 byte  * pad ---
+    # --- *  1 byte  * separator ---
     # header:
     # [x] *  4 bytes * content length (32Gb data max)
-    # [x] * 64 bytes * signature (see bellow)
+    # [x] * 64 bytes * signature
     # [ ] other things, maybe
-    # --- *  1 byte  * pad ---
+    # --- *  1 byte  * separator ---
     # data:
     # [x] *  1 bit   * is seed a string
     # [x] *  1 byte  * length of seed
@@ -113,11 +113,11 @@ class WorldGeneratorDatafile:
     __magic = '#D-MG#WG-D'.encode('ascii')
 
     def __init__(self):
-        self._data: bytes = bytes()
+        self._data: bytes = b''
 
     # TODO: implement method for data to be validated
 
-    def add_data(self, seed: SeedType, safe_seed: int, config: WorldConfig, chunks: list[WorldChunkData, ...]):
+    def set_data(self, seed: SeedType, safe_seed: int, config: WorldConfig, chunks: list[WorldChunkData, ...]):
         if seed is None:
             is_seed_str = False
             seed = b''
@@ -149,6 +149,9 @@ class WorldGeneratorDatafile:
             b'\00'.join(self._encode_chunk_data(chunk) for chunk in chunks)
         ))
 
+    def clear_data(self):
+        self._data = b''
+
     def save(self, filename: Union[str, bytes], key: bytes):
         with open(filename, 'wb') as f:
             content_length = len(self._data)
@@ -169,9 +172,13 @@ class WorldGeneratorDatafile:
                 len(header),  # 2 bytes
                 # pad 1 byte
             )
-            f.write(magic)
-            f.write(header)
-            f.write(self._data)
+            f.write(b'\00'.join((
+                magic,
+                # separator 1 byte
+                header,
+                # separator 1 byte
+                self._data
+            )))
 
     @staticmethod
     def _encode_chunk_data(chunk: WorldChunkData):
