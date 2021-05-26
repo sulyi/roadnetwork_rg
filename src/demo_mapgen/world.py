@@ -67,12 +67,12 @@ default_render_options = WorldRenderOptions()
 class WorldGeneratorDatafile:
     # TODO: implement file format:
     # [x] * 10 bytes * magic number
+    # [x] *  3 bytes * version number
+    # [x] * 64 bytes * header checksum
     # [x] *  2 bytes * data offset
-    # [ ] header checksum
     # --- *  1 byte  * pad ---
     # header:
-    # [x] *  3 bytes * version number
-    # [x] *  4 bytes * content length
+    # [ ] *  4 bytes * content length !!! check if it is stored in a sufficient sized field !!!
     # [x] * 64 bytes * signature (see bellow)
     # [ ] ... other things, maybe
     # --- *  1 byte  * pad ---
@@ -85,7 +85,28 @@ class WorldGeneratorDatafile:
     # --- *  1 byte  * pad ---
     # [x] *  1 byte  * length of config (future proof, currently 43)
     # [x] *  varied  * config (including: used functions from `intensity`, possibly names only)
-    # [ ] chunks (including: cities, cost and pixels of pixel_paths, height_map and potential_map images)
+    # --- *  1 byte  * pad ---
+    # chunks:
+    # [ ] length of chunks
+    # [ ] --- pad ---
+    #   chunk:
+    #   [ ] x
+    #   [ ] y
+    #   [ ] length of cities
+    #   [ ] cities
+    #   [ ] --- pad ---
+    #   [ ] length of pixel_paths
+    #   [ ] --- pad ---
+    #       pixel_path:
+    #       [ ] cost
+    #       [ ] length of pixels
+    #       pixels:
+    #       [ ] pixels
+    # [ ] --- pad ---
+    # [ ] height_map
+    # [ ] --- pad ---
+    # [ ] potential_map
+    # [ ] --- pad ---
 
     __magic = '#D-MG#WG-D'.encode('ascii')
 
@@ -121,18 +142,21 @@ class WorldGeneratorDatafile:
     def save(self, filename: Union[str, bytes], key: bytes):
         with open(filename, 'wb') as f:
             signature = hmac.new(key, self._data, hashlib.sha512).digest()
-            content_length = 0
+            content_length = len(self._data)
             header = struct.pack(
-                '<x3BL%dsx' % len(signature),  # expected 64 (hmac digest_size with sha512 method)
-                *package_version,  # 3 bytes
+                '<xL%dsx' % len(signature),  # expected 64 (`hmac` `digest_size` with `sha512` method)
+                # pad 1 bytes
                 content_length,  # 4 bytes
                 signature,  # 64 bytes
                 # pad 1 byte
             )
+            checksum = hashlib.sha512(header).digest()
             f.write(struct.pack(
-                '<10sH',
+                '<10s3B%dsH' % len(checksum),  # expected 64 (`hashlib` `sha512` method `digest_size`)
                 self.__magic,  # 10 bytes
-                len(header)  # 2 bytes
+                *package_version,  # 3 bytes
+                checksum,  # 64 bytes
+                len(header),  # 2 bytes
                 # pad 1 byte
             ))
             f.write(header)
