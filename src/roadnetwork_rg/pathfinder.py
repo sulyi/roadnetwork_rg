@@ -75,7 +75,8 @@ def find_shortest_paths(graph: Image.Image, source: PointType, targets: Iterable
                     new_nodes.insert(index, neighbour)
 
     if {node[:2] for node in targets}.difference(nodes.keys()):
-        raise Exception("Couldn't be found a path to all nodes")
+        # XXX: shouldn't be reachable anyway
+        raise ArithmeticError("Couldn't be found a path to each node")
 
     paths = {(source, target): PixelPath(nodes[target[:2]].distance,
                                          backtrack(nodes, target[:2])) for target in targets}
