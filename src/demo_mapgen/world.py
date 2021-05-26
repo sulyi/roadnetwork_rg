@@ -122,8 +122,6 @@ class WorldGeneratorDatafile:
     def __init__(self) -> None:
         self._data: bytes = b''
 
-    # TODO: implement method for data to be validated
-
     def set_data(self, seed: SeedType, safe_seed: int, config: WorldConfig, chunks: list[WorldChunkData, ...]) -> None:
         # IDEA: use 2 bit `seed_type` instead byte?
         if seed is None:
@@ -399,16 +397,6 @@ class WorldGenerator:
     @staticmethod
     def clear_potential_cache():
         AdaptivePotentialFunction.clear_cache()
-
-    # TODO: implement i/o methods
-    # using following file format:
-    # - magic number followed by data offset,
-    # - header containing: version number and signature (see bellow) ... other things maybe
-    # - data to be serialized:
-    #      self._seed, self._safe_seed
-    #      config (including: used functions from `intensity`, possibly names only)
-    #      chunks (including: cities, cost and pixels of pixel_paths, height_map and potential_map images)
-    # - data needs to be signed (validated)
 
     @classmethod
     def load(cls, filename: Union[str, bytes], key: bytes) -> WorldGenerator:
