@@ -66,50 +66,52 @@ default_render_options = WorldRenderOptions()
 
 
 class WorldGeneratorDatafile:
-    # TODO: test file format:
-    # [x] * 10 bytes * magic number
-    # [x] *  3 bytes * version number
-    # [x] * 64 bytes * header checksum
-    # [x] *  2 bytes * data offset
-    # --- *  1 byte  * separator ---
-    # header:
-    # [x] *  4 bytes * content length (32Gb data max)
-    # [x] * 64 bytes * signature
-    # [ ] other things, maybe
-    # --- *  1 byte  * separator ---
-    # data:
-    # [x] *  1 byte   * seed type (None, int, str, bytes or bytearray)
-    # [x] *  1 byte  * length of seed
-    # [x] *  varied  * self._seed
-    # --- *  1 byte  * pad ---
-    # [x] *  8 bytes * self._safe_seed
-    # --- *  1 byte  * pad ---
-    # [x] *  1 byte  * length of config (future proof, currently 43)
-    # [x] *  varied  * config
-    # --- *  1 byte  * separator ---
-    # chunks:
-    # [x] *  2 bytes * length of chunks
-    # [?] *  1 byte  * pad ---
-    # chunk:
-    # [x] *  4 bytes * x
-    # [x] *  4 bytes * y
-    # [!] *  2 bytes * length of cities (is it enough?)
-    # [?] *  varied  * cities
-    # [?] *  1 byte  * pad ---
-    # [?] *  2 bytes * length of pixel_paths
-    # [?] *  1 byte  * separator ---
-    # pixel_path:
-    # [!] *  4 bytes * cost (is it correct?)
-    # [!] *  2 bytes * length of pixels (is it enough?)
-    # [?] *  varied  * pixels
-    # [?] *  1 byte  * separator ---
-    # [?] *  2 bytes * length of height_map (in TIFF format)
-    # [?] *  varied  * height_map
-    # [?] *  1 byte  * separator ---
-    # [?] *  2 bytes * length of potential_map
-    # [?] *  varied  * potential_map (in TIFF format)
-    # [x] *  1 byte * separator --- (if not last)
-    # [ ] EOF (might not be needed, note signature)
+    """file format:
+        * 10 bytes * magic number
+        *  3 bytes * version number
+        * 64 bytes * header checksum
+        *  2 bytes * data offset
+    --- *  1 byte  * separator ---
+    header:
+        *  4 bytes * content length (32Gb data max)
+        * 64 bytes * signature
+    --- *  1 byte  * separator ---
+    data:
+        *  1 byte   * seed type (None, int, str, bytes or bytearray)
+        *  1 byte  * length of seed
+        *  varied  * self._seed
+    --- *  1 byte  * pad ---
+        *  8 bytes * self._safe_seed
+    --- *  1 byte  * pad ---
+        *  1 byte  * length of config (future proof, currently 43)
+        *  varied  * config
+    --- *  1 byte  * separator ---
+    chunks:
+        *  2 bytes * length of chunks
+        *  1 byte  * pad ---
+    chunk:
+        *  4 bytes * x
+        *  4 bytes * y
+        *  2 bytes * length of cities (is it enough?)
+        *  varied  * cities
+        *  1 byte  * pad ---
+        *  2 bytes * length of pixel_paths
+        *  1 byte  * separator ---
+    pixel_path:
+        *  4 bytes * cost (is it correct?)
+        *  2 bytes * length of pixels (is it enough?)
+        *  varied  * pixels
+        *  1 byte  * separator ---
+        *  2 bytes * length of height_map (in TIFF format)
+        *  varied  * height_map
+        *  1 byte  * separator ---
+        *  2 bytes * length of potential_map
+        *  varied  * potential_map (in TIFF format)
+    --- *  1 byte * separator --- (if not last)
+    """
+
+    # TODO: decide if EOF is needed, (note signature)
+    # or if header needs other things
 
     # FIXME: handle struct and pickle exceptions
 
