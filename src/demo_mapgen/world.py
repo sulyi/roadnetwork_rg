@@ -5,6 +5,7 @@ import hmac
 import pickle
 import struct
 from dataclasses import dataclass, field
+from io import BytesIO
 from typing import Union
 
 from PIL import Image, ImageDraw, ImageStat
@@ -102,23 +103,27 @@ class WorldGeneratorDatafile:
     # [!] *  2 bytes * length of pixels (is it enough?)
     # [?] *  varied  * pixels
     # [?] *  1 byte  * separator ---
-    # [?] *  2 bytes * length of height_map
+    # [?] *  2 bytes * length of height_map (in TIFF format)
     # [?] *  varied  * height_map
     # [?] *  1 byte  * separator ---
     # [?] *  2 bytes * length of potential_map
-    # [?] *  varied  * potential_map
+    # [?] *  varied  * potential_map (in TIFF format)
     # [x] *  1 byte * separator --- (if not last)
     # [ ] EOF (might not be needed, note signature)
 
-    __magic = '#D-MG#WG-D'.encode('ascii')
+    # FIXME: handle struct and pickle exceptions
 
-    def __init__(self):
+    __magic = '#D-MG#WG-D'.encode('ascii')
+    __header_checksum_length = 64  # from `hashlib` `sha512` method `digest_size`
+    __data_signature_length = 64  # from `hmac` `digest_size` with `sha512` method
+
+    def __init__(self) -> None:
         self._data: bytes = b''
 
     # TODO: implement method for data to be validated
 
-    def set_data(self, seed: SeedType, safe_seed: int, config: WorldConfig, chunks: list[WorldChunkData, ...]):
-        # FIXME: use 2 bit `seed_type` instead byte?
+    def set_data(self, seed: SeedType, safe_seed: int, config: WorldConfig, chunks: list[WorldChunkData, ...]) -> None:
+        # IDEA: use 2 bit `seed_type` instead byte?
         if seed is None:
             seed_type = 0
             seed = b''
@@ -127,7 +132,7 @@ class WorldGeneratorDatafile:
             seed = seed.to_bytes((seed.bit_length() + 7) // 8, byteorder='little')
         elif isinstance(seed, str):
             seed_type = 2
-            seed = seed.encode()
+            seed = seed.encode('ascii')
         elif isinstance(seed, bytes):
             seed_type = 3
         else:
@@ -149,33 +154,88 @@ class WorldGeneratorDatafile:
                 len(chunks)  # 2 bytes
             ),
             # separator 1 byte
-            b'\00'.join(self._encode_chunk_data(chunk) for chunk in chunks)
+            b'\00'.join(self._encode_chunk(chunk) for chunk in chunks)
         ))
 
-    def clear_data(self):
+    def get_data(self) -> tuple[SeedType, int, WorldConfig, list[WorldChunkData, ...]]:
+        # FIXME: use more specific exceptions
+        data = BytesIO(self._data)
+        seed_type, seed_length = struct.unpack(
+            '<BB',
+            data.read(2)
+        )
+        seed: SeedType
+        if seed_type == 0:  # None
+            seed = None
+        elif seed_type == 1:  # int
+            # FIXME: check what integer seed is allowed
+            seed, = struct.unpack(
+                '<%ds' % seed_length,
+                data.read(seed_length)
+            )
+            seed = int.from_bytes(seed, 'little')
+        else:
+            seed, = struct.unpack(
+                '<%ds' % seed_length,
+                data.read(seed_length)
+            )
+            if seed_type == 2:  # str
+                seed: str = seed.decode('ascii')
+            elif seed_type == 3:  # bytes
+                pass
+            elif seed_type == 4:  # bytearray
+                seed: bytearray = bytearray(seed)
+            else:
+                raise Exception("Unrecognised seed type")
+
+        save_seed: int
+        safe_seed, config_length = struct.unpack(
+            '<xQxB',
+            data.read(11)
+        )
+
+        config: WorldConfig = WorldConfig(*pickle.loads(data.read(config_length)))
+
+        chunks_length, = struct.unpack(
+            '<H',
+            data.read(2)
+        )
+        if data.read(1) != b'\00':
+            raise Exception("Data is corrupted")
+
+        chunks: list[WorldChunkData, ...] = []
+        for _ in range(chunks_length - 1):
+            chunks.append(self._decode_chunk(data))
+            if data.read(1) != b'\00':
+                raise Exception("Data is corrupted")
+        else:
+            chunks.append(self._decode_chunk(data))
+
+        return seed, safe_seed, config, chunks
+
+    def clear_data(self) -> None:
         self._data = b''
 
-    def save(self, filename: Union[str, bytes], key: bytes):
-        with open(filename, 'wb') as f:
+    def save(self, filename: Union[str, bytes], key: bytes) -> None:
+        # FIXME: handle no write permission
+        with open(filename, 'wb') as file:
             content_length = len(self._data)
             signature = hmac.new(key, self._data, hashlib.sha512).digest()
             header = struct.pack(
-                '<xL%dsx' % len(signature),  # expected 64 (`hmac` `digest_size` with `sha512` method)
-                # pad 1 bytes
+                '<L%ds' % self.__data_signature_length,
                 content_length,  # 4 bytes
                 signature,  # 64 bytes
-                # pad 1 byte
             )
             checksum = hashlib.sha512(header).digest()
             magic = struct.pack(
-                '<10s3B%dsH' % len(checksum),  # expected 64 (`hashlib` `sha512` method `digest_size`)
+                '<10s3B%dsH' % self.__header_checksum_length,
                 self.__magic,  # 10 bytes
                 *package_version,  # 3 bytes
                 checksum,  # 64 bytes
                 len(header),  # 2 bytes
                 # pad 1 byte
             )
-            f.write(b'\00'.join((
+            file.write(b'\00'.join((
                 magic,
                 # separator 1 byte
                 header,
@@ -183,11 +243,47 @@ class WorldGeneratorDatafile:
                 self._data
             )))
 
+    def load(self, filename: Union[str, bytes], key: bytes) -> None:
+        compatible_versions = ((0, 1, 0), package_version)
+        # FIXME: handle case when filename does not exist
+
+        # FIXME: handle EOF errors when read
+        with open(filename, 'rb') as file:
+            magic, vm, vn, vo, checksum, offset = struct.unpack(
+                '<10s3B%dsH' % self.__header_checksum_length,
+                file.read(79)
+            )
+            if magic != self.__magic:
+                # FIXME: use more specific exceptions
+                raise Exception("Argument filename is not a %s" % self.__class__.__name__)
+            if (vm, vn, vo) not in compatible_versions:
+                raise Exception("Argument filename has a non-compatible version")
+            if file.read(1) != b'\00':
+                raise Exception("Argument filename is corrupted")
+            header = file.read(offset)
+            if checksum != hashlib.sha512(header).digest():
+                raise Exception("Argument filename is corrupted")
+
+            content_length, signature = struct.unpack(
+                '<L%ds' % self.__data_signature_length,
+                header
+            )
+            if file.read(1) != b'\00':
+                raise Exception("Argument filename is corrupted")
+            data = file.read(content_length)
+            if signature != hmac.new(key, data, hashlib.sha512).digest():
+                raise Exception("Argument filename is corrupted")
+            self._data = data
+
     @staticmethod
-    def _encode_chunk_data(chunk: WorldChunkData):
+    def _encode_chunk(chunk: WorldChunkData) -> bytes:
         cities = pickle.dumps(chunk.cities)
-        height_map = chunk.height_map.tobytes()
-        potential_map = chunk.potential_map.tobytes()
+        with BytesIO() as buff:
+            chunk.height_map.save(buff, format='TIFF')
+            height_map = buff.getvalue()
+        with BytesIO() as buff:
+            chunk.potential_map.save(buff, format='TIFF')
+            potential_map = buff.getvalue()
 
         data = b'\00'.join((
             struct.pack(
@@ -203,29 +299,89 @@ class WorldGeneratorDatafile:
             b'\00'.join(WorldGeneratorDatafile._encode_pixel_path(path) for path in chunk.pixel_paths),
             # separator 1 byte
             struct.pack(
-                '<H%ds',
-                len(height_map),
+                '<H%ds' % len(height_map),
+                len(height_map),  # 2 bytes
                 height_map
             ),
             # separator 1 byte
             struct.pack(
-                '<H%ds',
-                len(potential_map),
+                '<H%ds' % len(potential_map),
+                len(potential_map),  # 2 bytes
                 potential_map
             )
         ))
         return data
 
     @staticmethod
-    def _encode_pixel_path(path: PixelPath):
+    def _decode_chunk(data: BytesIO) -> WorldChunkData:
+        x: int
+        y: int
+        x, y, cities_length = struct.unpack(
+            '<iiH',
+            data.read(10)
+        )
+        cities: list[PointType, ...] = pickle.loads(data.read(cities_length))
+
+        if data.read(1) != b'\00':
+            raise Exception("Data is corrupted")
+
+        pixel_paths_length, = struct.unpack(
+            '<H',
+            data.read(2)
+        )
+
+        if data.read(1) != b'\00':
+            raise Exception("Data is corrupted")
+
+        pixel_paths: list[PixelPath, ...]
+        pixel_paths = []
+        for _ in range(pixel_paths_length - 1):
+            pixel_paths.append(WorldGeneratorDatafile._decode_pixel_path(data))
+            if data.read(1) != b'\00':
+                raise Exception("Data is corrupted")
+        else:
+            pixel_paths.append(WorldGeneratorDatafile._decode_pixel_path(data))
+
+        if data.read(1) != b'\00':
+            raise Exception("Data is corrupted")
+
+        height_map_length, = struct.unpack(
+            '<H',
+            data.read(2)
+        )
+        height_map: Image.Image = Image.open(BytesIO(data.read(height_map_length)))
+
+        if data.read(1) != b'\00':
+            raise Exception("Data is corrupted")
+
+        potential_map_length, = struct.unpack(
+            '<H',
+            data.read(2)
+        )
+        potential_map: Image.Image = Image.open(BytesIO(data.read(potential_map_length)))
+
+        return WorldChunkData(x, y, height_map, cities, potential_map, pixel_paths)
+
+    @staticmethod
+    def _encode_pixel_path(path: PixelPath) -> bytes:
         pixels = pickle.dumps(path.pixels)
         data = struct.pack(
-            '<iH%ds',
+            '<fH%ds' % len(pixels),
             path.cost,  # 4 bytes
             len(pixels),  # 2 bytes
             pixels
         )
         return data
+
+    @staticmethod
+    def _decode_pixel_path(data: BytesIO) -> PixelPath:
+        cost: float
+        cost, pixels_length = struct.unpack(
+            '<fH',
+            data.read(6)
+        )
+        pixels: list[tuple[int, int], ...] = pickle.loads(data.read(pixels_length))
+        return PixelPath(cost, pixels)
 
 
 class WorldGenerator:
@@ -255,6 +411,17 @@ class WorldGenerator:
     #      config (including: used functions from `intensity`, possibly names only)
     #      chunks (including: cities, cost and pixels of pixel_paths, height_map and potential_map images)
     # - data needs to be signed (validated)
+
+    @classmethod
+    def load(cls, filename: Union[str, bytes], key: bytes) -> WorldGenerator:
+        datafile = WorldGeneratorDatafile()
+        datafile.load(filename, key)
+        seed, safe_seed, config, chunks = datafile.get_data()
+        instance = cls(config=config, seed=seed)
+        # FIXME: rethink assertion
+        assert instance._safe_seed == safe_seed
+        instance._chunks = chunks
+        return instance
 
     def add_chunk(self, chunk_x: int, chunk_y: int):
         chunk = WorldChunk(chunk_x, chunk_y, self.config.chunk_size, self.config.height, self.config.roughness,
