@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import hashlib
+import hmac
 import struct
 from dataclasses import dataclass, field
+from typing import Union
 
 from PIL import Image, ImageDraw, ImageStat
 
@@ -68,20 +71,22 @@ class WorldGeneratorDatafile:
     # --- *  1 byte  * header pad ---
     # [x] *  3 bytes * version number
     # [x] *  4 bytes * content length
-    # [ ] signature (see bellow)
+    # [x] * 64 bytes * signature (see bellow)
     # [ ] ... other things, maybe
     # --- *  1 byte  * data pad ---
     # [x] *  1 bit   * is seed a string
     # [x] *  1 byte  * length of seed
     # [x] *  varied  * self._seed
+    # --- *  1 byte  * seed pad ---
     # [x] *  8 bytes * self._safe_seed
+    # --- *  1 byre  * safe_seed pad ---
     # [ ] config (including: used functions from `intensity`, possibly names only)
     # [ ] chunks (including: cities, cost and pixels of pixel_paths, height_map and potential_map images)
 
     __magic = '#D-MG#WG-D'.encode('ascii')
 
     def __init__(self):
-        self._data = None
+        self._data: bytes = bytes()
 
     # TODO: implement method for data to be signed and validated
 
@@ -97,21 +102,22 @@ class WorldGeneratorDatafile:
         seed = seed[:255]  # first 255 bytes (if larger)
 
         self._data = struct.pack(
-            '<?B%dcQ' % len(seed),
+            '<?B%dcxQx' % len(seed),
             is_seed_str,
             len(seed),
             *(seed[i:i + 1] for i in range(len(seed))),
             safe_seed
         )
 
-    def save(self, filename):
+    def save(self, filename: Union[str, bytes], key: bytes):
         with open(filename, 'wb') as f:
-            data = bytes()  # if self._data is None else self._data
+            signature = hmac.new(key, self._data, hashlib.sha512).digest()
             content_length = 0
             header = struct.pack(
-                '<x3BLx',
+                '<x3BL%dsx' % len(signature),  # expected 64 (hmac digest_size with sha512 method)
                 *package_version,  # 3 byte
-                content_length  # 4 byte
+                content_length,  # 4 byte
+                signature,  # 64 bytes
                 # pad 1 byte
             )
             f.write(struct.pack(
@@ -121,7 +127,7 @@ class WorldGeneratorDatafile:
                 # pad 1 byte
             ))
             f.write(header)
-            f.write(data)
+            f.write(self._data)
 
 
 class WorldGenerator:
