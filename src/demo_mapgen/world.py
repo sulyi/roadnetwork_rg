@@ -122,6 +122,19 @@ class WorldGeneratorDatafile:
     def __init__(self) -> None:
         self._data: bytes = b''
 
+    @classmethod
+    def save(cls, filename: Union[str, bytes], key: bytes,
+             seed: SeedType, safe_seed: int, config: WorldConfig, chunks: list[WorldChunkData, ...]) -> None:
+        file = cls()
+        file.set_data(seed, safe_seed, config, chunks)
+        file.write(filename, key)
+
+    @classmethod
+    def load(cls, filename: Union[str, bytes], key: bytes) -> WorldGeneratorDatafile:
+        instance = cls()
+        instance.read(filename, key)
+        return instance
+
     def set_data(self, seed: SeedType, safe_seed: int, config: WorldConfig, chunks: list[WorldChunkData, ...]) -> None:
         # IDEA: use 2 bit `seed_type` instead byte?
         if seed is None:
@@ -216,7 +229,7 @@ class WorldGeneratorDatafile:
     def clear_data(self) -> None:
         self._data = b''
 
-    def save(self, filename: Union[str, bytes], key: bytes) -> None:
+    def write(self, filename: Union[str, bytes], key: bytes) -> None:
         # FIXME: handle no write permission
         with open(filename, 'wb') as file:
             content_length = len(self._data)
@@ -243,7 +256,7 @@ class WorldGeneratorDatafile:
                 self._data
             )))
 
-    def load(self, filename: Union[str, bytes], key: bytes) -> None:
+    def read(self, filename: Union[str, bytes], key: bytes) -> None:
         compatible_versions = ((0, 1, 0), package_version)
         # FIXME: handle case when filename does not exist
 
@@ -399,19 +412,33 @@ class WorldGenerator:
         AdaptivePotentialFunction.clear_cache()
 
     @classmethod
+    def save(cls, instance: WorldGenerator, filename: Union[str, bytes], key: bytes) -> None:
+        instance.write(filename, key)
+
+    @classmethod
     def load(cls, filename: Union[str, bytes], key: bytes) -> WorldGenerator:
-        datafile = WorldGeneratorDatafile()
-        datafile.load(filename, key)
-        seed, safe_seed, config, chunks = datafile.get_data()
-        instance = cls(config=config, seed=seed)
-        # FIXME: rethink assertion
-        assert instance._safe_seed == safe_seed
-        instance._chunks = chunks
+        instance = cls.__new__(cls)
+        instance.read(filename, key)
         return instance
 
     @property
     def seed(self) -> SeedType:
         return self._seed if self._seed is not None else self._safe_seed
+
+    def read(self, filename: Union[str, bytes], key: bytes):
+        seed, safe_seed, config, chunks = WorldGeneratorDatafile.load(filename, key).get_data()
+        # FIXME: rethink assertion
+        assert get_safe_seed(seed, config.bit_length) == safe_seed
+        config.check()
+        self.config = config
+        self._chunks = chunks
+
+        self._seed = seed
+        self._safe_seed = safe_seed
+
+    def write(self, filename: Union[str, bytes], key: bytes):
+        WorldGeneratorDatafile.save(filename, key,
+                                    self._seed, self._safe_seed, self.config, self._chunks)
 
     def add_chunk(self, chunk_x: int, chunk_y: int):
         chunk = WorldChunk(chunk_x, chunk_y, self.config.chunk_size, self.config.height, self.config.roughness,
