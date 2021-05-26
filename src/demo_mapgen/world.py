@@ -85,7 +85,7 @@ class WorldGeneratorDatafile:
     # --- *  1 byte  * pad ---
     # [x] *  1 byte  * length of config (future proof, currently 43)
     # [x] *  varied  * config
-    # --- *  1 byte  * pad ---
+    # --- *  1 byte  * separator ---
     # chunks:
     # [x] *  2 bytes * length of chunks
     # [?] *  1 byte  * pad ---
@@ -96,19 +96,19 @@ class WorldGeneratorDatafile:
     # [?] *  varied  * cities
     # [?] *  1 byte  * pad ---
     # [?] *  2 bytes * length of pixel_paths
-    # [?] *  1 byte  * pad ---
+    # [?] *  1 byte  * separator ---
     #   pixel_path:
     #   [?] cost
     #   [?] length of pixels
     #   pixels:
     #   [?] pixels
-    # [?] *  1 byte  * pad ---
+    # [?] *  1 byte  * separator ---
     # [?] *  2 bytes * length of height_map
     # [?] *  varied  * height_map
-    # [?] *  1 byte  * pad ---
+    # [?] *  1 byte  * separator ---
     # [?] *  2 bytes * length of potential_map
     # [?] *  varied  * potential_map
-    # [x] --- separator --- (if not last)
+    # [x] *  1 byte * separator --- (if not last)
     # [ ] EOF (might not be needed, note signature)
 
     __magic = '#D-MG#WG-D'.encode('ascii')
@@ -133,28 +133,27 @@ class WorldGeneratorDatafile:
         seed = seed[:255]  # first 255 bytes (if larger)
         config = pickle.dumps(list(config.__dict__.values()))
 
-        self._data = struct.pack(
-            '<?B%dsxQxB%dsH' % (len(seed), len(config)),
-            is_seed_str,  # 1 bit
-            len(seed),  # 1 byte
-            seed,  # varied
-            # pad 1 byte
-            safe_seed,  # 8 bytes
-            # pad 1 byte
-            len(config),  # 1 byte
-            config,  # 43 bytes
-            len(chunks)  # 2 bytes
-        )
-
         self._data = b'\00'.join((
-            self._data,
+            struct.pack(
+                '<?B%dsxQxB%dsH' % (len(seed), len(config)),
+                is_seed_str,  # 1 bit
+                len(seed),  # 1 byte
+                seed,  # varied
+                # pad 1 byte
+                safe_seed,  # 8 bytes
+                # pad 1 byte
+                len(config),  # 1 byte
+                config,  # 43 bytes
+                len(chunks)  # 2 bytes
+            ),
+            # separator 1 byte
             b'\00'.join(self._encode_chunk_data(chunk) for chunk in chunks)
         ))
 
     def save(self, filename: Union[str, bytes], key: bytes):
         with open(filename, 'wb') as f:
-            signature = hmac.new(key, self._data, hashlib.sha512).digest()
             content_length = len(self._data)
+            signature = hmac.new(key, self._data, hashlib.sha512).digest()
             header = struct.pack(
                 '<xL%dsx' % len(signature),  # expected 64 (`hmac` `digest_size` with `sha512` method)
                 # pad 1 bytes
@@ -163,14 +162,15 @@ class WorldGeneratorDatafile:
                 # pad 1 byte
             )
             checksum = hashlib.sha512(header).digest()
-            f.write(struct.pack(
+            magic = struct.pack(
                 '<10s3B%dsH' % len(checksum),  # expected 64 (`hashlib` `sha512` method `digest_size`)
                 self.__magic,  # 10 bytes
                 *package_version,  # 3 bytes
                 checksum,  # 64 bytes
                 len(header),  # 2 bytes
                 # pad 1 byte
-            ))
+            )
+            f.write(magic)
             f.write(header)
             f.write(self._data)
 
@@ -190,12 +190,15 @@ class WorldGeneratorDatafile:
                 # pad 1 byte
                 len(chunk.pixel_paths)  # 2 bytes
             ),
+            # separator 1 byte
             b'\00'.join(WorldGeneratorDatafile._encode_pixel_path(path) for path in chunk.pixel_paths),
+            # separator 1 byte
             struct.pack(
                 '<H%ds',
                 len(height_map),
                 height_map
             ),
+            # separator 1 byte
             struct.pack(
                 '<H%ds',
                 len(potential_map),
