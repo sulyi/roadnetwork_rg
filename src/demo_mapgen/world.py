@@ -72,9 +72,9 @@ class WorldGeneratorDatafile:
     # [x] *  2 bytes * data offset
     # --- *  1 byte  * pad ---
     # header:
-    # [ ] *  4 bytes * content length !!! check if it is stored in a sufficient sized field !!!
+    # [x] *  4 bytes * content length (32Gb data max)
     # [x] * 64 bytes * signature (see bellow)
-    # [ ] ... other things, maybe
+    # [ ] other things, maybe
     # --- *  1 byte  * pad ---
     # data:
     # [x] *  1 bit   * is seed a string
