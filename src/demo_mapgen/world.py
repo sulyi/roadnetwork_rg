@@ -113,7 +113,7 @@ class WorldGeneratorDatafile:
     def __init__(self):
         self._data: bytes = bytes()
 
-    # TODO: implement method for data to be signed and validated
+    # TODO: implement method for data to be validated
 
     def add_data(self, seed: SeedType, safe_seed: int, config: WorldConfig, chunks: list[WorldChunkData, ...]):
         if isinstance(seed, int):
