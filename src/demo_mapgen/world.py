@@ -116,13 +116,16 @@ class WorldGeneratorDatafile:
     # TODO: implement method for data to be validated
 
     def add_data(self, seed: SeedType, safe_seed: int, config: WorldConfig, chunks: list[WorldChunkData, ...]):
-        if isinstance(seed, int):
+        if seed is None:
+            is_seed_str = False
+            seed = b''
+        elif isinstance(seed, int):
             is_seed_str = False
             seed = seed.to_bytes((seed.bit_length() + 7) // 8, byteorder='little')
         elif isinstance(seed, str):
             is_seed_str = True
             seed = seed.encode()
-        else:
+        else:  # bytes or bytearray
             is_seed_str = False
         seed = seed[:255]  # first 255 bytes (if larger)
         config = pickle.dumps(list(config.__dict__.values()))
@@ -170,7 +173,7 @@ class WorldGenerator:
         self.config = config
         self._chunks: list[WorldChunkData, ...] = []
 
-        self._seed = seed if isinstance(seed, int) else seed[:255]  # for i/o compatibility
+        self._seed = seed if isinstance(seed, int) or seed is None else seed[:255]  # for i/o compatibility
         self._safe_seed = get_safe_seed(seed, self.config.bit_length)
 
     @property
