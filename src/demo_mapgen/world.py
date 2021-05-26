@@ -77,7 +77,7 @@ class WorldGeneratorDatafile:
     # [ ] other things, maybe
     # --- *  1 byte  * separator ---
     # data:
-    # [x] *  1 bit   * is seed a string
+    # [x] *  1 byte   * seed type (None, int, str, bytes or bytearray)
     # [x] *  1 byte  * length of seed
     # [x] *  varied  * self._seed
     # --- *  1 byte  * pad ---
@@ -118,24 +118,27 @@ class WorldGeneratorDatafile:
     # TODO: implement method for data to be validated
 
     def set_data(self, seed: SeedType, safe_seed: int, config: WorldConfig, chunks: list[WorldChunkData, ...]):
+        # FIXME: use 2 bit `seed_type` instead byte?
         if seed is None:
-            is_seed_str = False
+            seed_type = 0
             seed = b''
         elif isinstance(seed, int):
-            is_seed_str = False
+            seed_type = 1
             seed = seed.to_bytes((seed.bit_length() + 7) // 8, byteorder='little')
         elif isinstance(seed, str):
-            is_seed_str = True
+            seed_type = 2
             seed = seed.encode()
-        else:  # bytes or bytearray
-            is_seed_str = False
+        elif isinstance(seed, bytes):
+            seed_type = 3
+        else:
+            seed_type = 4
         seed = seed[:255]  # first 255 bytes (if larger)
         config = pickle.dumps(list(config.__dict__.values()))
 
         self._data = b'\00'.join((
             struct.pack(
-                '<?B%dsxQxB%dsH' % (len(seed), len(config)),
-                is_seed_str,  # 1 bit
+                '<BB%dsxQxB%dsH' % (len(seed), len(config)),
+                seed_type,  # 1 byte
                 len(seed),  # 1 byte
                 seed,  # varied
                 # pad 1 byte
