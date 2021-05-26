@@ -65,7 +65,7 @@ default_render_options = WorldRenderOptions()
 
 
 class WorldGeneratorDatafile:
-    # TODO: implement file format:
+    # TODO: test file format:
     # [x] * 10 bytes * magic number
     # [x] *  3 bytes * version number
     # [x] * 64 bytes * header checksum
@@ -92,16 +92,15 @@ class WorldGeneratorDatafile:
     # chunk:
     # [x] *  4 bytes * x
     # [x] *  4 bytes * y
-    # [!] *  2 bytes * length of cities
+    # [!] *  2 bytes * length of cities (is it enough?)
     # [?] *  varied  * cities
     # [?] *  1 byte  * pad ---
     # [?] *  2 bytes * length of pixel_paths
     # [?] *  1 byte  * separator ---
-    #   pixel_path:
-    #   [?] cost
-    #   [?] length of pixels
-    #   pixels:
-    #   [?] pixels
+    # pixel_path:
+    # [!] *  4 bytes * cost (is it correct?)
+    # [!] *  2 bytes * length of pixels (is it enough?)
+    # [?] *  varied  * pixels
     # [?] *  1 byte  * separator ---
     # [?] *  2 bytes * length of height_map
     # [?] *  varied  * height_map
@@ -211,9 +210,9 @@ class WorldGeneratorDatafile:
     def _encode_pixel_path(path: PixelPath):
         pixels = pickle.dumps(path.pixels)
         data = struct.pack(
-            '<ii%ds',
-            path.cost,
-            len(pixels),
+            '<iH%ds',
+            path.cost,  # 4 bytes
+            len(pixels),  # 2 bytes
             pixels
         )
         return data
