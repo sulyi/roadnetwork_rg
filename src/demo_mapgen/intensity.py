@@ -59,7 +59,7 @@ class AdaptivePotentialFunction(MarkovChainMonteCarloPotentialFunction):
         cls._monopole_potential_cache.clear()
 
     @property
-    def potential_map(self) -> Image:
+    def potential_map(self) -> Image.Image:
         return self._potential_image
 
     def get(self, value):
@@ -97,7 +97,7 @@ class ExponentialZCompositeFunction(MarkovChainMonteCarloCompositeFunction):
 
 class MarkovChainMonteCarloIntensityFunction(IntensityFunction):
 
-    def __init__(self, rate: Union[int, float], kernel_image: Image,
+    def __init__(self, rate: Union[int, float], kernel_image: Image.Image,
                  potential_func: MarkovChainMonteCarloPotentialFunction,
                  composite_func: MarkovChainMonteCarloCompositeFunction) -> None:
         super().__init__()
@@ -123,7 +123,7 @@ class MarkovChainMonteCarloIntensityFunction(IntensityFunction):
 
 
 class SpatialPoissonPointProcessIntensityFunction(MarkovChainMonteCarloIntensityFunction):
-    def __init__(self, rate: Union[int, float], kernel_image: Image,
+    def __init__(self, rate: Union[int, float], kernel_image: Image.Image,
                  potential_func: SpatialPoissonPointProcessPotentialFunction,
                  composite_func: SpatialPoissonPointProcessCompositeFunction) -> None:
         super().__init__(rate, kernel_image, potential_func, composite_func)

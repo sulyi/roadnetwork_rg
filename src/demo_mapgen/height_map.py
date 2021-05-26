@@ -24,7 +24,7 @@ class HeightMap(object):
         self._seed = get_safe_seed(seed, bit_length)
 
     @staticmethod
-    def check(size, height, roughness):
+    def check(size: int, height: float, roughness: float) -> None:
         if not isinstance(size, int):
             raise TypeError("Argument 'size' should be integer number, not '%s'" % type(size).__name__)
         if size <= 0:
@@ -57,7 +57,7 @@ class HeightMap(object):
         value = int.from_bytes(h.digest(), 'big') / max_value * 2 - 1
         return value
 
-    def generate(self):
+    def generate(self) -> Image.Image:
         cx = self._offset_x * self._size
         cy = self._offset_y * self._size
 

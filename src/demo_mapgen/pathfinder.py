@@ -2,13 +2,13 @@ import bisect
 from collections import Iterable
 from typing import Union
 
-from PIL.Image import Image
+from PIL import Image
 
 from .common import PointType
 
 
 class PixelPath:
-    def __init__(self, cost: int, pixels: list[tuple[int, int]]) -> None:
+    def __init__(self, cost: float, pixels: list[tuple[int, int]]) -> None:
         self.cost = cost
         self.pixels = pixels
 
@@ -21,7 +21,7 @@ class PixelPath:
 
 class Node:
 
-    def __init__(self, x: int, y: int, distance: float = float('inf')) -> None:
+    def __init__(self, x: int, y: int, *, distance: float = float('inf')) -> None:
         # XXX: 'x' and 'y' being properties would do more harm than good
         self.x = x
         self.y = y
@@ -34,7 +34,7 @@ class Node:
                                    self.distance if self.distance is None else "%d" % self.distance)
 
 
-def find_shortest_paths(graph: Image, source: PointType, targets: Iterable[PointType, ...]
+def find_shortest_paths(graph: Image.Image, source: PointType, targets: Iterable[PointType, ...]
                         ) -> dict[tuple[PointType, PointType], PixelPath]:
     sx, sy = graph.size
     nodes = {(x, y): Node(x, y) for x in range(sx) for y in range(sy)}

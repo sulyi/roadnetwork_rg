@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 
 from PIL import Image, ImageDraw, ImageStat
@@ -42,23 +44,23 @@ class WorldRenderOptions:
     show_potential_map: bool = False
 
 
-default_world_config = WorldConfig(chunk_size=256, height=1., roughness=.5, city_rate=32, city_sizes=8)
-default_render_options = WorldRenderOptions()
-
-
 @dataclass(order=True, frozen=True)
 class WorldChunkData:
     x: int
     y: int
-    height_map: Image = field(compare=False)
+    height_map: Image.Image = field(compare=False)
     cities: list[PointType, ...] = field(compare=False)
-    potential_map: Image = field(compare=False)
+    potential_map: Image.Image = field(compare=False)
     pixel_paths: list[PixelPath, ...] = field(compare=False)
+
+
+default_world_config = WorldConfig(chunk_size=256, height=1., roughness=.5, city_rate=32, city_sizes=8)
+default_render_options = WorldRenderOptions()
 
 
 class WorldGenerator:
 
-    def __init__(self, config: WorldConfig = default_world_config, seed: SeedType = None) -> None:
+    def __init__(self, *, config: WorldConfig = default_world_config, seed: SeedType = None) -> None:
         config.check()
         self.config = config
         self._chunks: list[WorldChunkData, ...] = []
@@ -67,7 +69,7 @@ class WorldGenerator:
         self._safe_seed = get_safe_seed(seed, self.config.bit_length)
 
     @property
-    def seed(self):
+    def seed(self) -> SeedType:
         return self._seed if self._seed is not None else self._safe_seed
 
     @staticmethod
@@ -144,7 +146,7 @@ class WorldGenerator:
 
             # draw roads
             if options.show_roads:
-                # XXX: avoiding `Image.putpixel`
+                # XXX: avoiding `Image.Image.putpixel`
                 path_data = [0] * (self.config.chunk_size * self.config.chunk_size)
                 for path in chunk.pixel_paths:
                     for point_x, point_y in path.pixels:
@@ -198,7 +200,7 @@ class WorldChunk:
     def height_map(self) -> HeightMap:
         return self._height_map
 
-    def generate(self):
+    def generate(self) -> WorldChunkData:
         height_map_image = self.height_map.generate()
 
         potential_function = AdaptivePotentialFunction(self._size, self.city_sizes)
