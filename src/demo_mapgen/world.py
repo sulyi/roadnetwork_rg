@@ -396,10 +396,6 @@ class WorldGenerator:
         self._seed = seed if isinstance(seed, int) or seed is None else seed[:255]  # for i/o compatibility
         self._safe_seed = get_safe_seed(seed, self.config.bit_length)
 
-    @property
-    def seed(self) -> SeedType:
-        return self._seed if self._seed is not None else self._safe_seed
-
     @staticmethod
     def clear_potential_cache():
         AdaptivePotentialFunction.clear_cache()
@@ -424,6 +420,10 @@ class WorldGenerator:
         assert instance._safe_seed == safe_seed
         instance._chunks = chunks
         return instance
+
+    @property
+    def seed(self) -> SeedType:
+        return self._seed if self._seed is not None else self._safe_seed
 
     def add_chunk(self, chunk_x: int, chunk_y: int):
         chunk = WorldChunk(chunk_x, chunk_y, self.config.chunk_size, self.config.height, self.config.roughness,
