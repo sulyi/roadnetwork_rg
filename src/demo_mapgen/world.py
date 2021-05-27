@@ -457,9 +457,16 @@ class WorldGenerator:
 
     def read(self, filename: Union[str, bytes], key: bytes):
         seed, safe_seed, config, chunks = Datafile.load(filename, key).get_data()
-        # FIXME: rethink assertion
-        assert get_safe_seed(seed, config.bit_length) == safe_seed
-        config.check()
+        try:
+            config.check()
+        except (ValueError, TypeError) as e:
+            # XXX: Config check warning
+            config = default_world_config
+            print("Failed `config` check, set to default", e)
+        if seed is not None and get_safe_seed(seed, config.bit_length) == safe_seed:
+            # XXX: Seed mismatch warning
+            seed = None
+            print("Mismatching seed and safe_seed, seed is discarded")
         self.config = config
         self._chunks = chunks
 
