@@ -73,47 +73,54 @@ class DatafileError(Exception):
 class Datafile:
     """file format:
 
-        * 10 bytes * magic number
-        *  3 bytes * version number
-        * 64 bytes * header checksum
-        *  2 bytes * data offset
-    --- *  1 byte  * separator ---
-    header:
-        *  4 bytes * content length (4Gb data max)
-        * 64 bytes * signature
-    --- *  1 byte  * separator ---
-    data:
-        *  1 byte   * seed type (None: 0, int: 1, str: 2, bytes: 3 and bytearray: 4)
-        *  1 byte  * length of seed
-        *  varied  * self._seed
-    --- *  1 byte  * pad ---
-        *  8 bytes * self._safe_seed
-    --- *  1 byte  * pad ---
-        *  1 byte  * length of config (future proof, currently 43)
-        *  varied  * config (pickled format)
-    --- *  1 byte  * pad ---
-    chunks:
-        *  2 bytes * number of chunks
-    --- *  1 byte  * separator ---
-    chunk:
-        *  4 bytes * x
-        *  4 bytes * y
-        *  2 bytes * length of cities
-        *  varied  * cities (pickled format)
-    --- *  1 byte  * pad ---
-        *  2 bytes * number of paths
-    --- *  1 byte  * separator ---
-    pixel_path:
-        *  8 bytes * cost
-        *  2 bytes * length of pixels
-        *  varied  * pixels (pickled format)
-    --- *  1 byte  * separator ---
-        *  4 bytes * length of height_map
-        *  varied  * height_map (in TIFF format)
-    --- *  1 byte  * separator ---
-        *  4 bytes * length of potential_map
-        *  varied  * potential_map (in TIFF format)
-    --- *  1 byte  * separator --- (if not last)
+    * all number is in little endian
+
+    ============== =================
+        size        description
+    ============== =================
+       10 bytes      magic number
+        3 bytes     version number
+       64 bytes      header checksum
+        2 bytes       data offset
+     -- 1 byte --   -- separator --
+     header:
+        4 bytes         content length (4Gb data max)
+       64 bytes         signature
+     -- 1 byte --   -- separator --
+     data:
+        1 byte         seed type (None:0, int:1, str:2, bytes:3, bytearray:4)
+        1 byte        length of seed
+        varied            seed
+     -- 1 byte --   --    pad    --
+        8 bytes        safe_seed
+     -- 1 byte --   --    pad    --
+        1 byte      length of config (future proof, currently 43)
+        varied           config (pickled format)
+     -- 1 byte --   --    pad    --
+     chunks:
+        2 bytes     number of chunks
+     -- 1 byte --   -- separator --
+     chunk:
+        4 bytes           x
+        4 bytes           y
+        2 bytes     length of cities
+        varied          cities (pickled format)
+     -- 1 byte --   --    pad    --
+        2 bytes     number of paths
+     -- 1 byte --   -- separator --
+     pixel_path:
+        8 bytes          cost
+        2 bytes     length of pixels
+        varied          pixels (pickled format)
+     -- 1 byte --   -- separator --
+        4 bytes     length of height_map
+        varied         height_map (in TIFF format)
+     -- 1 byte --   -- separator --
+        4 bytes     length of potential_map
+        varied        potential_map (in TIFF format)
+     -- 1 byte --   -- separator -- (if not last)
+    ============== =================
+
     """
 
     # TODO: decide
