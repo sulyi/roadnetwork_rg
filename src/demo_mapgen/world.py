@@ -91,10 +91,10 @@ class Datafile:
     --- *  1 byte  * pad ---
         *  1 byte  * length of config (future proof, currently 43)
         *  varied  * config (pickled format)
-    --- *  1 byte  * separator ---
+    --- *  1 byte  * pad ---
     chunks:
         *  2 bytes * number of chunks
-    --- *  1 byte  * pad ---
+    --- *  1 byte  * separator ---
     chunk:
         *  4 bytes * x
         *  4 bytes * y
@@ -168,7 +168,7 @@ class Datafile:
 
         self._data = b'\00'.join((
             struct.pack(
-                '<BB%dsxQxB%dsH' % (len(seed), len(config)),
+                '<BB%dsxQxB%dsxH' % (len(seed), len(config)),
                 seed_type,  # 1 byte
                 len(seed),  # 1 byte
                 seed,  # varied
@@ -177,6 +177,7 @@ class Datafile:
                 # pad 1 byte
                 len(config),  # 1 byte
                 config,  # 43 bytes
+                # pad 1 byte
                 len(chunks)  # 2 bytes
             ),
             # separator 1 byte
@@ -213,16 +214,22 @@ class Datafile:
             else:
                 raise DatafileError("Unrecognised seed type")
 
+        if data.read(1) != b'\00':
+            raise DatafileError
+
         save_seed: int
         safe_seed, config_length = struct.unpack(
-            '<xQxB',
-            data.read(11)
+            '<QxB',
+            data.read(10)
         )
 
         try:
             config: WorldConfig = WorldConfig(*pickle.loads(data.read(config_length)))
         except pickle.UnpicklingError as e:
             raise DatafileError(e)
+
+        if data.read(1) != b'\00':
+            raise DatafileError
 
         chunks_length, = struct.unpack(
             '<H',
@@ -314,7 +321,7 @@ class Datafile:
                 chunk.x,  # 4 bytes
                 chunk.y,  # 4 bytes
                 len(cities),  # 2 bytes
-                cities,
+                cities,  # varied
                 # pad 1 byte
                 len(chunk.pixel_paths)  # 2 bytes
             ),
@@ -324,13 +331,13 @@ class Datafile:
             struct.pack(
                 '<L%ds' % len(height_map),
                 len(height_map),  # 2 bytes
-                height_map
+                height_map  # varied
             ),
             # separator 1 byte
             struct.pack(
                 '<L%ds' % len(potential_map),
                 len(potential_map),  # 2 bytes
-                potential_map
+                potential_map  # varied
             )
         ))
         return data
@@ -395,7 +402,7 @@ class Datafile:
             '<dH%ds' % len(pixels),
             path.cost,  # 8 bytes
             len(pixels),  # 2 bytes
-            pixels
+            pixels  # varied
         )
         return data
 
