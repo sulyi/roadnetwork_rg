@@ -65,8 +65,13 @@ default_world_config = WorldConfig(chunk_size=256, height=1., roughness=.5, city
 default_render_options = WorldRenderOptions()
 
 
-class DatafileError(Exception):
-    """File corruption if found"""
+class DatafileDecodeError(Exception):
+    """File corruption found"""
+    pass
+
+
+class DatafileEncodingError(Exception):
+    """Unexpected data"""
     pass
 
 
@@ -129,11 +134,7 @@ class Datafile:
     # if 2 bytes of short is enough for length of cities (note when pickled)
     # if 2 bytes of short is enough for length of pixels (note when pickled)
 
-    # FIXME: handle struct and pickle exceptions
-    # [x] UnpicklingError
-    # [?] PicklingError
-    # [ ] struct.error (both for pack(?) and unpack)
-    # [-] OSError
+    # FIXME: raise ValueError when part of the data is larger than format allows
 
     __magic = '#D-MG#WG-D'.encode('ascii')
     __header_checksum_length = 64  # from `hashlib` `sha512` method `digest_size`
@@ -171,10 +172,13 @@ class Datafile:
         else:
             seed_type = 4
         seed = seed[:255]  # first 255 bytes (if larger)
-        config = pickle.dumps(list(config.__dict__.values()))
+        try:
+            config = pickle.dumps(list(config.__dict__.values()))
+        except pickle.PicklingError as e:
+            raise DatafileEncodingError("Failed to encode config", e)
 
-        self._data = b'\00'.join((
-            struct.pack(
+        try:
+            config_pack = struct.pack(
                 '<BB%dsxQxB%dsxH' % (len(seed), len(config)),
                 seed_type,  # 1 byte
                 len(seed),  # 1 byte
@@ -186,32 +190,46 @@ class Datafile:
                 config,  # 43 bytes
                 # pad 1 byte
                 len(chunks)  # 2 bytes
-            ),
+            )
+        except struct.error as e:
+            raise DatafileEncodingError("Failed to encode config", e)
+
+        self._data = b'\00'.join((
+            config_pack,
             # separator 1 byte
             b'\00'.join(self._encode_chunk(chunk) for chunk in chunks)
         ))
 
     def get_data(self) -> tuple[SeedType, int, WorldConfig, list[WorldChunkData, ...]]:
         data = BytesIO(self._data)
-        seed_type, seed_length = struct.unpack(
-            '<BB',
-            data.read(2)
-        )
+        try:
+            seed_type, seed_length = struct.unpack(
+                '<BB',
+                data.read(2)
+            )
+        except struct.error as e:
+            raise DatafileDecodeError("Failed to decode  seed type and length", e)
+
         seed: SeedType
         if seed_type == 0:  # None
             seed = None
         elif seed_type == 1:  # int
-            # FIXME: check what integer seed is allowed
-            seed, = struct.unpack(
-                '<%ds' % seed_length,
-                data.read(seed_length)
-            )
+            try:
+                seed, = struct.unpack(
+                    '<%ds' % seed_length,
+                    data.read(seed_length)
+                )
+            except struct.error as e:
+                raise DatafileDecodeError("Failed to decode seed", e)
             seed = int.from_bytes(seed, 'little')
         else:
-            seed, = struct.unpack(
-                '<%ds' % seed_length,
-                data.read(seed_length)
-            )
+            try:
+                seed, = struct.unpack(
+                    '<%ds' % seed_length,
+                    data.read(seed_length)
+                )
+            except struct.error as e:
+                raise DatafileDecodeError("Failed to decode seed", e)
             if seed_type == 2:  # str
                 seed: str = seed.decode('ascii')
             elif seed_type == 3:  # bytes
@@ -219,37 +237,45 @@ class Datafile:
             elif seed_type == 4:  # bytearray
                 seed: bytearray = bytearray(seed)
             else:
-                raise DatafileError("Unrecognised seed type")
+                raise DatafileDecodeError("Unrecognised seed type")
 
         if data.read(1) != b'\00':
-            raise DatafileError
+            raise DatafileDecodeError
 
-        save_seed: int
-        safe_seed, config_length = struct.unpack(
-            '<QxB',
-            data.read(10)
-        )
+        try:
+            safe_seed: int
+            safe_seed, config_length = struct.unpack(
+                '<QxB',
+                data.read(10)
+            )
+        except struct.error as e:
+            raise DatafileDecodeError("Failed to decode safe_seed and length of config", e)
 
         try:
             config: WorldConfig = WorldConfig(*pickle.loads(data.read(config_length)))
         except pickle.UnpicklingError as e:
-            raise DatafileError(e)
+            raise DatafileDecodeError("Failed to decode config", e)
 
         if data.read(1) != b'\00':
-            raise DatafileError
+            raise DatafileDecodeError
 
-        chunks_length, = struct.unpack(
-            '<H',
-            data.read(2)
-        )
+        try:
+            chunks_count, = struct.unpack(
+                '<H',
+                data.read(2)
+            )
+        except struct.error as e:
+            raise DatafileDecodeError("Failed to decode length of chunks", e)
+
         if data.read(1) != b'\00':
-            raise DatafileError
+            raise DatafileDecodeError
 
+        # XXX: there might be a better pattern
         chunks: list[WorldChunkData, ...] = []
-        for _ in range(chunks_length - 1):
+        for _ in range(chunks_count - 1):
             chunks.append(self._decode_chunk(data))
             if data.read(1) != b'\00':
-                raise DatafileError
+                raise DatafileDecodeError
         else:
             chunks.append(self._decode_chunk(data))
 
@@ -262,20 +288,26 @@ class Datafile:
         with open(filename, 'wb') as file:
             content_length = len(self._data)
             signature = hmac.new(key, self._data, hashlib.sha512).digest()
-            header = struct.pack(
-                '<L%ds' % self.__data_signature_length,
-                content_length,  # 4 bytes
-                signature,  # 64 bytes
-            )
+            try:
+                header = struct.pack(
+                    '<L%ds' % self.__data_signature_length,
+                    content_length,  # 4 bytes
+                    signature,  # 64 bytes
+                )
+            except struct.error as e:
+                raise DatafileEncodingError("Failed to encode header", e)
             checksum = hashlib.sha512(header).digest()
-            magic = struct.pack(
-                '<10s3B%dsH' % self.__header_checksum_length,
-                self.__magic,  # 10 bytes
-                *package_version,  # 3 bytes
-                checksum,  # 64 bytes
-                len(header),  # 2 bytes
-                # pad 1 byte
-            )
+            try:
+                magic = struct.pack(
+                    '<10s3B%dsH' % self.__header_checksum_length,
+                    self.__magic,  # 10 bytes
+                    *package_version,  # 3 bytes
+                    checksum,  # 64 bytes
+                    len(header),  # 2 bytes
+                    # pad 1 byte
+                )
+            except struct.error as e:
+                raise DatafileEncodingError("Failed to encode magic", e)
             file.write(b'\00'.join((
                 magic,
                 # separator 1 byte
@@ -287,34 +319,45 @@ class Datafile:
     def read(self, filename: Union[str, bytes], key: bytes) -> None:
         compatible_versions = ((0, 1, 0), package_version)
         with open(filename, 'rb') as file:
-            magic, vm, vn, vo, checksum, offset = struct.unpack(
-                '<10s3B%dsH' % self.__header_checksum_length,
-                file.read(79)
-            )
+            try:
+                magic, vm, vn, vo, checksum, offset = struct.unpack(
+                    '<10s3B%dsH' % self.__header_checksum_length,
+                    file.read(79)
+                )
+            except struct.error as e:
+                raise DatafileDecodeError("Failed to decode magic", e)
+
             if magic != self.__magic:
-                raise DatafileError("Argument filename has unrecognised format")
+                raise DatafileDecodeError("Argument filename has unrecognised format")
             if (vm, vn, vo) not in compatible_versions:
-                raise DatafileError("Argument filename has a non-compatible version")
+                raise DatafileDecodeError("Argument filename has a non-compatible version")
             if file.read(1) != b'\00':
-                raise DatafileError
+                raise DatafileDecodeError
             header = file.read(offset)
             if checksum != hashlib.sha512(header).digest():
-                raise DatafileError("Invalid headed checksum")
+                raise DatafileDecodeError("Invalid headed checksum")
 
-            content_length, signature = struct.unpack(
-                '<L%ds' % self.__data_signature_length,
-                header
-            )
+            try:
+                content_length, signature = struct.unpack(
+                    '<L%ds' % self.__data_signature_length,
+                    header
+                )
+            except struct.error as e:
+                raise DatafileDecodeError("Failed to decode header", e)
+
             if file.read(1) != b'\00':
-                raise DatafileError
+                raise DatafileDecodeError
             data = file.read(content_length)
             if signature != hmac.new(key, data, hashlib.sha512).digest():
-                raise DatafileError("Invalid data signature")
+                raise DatafileDecodeError("Invalid data signature")
             self._data = data
 
     @staticmethod
     def _encode_chunk(chunk: WorldChunkData) -> bytes:
-        cities = pickle.dumps(chunk.cities)
+        try:
+            cities = pickle.dumps(chunk.cities)
+        except pickle.PicklingError as e:
+            raise DatafileEncodingError("Failed to encode cities", e)
         with BytesIO() as buff:
             chunk.height_map.save(buff, format='TIFF')
             height_map = buff.getvalue()
@@ -322,8 +365,8 @@ class Datafile:
             chunk.potential_map.save(buff, format='TIFF')
             potential_map = buff.getvalue()
 
-        data = b'\00'.join((
-            struct.pack(
+        try:
+            chunk_pack = struct.pack(
                 '<iiH%dsxH' % len(cities),
                 chunk.x,  # 4 bytes
                 chunk.y,  # 4 bytes
@@ -331,99 +374,130 @@ class Datafile:
                 cities,  # varied
                 # pad 1 byte
                 len(chunk.pixel_paths)  # 2 bytes
-            ),
-            # separator 1 byte
-            b'\00'.join(Datafile._encode_pixel_path(path) for path in chunk.pixel_paths),
-            # separator 1 byte
-            struct.pack(
+            )
+            height_map_pack = struct.pack(
                 '<L%ds' % len(height_map),
                 len(height_map),  # 2 bytes
                 height_map  # varied
-            ),
-            # separator 1 byte
-            struct.pack(
+            )
+            potential_map_pack = struct.pack(
                 '<L%ds' % len(potential_map),
                 len(potential_map),  # 2 bytes
                 potential_map  # varied
             )
+        except struct.error as e:
+            raise DatafileEncodingError("Failed to encode chunk", e)
+
+        data = b'\00'.join((
+            chunk_pack,
+            # separator 1 byte
+            b'\00'.join(Datafile._encode_pixel_path(path) for path in chunk.pixel_paths),
+            # separator 1 byte
+            height_map_pack,
+            # separator 1 byte
+            potential_map_pack
         ))
         return data
 
     @staticmethod
     def _decode_chunk(data: BytesIO) -> WorldChunkData:
-        x: int
-        y: int
-        x, y, cities_length = struct.unpack(
-            '<iiH',
-            data.read(10)
-        )
+        try:
+            x: int
+            y: int
+            x, y, cities_length = struct.unpack(
+                '<iiH',
+                data.read(10)
+            )
+        except struct.error as e:
+            raise DatafileDecodeError("Failed to decode x, y, length of cities of chunk", e)
+
         try:
             cities: list[PointType, ...] = pickle.loads(data.read(cities_length))
         except pickle.UnpicklingError as e:
-            raise DatafileError(e)
+            raise DatafileDecodeError("Failed to decode cities", e)
 
         if data.read(1) != b'\00':
-            raise DatafileError
+            raise DatafileDecodeError
 
-        pixel_paths_length, = struct.unpack(
-            '<H',
-            data.read(2)
-        )
+        try:
+            pixel_paths_count, = struct.unpack(
+                '<H',
+                data.read(2)
+            )
+        except struct.error as e:
+            raise DatafileDecodeError("Failed to decode length of pixel_paths", e)
 
         if data.read(1) != b'\00':
-            raise DatafileError
+            raise DatafileDecodeError
 
-        pixel_paths: list[PixelPath, ...]
-        pixel_paths = []
-        for _ in range(pixel_paths_length - 1):
+        # XXX: there might be a better pattern
+        pixel_paths: list[PixelPath, ...] = []
+        for _ in range(pixel_paths_count - 1):
             pixel_paths.append(Datafile._decode_pixel_path(data))
             if data.read(1) != b'\00':
-                raise DatafileError
+                raise DatafileDecodeError
         else:
             pixel_paths.append(Datafile._decode_pixel_path(data))
 
         if data.read(1) != b'\00':
-            raise DatafileError
+            raise DatafileDecodeError
 
-        height_map_length, = struct.unpack(
-            '<L',
-            data.read(4)
-        )
-        height_map: Image.Image = Image.open(BytesIO(data.read(height_map_length)))
+        try:
+            height_map_length, = struct.unpack(
+                '<L',
+                data.read(4)
+            )
+            height_map: Image.Image = Image.open(BytesIO(data.read(height_map_length)))
+        except struct.error as e:
+            raise DatafileDecodeError("Failed to decode length of height_map", e)
 
         if data.read(1) != b'\00':
-            raise DatafileError
+            raise DatafileDecodeError
 
-        potential_map_length, = struct.unpack(
-            '<L',
-            data.read(4)
-        )
+        try:
+            potential_map_length, = struct.unpack(
+                '<L',
+                data.read(4)
+            )
+        except struct.error as e:
+            raise DatafileDecodeError("Failed to decode length of potential_map", e)
+
         potential_map: Image.Image = Image.open(BytesIO(data.read(potential_map_length)))
 
         return WorldChunkData(x, y, height_map, cities, potential_map, pixel_paths)
 
     @staticmethod
     def _encode_pixel_path(path: PixelPath) -> bytes:
-        pixels = pickle.dumps(path.pixels)
-        data = struct.pack(
-            '<dH%ds' % len(pixels),
-            path.cost,  # 8 bytes
-            len(pixels),  # 2 bytes
-            pixels  # varied
-        )
+        try:
+            pixels = pickle.dumps(path.pixels)
+        except pickle.PicklingError as e:
+            raise DatafileEncodingError("Failed to encode pixels", e)
+        try:
+            data = struct.pack(
+                '<dH%ds' % len(pixels),
+                path.cost,  # 8 bytes
+                len(pixels),  # 2 bytes
+                pixels  # varied
+            )
+        except struct.error as e:
+            raise DatafileEncodingError("Failed to encode PixelPath", e)
+
         return data
 
     @staticmethod
     def _decode_pixel_path(data: BytesIO) -> PixelPath:
-        cost: float
-        cost, pixels_length = struct.unpack(
-            '<dH',
-            data.read(10)
-        )
+        try:
+            cost: float
+            cost, pixels_length = struct.unpack(
+                '<dH',
+                data.read(10)
+            )
+        except struct.error as e:
+            raise DatafileDecodeError("Failed to decode PixelPath cost and length of pixels", e)
         try:
             pixels: list[tuple[int, int], ...] = pickle.loads(data.read(pixels_length))
         except pickle.UnpicklingError as e:
-            raise DatafileError(e)
+            raise DatafileDecodeError("Failed to decode pixels", e)
         return PixelPath(cost, pixels)
 
 
