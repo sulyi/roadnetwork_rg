@@ -102,7 +102,7 @@ class Datafile:
         *  varied  * cities (pickled format)
     --- *  1 byte  * pad ---
         *  2 bytes * number of paths
-        *  1 byte  * separator ---
+    --- *  1 byte  * separator ---
     pixel_path:
         *  8 bytes * cost
         *  2 bytes * length of pixels
@@ -113,7 +113,7 @@ class Datafile:
     --- *  1 byte  * separator ---
         *  4 bytes * length of potential_map
         *  varied  * potential_map (in TIFF format)
-    --- *  1 byte * separator --- (if not last)
+    --- *  1 byte  * separator --- (if not last)
     """
 
     # TODO: decide
@@ -123,6 +123,10 @@ class Datafile:
     # if 2 bytes of short is enough for length of pixels (note when pickled)
 
     # FIXME: handle struct and pickle exceptions
+    # [x] UnpicklingError
+    # [?] PicklingError
+    # [ ] struct.error (both for pack(?) and unpack)
+    # [-] OSError
 
     __magic = '#D-MG#WG-D'.encode('ascii')
     __header_checksum_length = 64  # from `hashlib` `sha512` method `digest_size`
@@ -207,8 +211,7 @@ class Datafile:
             elif seed_type == 4:  # bytearray
                 seed: bytearray = bytearray(seed)
             else:
-                # FIXME: use more specific exceptions
-                raise Exception("Unrecognised seed type")
+                raise DatafileError("Unrecognised seed type")
 
         save_seed: int
         safe_seed, config_length = struct.unpack(
@@ -216,20 +219,23 @@ class Datafile:
             data.read(11)
         )
 
-        config: WorldConfig = WorldConfig(*pickle.loads(data.read(config_length)))
+        try:
+            config: WorldConfig = WorldConfig(*pickle.loads(data.read(config_length)))
+        except pickle.UnpicklingError as e:
+            raise DatafileError(e)
 
         chunks_length, = struct.unpack(
             '<H',
             data.read(2)
         )
         if data.read(1) != b'\00':
-            raise Exception("Data is corrupted")
+            raise DatafileError
 
         chunks: list[WorldChunkData, ...] = []
         for _ in range(chunks_length - 1):
             chunks.append(self._decode_chunk(data))
             if data.read(1) != b'\00':
-                raise Exception("Data is corrupted")
+                raise DatafileError
         else:
             chunks.append(self._decode_chunk(data))
 
@@ -239,7 +245,6 @@ class Datafile:
         self._data = b''
 
     def write(self, filename: Union[str, bytes], key: bytes) -> None:
-        # FIXME: handle no write permission
         with open(filename, 'wb') as file:
             content_length = len(self._data)
             signature = hmac.new(key, self._data, hashlib.sha512).digest()
@@ -267,34 +272,30 @@ class Datafile:
 
     def read(self, filename: Union[str, bytes], key: bytes) -> None:
         compatible_versions = ((0, 1, 0), package_version)
-        # FIXME: handle case when filename does not exist
-
-        # FIXME: handle EOF errors when read
         with open(filename, 'rb') as file:
             magic, vm, vn, vo, checksum, offset = struct.unpack(
                 '<10s3B%dsH' % self.__header_checksum_length,
                 file.read(79)
             )
             if magic != self.__magic:
-                # FIXME: use more specific exceptions
-                raise Exception("Argument filename is not a %s" % self.__class__.__name__)
+                raise DatafileError("Argument filename has unrecognised format")
             if (vm, vn, vo) not in compatible_versions:
-                raise Exception("Argument filename has a non-compatible version")
+                raise DatafileError("Argument filename has a non-compatible version")
             if file.read(1) != b'\00':
-                raise Exception("Argument filename is corrupted")
+                raise DatafileError
             header = file.read(offset)
             if checksum != hashlib.sha512(header).digest():
-                raise Exception("Argument filename is corrupted")
+                raise DatafileError("Invalid headed checksum")
 
             content_length, signature = struct.unpack(
                 '<L%ds' % self.__data_signature_length,
                 header
             )
             if file.read(1) != b'\00':
-                raise Exception("Argument filename is corrupted")
+                raise DatafileError
             data = file.read(content_length)
             if signature != hmac.new(key, data, hashlib.sha512).digest():
-                raise Exception("Argument filename is corrupted")
+                raise DatafileError("Invalid data signature")
             self._data = data
 
     @staticmethod
@@ -342,10 +343,13 @@ class Datafile:
             '<iiH',
             data.read(10)
         )
-        cities: list[PointType, ...] = pickle.loads(data.read(cities_length))
+        try:
+            cities: list[PointType, ...] = pickle.loads(data.read(cities_length))
+        except pickle.UnpicklingError as e:
+            raise DatafileError(e)
 
         if data.read(1) != b'\00':
-            raise Exception("Data is corrupted")
+            raise DatafileError
 
         pixel_paths_length, = struct.unpack(
             '<H',
@@ -353,19 +357,19 @@ class Datafile:
         )
 
         if data.read(1) != b'\00':
-            raise Exception("Data is corrupted")
+            raise DatafileError
 
         pixel_paths: list[PixelPath, ...]
         pixel_paths = []
         for _ in range(pixel_paths_length - 1):
             pixel_paths.append(Datafile._decode_pixel_path(data))
             if data.read(1) != b'\00':
-                raise Exception("Data is corrupted")
+                raise DatafileError
         else:
             pixel_paths.append(Datafile._decode_pixel_path(data))
 
         if data.read(1) != b'\00':
-            raise Exception("Data is corrupted")
+            raise DatafileError
 
         height_map_length, = struct.unpack(
             '<L',
@@ -374,7 +378,7 @@ class Datafile:
         height_map: Image.Image = Image.open(BytesIO(data.read(height_map_length)))
 
         if data.read(1) != b'\00':
-            raise Exception("Data is corrupted")
+            raise DatafileError
 
         potential_map_length, = struct.unpack(
             '<L',
@@ -402,7 +406,10 @@ class Datafile:
             '<dH',
             data.read(10)
         )
-        pixels: list[tuple[int, int], ...] = pickle.loads(data.read(pixels_length))
+        try:
+            pixels: list[tuple[int, int], ...] = pickle.loads(data.read(pixels_length))
+        except pickle.UnpicklingError as e:
+            raise DatafileError(e)
         return PixelPath(cost, pixels)
 
 
