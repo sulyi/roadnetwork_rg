@@ -67,17 +67,18 @@ default_render_options = WorldRenderOptions()
 
 class WorldGeneratorDatafile:
     """file format:
+
         * 10 bytes * magic number
         *  3 bytes * version number
         * 64 bytes * header checksum
         *  2 bytes * data offset
     --- *  1 byte  * separator ---
     header:
-        *  4 bytes * content length (32Gb data max)
+        *  4 bytes * content length (4Gb data max)
         * 64 bytes * signature
     --- *  1 byte  * separator ---
     data:
-        *  1 byte   * seed type (None, int, str, bytes or bytearray)
+        *  1 byte   * seed type (None: 0, int: 1, str: 2, bytes: 3 and bytearray: 4)
         *  1 byte  * length of seed
         *  varied  * self._seed
     --- *  1 byte  * pad ---
@@ -87,31 +88,34 @@ class WorldGeneratorDatafile:
         *  varied  * config
     --- *  1 byte  * separator ---
     chunks:
-        *  2 bytes * length of chunks
-        *  1 byte  * pad ---
+        *  2 bytes * number of chunks
+    --- *  1 byte  * pad ---
     chunk:
         *  4 bytes * x
         *  4 bytes * y
-        *  2 bytes * length of cities (is it enough?)
-        *  varied  * cities
-        *  1 byte  * pad ---
-        *  2 bytes * length of pixel_paths
+        *  2 bytes * length of cities
+        *  varied  * cities (pickled)
+    --- *  1 byte  * pad ---
+        *  2 bytes * number of paths
         *  1 byte  * separator ---
     pixel_path:
-        *  4 bytes * cost (is it correct?)
-        *  2 bytes * length of pixels (is it enough?)
-        *  varied  * pixels
-        *  1 byte  * separator ---
-        *  2 bytes * length of height_map (in TIFF format)
-        *  varied  * height_map
-        *  1 byte  * separator ---
-        *  2 bytes * length of potential_map
+        *  8 bytes * cost
+        *  2 bytes * length of pixels
+        *  varied  * pixels (pickled)
+    --- *  1 byte  * separator ---
+        *  4 bytes * length of height_map
+        *  varied  * height_map (in TIFF format)
+    --- *  1 byte  * separator ---
+        *  4 bytes * length of potential_map
         *  varied  * potential_map (in TIFF format)
     --- *  1 byte * separator --- (if not last)
     """
 
-    # TODO: decide if EOF is needed, (note signature)
-    # or if header needs other things
+    # TODO: decide
+    # if EOF is needed, (note signature)
+    # if header needs other things
+    # if 2 bytes of short is enough for length of cities (note when pickled)
+    # if 2 bytes of short is enough for length of pixels (note when pickled)
 
     # FIXME: handle struct and pickle exceptions
 
@@ -171,7 +175,6 @@ class WorldGeneratorDatafile:
         ))
 
     def get_data(self) -> tuple[SeedType, int, WorldConfig, list[WorldChunkData, ...]]:
-        # FIXME: use more specific exceptions
         data = BytesIO(self._data)
         seed_type, seed_length = struct.unpack(
             '<BB',
@@ -199,6 +202,7 @@ class WorldGeneratorDatafile:
             elif seed_type == 4:  # bytearray
                 seed: bytearray = bytearray(seed)
             else:
+                # FIXME: use more specific exceptions
                 raise Exception("Unrecognised seed type")
 
         save_seed: int
@@ -312,13 +316,13 @@ class WorldGeneratorDatafile:
             b'\00'.join(WorldGeneratorDatafile._encode_pixel_path(path) for path in chunk.pixel_paths),
             # separator 1 byte
             struct.pack(
-                '<H%ds' % len(height_map),
+                '<L%ds' % len(height_map),
                 len(height_map),  # 2 bytes
                 height_map
             ),
             # separator 1 byte
             struct.pack(
-                '<H%ds' % len(potential_map),
+                '<L%ds' % len(potential_map),
                 len(potential_map),  # 2 bytes
                 potential_map
             )
@@ -359,8 +363,8 @@ class WorldGeneratorDatafile:
             raise Exception("Data is corrupted")
 
         height_map_length, = struct.unpack(
-            '<H',
-            data.read(2)
+            '<L',
+            data.read(4)
         )
         height_map: Image.Image = Image.open(BytesIO(data.read(height_map_length)))
 
@@ -368,8 +372,8 @@ class WorldGeneratorDatafile:
             raise Exception("Data is corrupted")
 
         potential_map_length, = struct.unpack(
-            '<H',
-            data.read(2)
+            '<L',
+            data.read(4)
         )
         potential_map: Image.Image = Image.open(BytesIO(data.read(potential_map_length)))
 
@@ -379,8 +383,8 @@ class WorldGeneratorDatafile:
     def _encode_pixel_path(path: PixelPath) -> bytes:
         pixels = pickle.dumps(path.pixels)
         data = struct.pack(
-            '<fH%ds' % len(pixels),
-            path.cost,  # 4 bytes
+            '<dH%ds' % len(pixels),
+            path.cost,  # 8 bytes
             len(pixels),  # 2 bytes
             pixels
         )
@@ -390,8 +394,8 @@ class WorldGeneratorDatafile:
     def _decode_pixel_path(data: BytesIO) -> PixelPath:
         cost: float
         cost, pixels_length = struct.unpack(
-            '<fH',
-            data.read(6)
+            '<dH',
+            data.read(10)
         )
         pixels: list[tuple[int, int], ...] = pickle.loads(data.read(pixels_length))
         return PixelPath(cost, pixels)
