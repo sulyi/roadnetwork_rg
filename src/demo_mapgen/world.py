@@ -65,7 +65,12 @@ default_world_config = WorldConfig(chunk_size=256, height=1., roughness=.5, city
 default_render_options = WorldRenderOptions()
 
 
-class WorldGeneratorDatafile:
+class DatafileError(Exception):
+    """File corruption if found"""
+    pass
+
+
+class Datafile:
     """file format:
 
         * 10 bytes * magic number
@@ -85,7 +90,7 @@ class WorldGeneratorDatafile:
         *  8 bytes * self._safe_seed
     --- *  1 byte  * pad ---
         *  1 byte  * length of config (future proof, currently 43)
-        *  varied  * config
+        *  varied  * config (pickled format)
     --- *  1 byte  * separator ---
     chunks:
         *  2 bytes * number of chunks
@@ -94,14 +99,14 @@ class WorldGeneratorDatafile:
         *  4 bytes * x
         *  4 bytes * y
         *  2 bytes * length of cities
-        *  varied  * cities (pickled)
+        *  varied  * cities (pickled format)
     --- *  1 byte  * pad ---
         *  2 bytes * number of paths
         *  1 byte  * separator ---
     pixel_path:
         *  8 bytes * cost
         *  2 bytes * length of pixels
-        *  varied  * pixels (pickled)
+        *  varied  * pixels (pickled format)
     --- *  1 byte  * separator ---
         *  4 bytes * length of height_map
         *  varied  * height_map (in TIFF format)
@@ -134,7 +139,7 @@ class WorldGeneratorDatafile:
         file.write(filename, key)
 
     @classmethod
-    def load(cls, filename: Union[str, bytes], key: bytes) -> WorldGeneratorDatafile:
+    def load(cls, filename: Union[str, bytes], key: bytes) -> Datafile:
         instance = cls()
         instance.read(filename, key)
         return instance
@@ -313,7 +318,7 @@ class WorldGeneratorDatafile:
                 len(chunk.pixel_paths)  # 2 bytes
             ),
             # separator 1 byte
-            b'\00'.join(WorldGeneratorDatafile._encode_pixel_path(path) for path in chunk.pixel_paths),
+            b'\00'.join(Datafile._encode_pixel_path(path) for path in chunk.pixel_paths),
             # separator 1 byte
             struct.pack(
                 '<L%ds' % len(height_map),
@@ -353,11 +358,11 @@ class WorldGeneratorDatafile:
         pixel_paths: list[PixelPath, ...]
         pixel_paths = []
         for _ in range(pixel_paths_length - 1):
-            pixel_paths.append(WorldGeneratorDatafile._decode_pixel_path(data))
+            pixel_paths.append(Datafile._decode_pixel_path(data))
             if data.read(1) != b'\00':
                 raise Exception("Data is corrupted")
         else:
-            pixel_paths.append(WorldGeneratorDatafile._decode_pixel_path(data))
+            pixel_paths.append(Datafile._decode_pixel_path(data))
 
         if data.read(1) != b'\00':
             raise Exception("Data is corrupted")
@@ -430,7 +435,7 @@ class WorldGenerator:
         return self._seed if self._seed is not None else self._safe_seed
 
     def read(self, filename: Union[str, bytes], key: bytes):
-        seed, safe_seed, config, chunks = WorldGeneratorDatafile.load(filename, key).get_data()
+        seed, safe_seed, config, chunks = Datafile.load(filename, key).get_data()
         # FIXME: rethink assertion
         assert get_safe_seed(seed, config.bit_length) == safe_seed
         config.check()
@@ -441,8 +446,8 @@ class WorldGenerator:
         self._safe_seed = safe_seed
 
     def write(self, filename: Union[str, bytes], key: bytes):
-        WorldGeneratorDatafile.save(filename, key,
-                                    self._seed, self._safe_seed, self.config, self._chunks)
+        Datafile.save(filename, key,
+                      self._seed, self._safe_seed, self.config, self._chunks)
 
     def add_chunk(self, chunk_x: int, chunk_y: int):
         chunk = WorldChunk(chunk_x, chunk_y, self.config.chunk_size, self.config.height, self.config.roughness,
