@@ -78,7 +78,7 @@ class DatafileEncodingError(Exception):
 class Datafile:
     """file format:
 
-    * all number is in little endian
+    * all numbers are in little endian
 
     ============== =================
         size        description
@@ -134,8 +134,6 @@ class Datafile:
     # if 2 bytes of short is enough for length of cities (note when pickled)
     # if 2 bytes of short is enough for length of pixels (note when pickled)
 
-    # FIXME: raise ValueError when part of the data is larger than format allows
-
     __magic = '#D-MG#WG-D'.encode('ascii')
     __header_checksum_length = 64  # from `hashlib` `sha512` method `digest_size`
     __data_signature_length = 64  # from `hmac` `digest_size` with `sha512` method
@@ -176,6 +174,11 @@ class Datafile:
             config = pickle.dumps(list(config.__dict__.values()))
         except pickle.PicklingError as e:
             raise DatafileEncodingError("Failed to encode config", e)
+
+        if len(seed) > 255:
+            raise DatafileEncodingError("Too large seed")
+        if len(config) > 255:
+            raise DatafileEncodingError("Too large config")
 
         try:
             config_pack = struct.pack(
@@ -285,18 +288,29 @@ class Datafile:
         self._data = b''
 
     def write(self, filename: Union[str, bytes], key: bytes) -> None:
+        if len(self._data) > 4294967295:
+            raise DatafileEncodingError("Too large data")
+
         with open(filename, 'wb') as file:
-            content_length = len(self._data)
             signature = hmac.new(key, self._data, hashlib.sha512).digest()
+            # fail-safe (overkill)
+            if len(signature) > self.__data_signature_length:
+                raise DatafileEncodingError("Too large data signature")
+
             try:
                 header = struct.pack(
                     '<L%ds' % self.__data_signature_length,
-                    content_length,  # 4 bytes
+                    len(self._data),  # 4 bytes
                     signature,  # 64 bytes
                 )
             except struct.error as e:
                 raise DatafileEncodingError("Failed to encode header", e)
+
             checksum = hashlib.sha512(header).digest()
+            # fail-safe (overkill)
+            if len(checksum) > self.__header_checksum_length:
+                raise DatafileEncodingError("Too large header checksum")
+
             try:
                 magic = struct.pack(
                     '<10s3B%dsH' % self.__header_checksum_length,
@@ -304,10 +318,10 @@ class Datafile:
                     *package_version,  # 3 bytes
                     checksum,  # 64 bytes
                     len(header),  # 2 bytes
-                    # pad 1 byte
                 )
             except struct.error as e:
                 raise DatafileEncodingError("Failed to encode magic", e)
+
             file.write(b'\00'.join((
                 magic,
                 # separator 1 byte
@@ -358,12 +372,20 @@ class Datafile:
             cities = pickle.dumps(chunk.cities)
         except pickle.PicklingError as e:
             raise DatafileEncodingError("Failed to encode cities", e)
+        if len(cities) > 65535:
+            raise DatafileEncodingError("Too large cities")
+
         with BytesIO() as buff:
             chunk.height_map.save(buff, format='TIFF')
             height_map = buff.getvalue()
+        if len(height_map) > 4294967295:
+            raise DatafileEncodingError("Too large height_map")
+
         with BytesIO() as buff:
             chunk.potential_map.save(buff, format='TIFF')
             potential_map = buff.getvalue()
+        if len(height_map) > 4294967295:
+            raise DatafileEncodingError("Too large potential_map")
 
         try:
             chunk_pack = struct.pack(
@@ -472,6 +494,9 @@ class Datafile:
             pixels = pickle.dumps(path.pixels)
         except pickle.PicklingError as e:
             raise DatafileEncodingError("Failed to encode pixels", e)
+        if len(pixels) > 65535:
+            raise DatafileEncodingError("Too large pixels")
+
         try:
             data = struct.pack(
                 '<dH%ds' % len(pixels),
