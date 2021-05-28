@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import bisect
 from collections import Iterable
 from typing import Union
@@ -12,10 +14,10 @@ class PixelPath:
         self.cost = cost
         self.pixels = pixels
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "%s(%d, %s)" % (self.__class__.__name__, self.cost, self.pixels)
 
-    def __eq__(self, other):
+    def __eq__(self, other: PixelPath) -> bool:
         return self is other or self.cost == other.cost and self.pixels == other.pixels
 
 
@@ -29,7 +31,7 @@ class Node:
         self.parent: Union[tuple[int, int], None] = None
         self.open: bool = False
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "%s(%d, %d, %s)" % (self.__class__.__name__, self.x, self.y,
                                    self.distance if self.distance is None else "%d" % self.distance)
 

@@ -31,7 +31,7 @@ class WorldConfig:
     city_sizes: int = 1
     bit_length: int = 64
 
-    def check(self):
+    def check(self) -> None:
         HeightMap.check(self.chunk_size, self.height, self.roughness)
         WorldChunk.check(self.city_rate, self.city_sizes)
 
@@ -548,10 +548,6 @@ class WorldGenerator:
         self._seed = seed if isinstance(seed, int) or seed is None else seed[:255]  # for i/o compatibility
         self._safe_seed = get_safe_seed(seed, self.config.bit_length)
 
-    @staticmethod
-    def clear_potential_cache():
-        AdaptivePotentialFunction.clear_cache()
-
     @classmethod
     def save(cls, instance: WorldGenerator, filename: Union[str, bytes], key: bytes) -> None:
         if not isinstance(instance, cls):
@@ -568,7 +564,7 @@ class WorldGenerator:
     def seed(self) -> SeedType:
         return self._seed if self._seed is not None else self._safe_seed
 
-    def read(self, filename: Union[str, bytes], key: bytes):
+    def read(self, filename: Union[str, bytes], key: bytes) -> None:
         seed, safe_seed, config, chunks = Datafile.load(filename, key).get_data()
         try:
             config.check()
@@ -586,18 +582,18 @@ class WorldGenerator:
         self._seed = seed
         self._safe_seed = safe_seed
 
-    def write(self, filename: Union[str, bytes], key: bytes):
+    def write(self, filename: Union[str, bytes], key: bytes) -> None:
         Datafile.save(filename, key,
                       self._seed, self._safe_seed, self.config, self._chunks)
 
-    def add_chunk(self, chunk_x: int, chunk_y: int):
+    def add_chunk(self, chunk_x: int, chunk_y: int) -> None:
         chunk = WorldChunk(chunk_x, chunk_y, self.config.chunk_size, self.config.height, self.config.roughness,
                            self.config.city_rate, self.config.city_sizes,
                            seed=self._safe_seed, bit_length=self.config.bit_length)
         chunk_data = chunk.generate()
         self._chunks.append(chunk_data)
 
-    def render(self, *, options: WorldRenderOptions = default_render_options):
+    def render(self, *, options: WorldRenderOptions = default_render_options) -> Image.Image:
         if not self._chunks:
             raise IndexError("There are no chunks added to render")
         if not any((options.show_debug, options.show_height_map, options.show_cities, options.show_roads,
@@ -672,6 +668,10 @@ class WorldGenerator:
         atlas_im.paste(draw_im, mask=draw_im)
         return atlas_im
 
+    @staticmethod
+    def clear_potential_cache() -> None:
+        AdaptivePotentialFunction.clear_cache()
+
 
 class WorldChunk:
 
@@ -696,11 +696,12 @@ class WorldChunk:
         self._local_seed = seed & ((1 << bit_length) - 1)
 
     @staticmethod
-    def check(city_rate, city_sizes):
+    def check(city_rate: int, city_sizes: int) -> None:
         if not isinstance(city_rate, int):
             raise TypeError("Argument 'city_rate' should be integer number, not '%s'" % type(city_rate).__name__)
         if city_rate <= 0:
             raise ValueError("Argument 'city_rate' should be positive")
+
         if not isinstance(city_sizes, int):
             raise TypeError("Argument 'city_sizes' should be integer number, not '%s'" % type(city_sizes).__name__)
         if city_sizes <= 0:
@@ -728,8 +729,6 @@ class WorldChunk:
         paths = {}
         for i, source in enumerate(cities[:-1], 1):
             paths.update(find_shortest_paths(height_map_image, source, cities[i:]))
-
-        selected_path = [max(paths.values(), key=lambda path: path.cost)]
 
         world_data = WorldChunkData(
             self._chunk_x, self._chunk_y, height_map_image, cities, potential_function.potential_map, paths

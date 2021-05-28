@@ -76,7 +76,7 @@ class AdaptivePotentialFunction(MarkovChainMonteCarloPotentialFunction):
         chop.paste(potential_image, (x - x0, y - y0))
         self._potential_image = ImageChops.add(self._potential_image, chop)
 
-    def _get_monopole_potential(self, r):
+    def _get_monopole_potential(self, r: int) -> Image.Image:
         if r not in self._monopole_potential_cache:
             p = 1 / 3
             s = ceil(2 ** .5 * r * (log(510 * r / (self._city_sizes + 1))) ** (.5 / p))
@@ -130,4 +130,6 @@ class SpatialPoissonPointProcessIntensityFunction(MarkovChainMonteCarloIntensity
 
     @property
     def rate(self):
+        self._potential_function: SpatialPoissonPointProcessPotentialFunction
+        self._composite_function: SpatialPoissonPointProcessCompositeFunction
         return self._rate / self._composite_function.expected / self._potential_function.expected

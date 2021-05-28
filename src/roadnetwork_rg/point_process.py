@@ -1,8 +1,8 @@
-from typing import Union, Generator, Iterator, TypeVar
+from typing import Union, Generator, Iterator, TypeVar, Generic
 
 import numpy as np
 
-T = TypeVar('T')
+T = TypeVar('T', bound=tuple[int, ...])
 
 
 class IntensityFunction:
@@ -15,10 +15,10 @@ class IntensityFunction:
         raise NotImplementedError
 
 
-class PointProcess(object):
+class PointProcess(Generic[T]):
 
     def __init__(self, rate: Union[int, float, IntensityFunction],
-                 size: tuple[int, ...], seed: int) -> None:
+                 size: T, seed: int) -> None:
         if (not isinstance(size, tuple) or
                 any(not isinstance(dim, int) for dim in size)):
             raise TypeError("Argument 'size' should be a tuple of integer numbers, not '%s'" % type(size).__name__)
@@ -53,7 +53,7 @@ class PointProcess(object):
 
 class MarkovChainMonteCarlo(PointProcess):
 
-    def _generator(self) -> Generator[tuple[int, ...], None, None]:
+    def _generator(self) -> Generator[T, None, None]:
         n = self._rng.poisson(self.rate.rate if isinstance(self.rate, IntensityFunction) else self.rate)
         count = 0
         while count <= n:
@@ -72,7 +72,7 @@ class MarkovChainMonteCarlo(PointProcess):
 
 class SpatialPoissonPointProcess(PointProcess):
 
-    def _generator(self) -> Generator[tuple[int, ...], None, None]:
+    def _generator(self) -> Generator[T, None, None]:
         n = self._rng.poisson(self.rate.rate if isinstance(self.rate, IntensityFunction) else self.rate)
         for _ in range(n):
             candidate = tuple(self._rng.integers([0] * len(self.size), self.size))
