@@ -200,7 +200,7 @@ class Datafile:
         self._data = b'\00'.join((
             config_pack,
             # separator 1 byte
-            b'\00'.join(self._encode_chunk(chunk) for chunk in chunks)
+            b'\00'.join(self.encode_chunk(chunk) for chunk in chunks)
         ))
 
     def get_data(self) -> tuple[SeedType, int, WorldConfig, list[WorldChunkData, ...]]:
@@ -274,7 +274,7 @@ class Datafile:
             raise DatafileDecodeError
 
         chunks: list[WorldChunkData, ...] = [
-            Datafile._read_list_item(data, i, chunks_count, b'\00', Datafile._decode_chunk)
+            Datafile._read_list_item(data, i, chunks_count, b'\00', Datafile.decode_chunk)
             for i in range(chunks_count)
         ]
 
@@ -363,18 +363,7 @@ class Datafile:
             self._data = data
 
     @staticmethod
-    def _read_list_item(data: BytesIO, index: int, end: int, delimiter: bytes, item_decoder: Callable[[BytesIO], Any]):
-        item = item_decoder(data)
-        # XXX: there might be a better pattern
-        # if there is a surrounding `delimiter` it could be handled
-        # here, or before the `_decode_pixel_path` call
-        if index < end - 1:
-            if data.read(len(delimiter)) != delimiter:
-                raise DatafileDecodeError
-        return item
-
-    @staticmethod
-    def _encode_chunk(chunk: WorldChunkData) -> bytes:
+    def encode_chunk(chunk: WorldChunkData) -> bytes:
         try:
             cities = pickle.dumps(chunk.cities)
         except pickle.PicklingError as e:
@@ -420,7 +409,7 @@ class Datafile:
         data = b'\00'.join((
             chunk_pack,
             # separator 1 byte
-            b'\00'.join(Datafile._encode_pixel_path(path) for path in chunk.pixel_paths),
+            b'\00'.join(Datafile.encode_pixel_path(path) for path in chunk.pixel_paths),
             # separator 1 byte
             height_map_pack,
             # separator 1 byte
@@ -429,7 +418,7 @@ class Datafile:
         return data
 
     @staticmethod
-    def _decode_chunk(data: BytesIO) -> WorldChunkData:
+    def decode_chunk(data: BytesIO) -> WorldChunkData:
         try:
             x: int
             y: int
@@ -460,7 +449,7 @@ class Datafile:
             raise DatafileDecodeError
 
         pixel_paths: list[PixelPath, ...] = [
-            Datafile._read_list_item(data, i, pixel_paths_count, b'\00', Datafile._decode_pixel_path)
+            Datafile._read_list_item(data, i, pixel_paths_count, b'\00', Datafile.decode_pixel_path)
             for i in range(pixel_paths_count)
         ]
 
@@ -492,7 +481,7 @@ class Datafile:
         return WorldChunkData(x, y, height_map, cities, potential_map, pixel_paths)
 
     @staticmethod
-    def _encode_pixel_path(path: PixelPath) -> bytes:
+    def encode_pixel_path(path: PixelPath) -> bytes:
         try:
             pixels = pickle.dumps(path.pixels)
         except pickle.PicklingError as e:
@@ -513,7 +502,7 @@ class Datafile:
         return data
 
     @staticmethod
-    def _decode_pixel_path(data: BytesIO) -> PixelPath:
+    def decode_pixel_path(data: BytesIO) -> PixelPath:
         try:
             cost: float
             cost, pixels_length = struct.unpack(
@@ -527,6 +516,18 @@ class Datafile:
         except pickle.UnpicklingError as e:
             raise DatafileDecodeError("Failed to decode pixels", e)
         return PixelPath(cost, pixels)
+
+    @staticmethod
+    def _read_list_item(data: BytesIO, index: int, end: int, delimiter: bytes,
+                        item_decoder: Callable[[BytesIO], Any]):
+        item = item_decoder(data)
+        # XXX: there might be a better pattern
+        # if there is a surrounding `delimiter` it could be handled
+        # here, or before the `_decode_pixel_path` call
+        if index < end - 1:
+            if data.read(len(delimiter)) != delimiter:
+                raise DatafileDecodeError
+        return item
 
 
 class WorldGenerator:
