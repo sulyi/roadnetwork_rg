@@ -6,7 +6,7 @@ import pickle
 import struct
 from dataclasses import dataclass, field
 from io import BytesIO
-from typing import Union, Callable, Any
+from typing import Union, Callable, TypeVar
 
 from PIL import Image, ImageDraw, ImageStat
 
@@ -18,6 +18,8 @@ from .intensity import AdaptivePotentialFunction, ExponentialZCompositeFunction,
     MarkovChainMonteCarloIntensityFunction
 from .pathfinder import find_shortest_paths, PixelPath
 from .point_process import MarkovChainMonteCarlo
+
+T = TypeVar('T')
 
 
 @dataclass(frozen=True)
@@ -58,7 +60,7 @@ class WorldChunkData:
     height_map: Image.Image = field(compare=False)
     cities: list[PointType, ...] = field(compare=False)
     potential_map: Image.Image = field(compare=False)
-    pixel_paths: list[PixelPath, ...] = field(compare=False)
+    pixel_paths: dict[tuple[PointType, PointType], PixelPath] = field(compare=False)
 
 
 default_world_config = WorldConfig(chunk_size=256, height=1., roughness=.5, city_rate=32, city_sizes=8)
@@ -115,6 +117,8 @@ class Datafile:
      -- 1 byte --   -- separator --
      pixel_path:
         8 bytes          cost
+        6 byte          source (2, 2, 2 byte)
+        6 byte          target (2, 2, 2 byte)
         2 bytes     length of pixels
         varied          pixels (pickled format)
      -- 1 byte --   -- separator --
@@ -409,7 +413,7 @@ class Datafile:
         data = b'\00'.join((
             chunk_pack,
             # separator 1 byte
-            b'\00'.join(Datafile.encode_pixel_path(path) for path in chunk.pixel_paths),
+            b'\00'.join(Datafile.encode_pixel_path(key, path) for key, path in chunk.pixel_paths.items()),
             # separator 1 byte
             height_map_pack,
             # separator 1 byte
@@ -448,10 +452,10 @@ class Datafile:
         if data.read(1) != b'\00':
             raise DatafileDecodeError
 
-        pixel_paths: list[PixelPath, ...] = [
+        pixel_paths: dict[tuple[PointType, PointType], PixelPath] = dict(
             Datafile._read_list_item(data, i, pixel_paths_count, b'\00', Datafile.decode_pixel_path)
             for i in range(pixel_paths_count)
-        ]
+        )
 
         if data.read(1) != b'\00':
             raise DatafileDecodeError
@@ -481,7 +485,7 @@ class Datafile:
         return WorldChunkData(x, y, height_map, cities, potential_map, pixel_paths)
 
     @staticmethod
-    def encode_pixel_path(path: PixelPath) -> bytes:
+    def encode_pixel_path(key: tuple[PointType, PointType], path: PixelPath) -> bytes:
         try:
             pixels = pickle.dumps(path.pixels)
         except pickle.PicklingError as e:
@@ -489,10 +493,13 @@ class Datafile:
         if len(pixels) > 65535:
             raise DatafileEncodingError("Too large pixels")
 
+        source, target = key
         try:
             data = struct.pack(
-                '<dH%ds' % len(pixels),
+                '<d HHH HHH H%ds' % len(pixels),
                 path.cost,  # 8 bytes
+                *source,
+                *target,
                 len(pixels),  # 2 bytes
                 pixels  # varied
             )
@@ -502,12 +509,12 @@ class Datafile:
         return data
 
     @staticmethod
-    def decode_pixel_path(data: BytesIO) -> PixelPath:
+    def decode_pixel_path(data: BytesIO) -> tuple[tuple[PointType, PointType], PixelPath]:
         try:
             cost: float
-            cost, pixels_length = struct.unpack(
-                '<dH',
-                data.read(10)
+            cost, sx, sy, sz, tx, ty, tz, pixels_length = struct.unpack(
+                '<d HHH HHH H',
+                data.read(22)
             )
         except struct.error as e:
             raise DatafileDecodeError("Failed to decode PixelPath cost and length of pixels", e)
@@ -515,11 +522,12 @@ class Datafile:
             pixels: list[tuple[int, int], ...] = pickle.loads(data.read(pixels_length))
         except pickle.UnpicklingError as e:
             raise DatafileDecodeError("Failed to decode pixels", e)
-        return PixelPath(cost, pixels)
+        key: tuple[PointType, PointType] = ((sx, sy, sz), (tx, ty, tz))
+        return key, PixelPath(cost, pixels)
 
     @staticmethod
     def _read_list_item(data: BytesIO, index: int, end: int, delimiter: bytes,
-                        item_decoder: Callable[[BytesIO], Any]):
+                        item_decoder: Callable[[BytesIO], T]) -> T:
         item = item_decoder(data)
         # XXX: there might be a better pattern
         # if there is a surrounding `delimiter` it could be handled
@@ -652,7 +660,7 @@ class WorldGenerator:
             if options.show_roads:
                 # XXX: avoiding `Image.Image.putpixel`
                 path_data = [0] * (self.config.chunk_size * self.config.chunk_size)
-                for path in chunk.pixel_paths:
+                for path in chunk.pixel_paths.values():
                     for point_x, point_y in path.pixels:
                         path_data[point_x + point_y * self.config.chunk_size] = 255
                 im = Image.new('RGBA', (self.config.chunk_size, self.config.chunk_size), 0)
@@ -722,6 +730,6 @@ class WorldChunk:
         selected_path = [max(paths.values(), key=lambda path: path.cost)]
 
         world_data = WorldChunkData(
-            self._chunk_x, self._chunk_y, height_map_image, cities, potential_function.potential_map, selected_path
+            self._chunk_x, self._chunk_y, height_map_image, cities, potential_function.potential_map, paths
         )
         return world_data
