@@ -1,24 +1,24 @@
 from setuptools import setup
 
-from src import demo_mapgen
+from src import roadnetwork_rg
 
-name = 'demo_mapgen'
-requires = ['Pillow']
+name = 'roadnetwork_rg'
+requires = ['Pillow', 'numpy']
 
 setup(
     name=name,
-    version=demo_mapgen.__version__,
+    version=roadnetwork_rg.__version__,
     packages=[name],
     package_data={
         name: ['data/colourmap.palette'],
     },
     include_package_data=True,
     package_dir={'': 'src',
-                 name: 'src/demo_mapgen'},
+                 name: 'src/roadnetwork_rg'},
     url='',
     license='',
     author='Ákos Sülyi',
     author_email='sulyi.gbox@gmail.com',
-    description='Generates height map with cities (and constructs a sensible road network)',
+    description='Generates height map and cities then constructs a sensible road network',
     install_requires=requires
 )
