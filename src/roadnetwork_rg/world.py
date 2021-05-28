@@ -6,7 +6,7 @@ import pickle
 import struct
 from dataclasses import dataclass, field
 from io import BytesIO
-from typing import Union
+from typing import Union, Callable, Any
 
 from PIL import Image, ImageDraw, ImageStat
 
@@ -273,14 +273,10 @@ class Datafile:
         if data.read(1) != b'\00':
             raise DatafileDecodeError
 
-        # XXX: there might be a better pattern
-        chunks: list[WorldChunkData, ...] = []
-        for _ in range(chunks_count - 1):
-            chunks.append(self._decode_chunk(data))
-            if data.read(1) != b'\00':
-                raise DatafileDecodeError
-        else:
-            chunks.append(self._decode_chunk(data))
+        chunks: list[WorldChunkData, ...] = [
+            Datafile._read_list_item(data, i, chunks_count, b'\00', Datafile._decode_chunk)
+            for i in range(chunks_count)
+        ]
 
         return seed, safe_seed, config, chunks
 
@@ -365,6 +361,17 @@ class Datafile:
             if signature != hmac.new(key, data, hashlib.sha512).digest():
                 raise DatafileDecodeError("Invalid data signature")
             self._data = data
+
+    @staticmethod
+    def _read_list_item(data: BytesIO, index: int, end: int, delimiter: bytes, item_decoder: Callable[[BytesIO], Any]):
+        item = item_decoder(data)
+        # XXX: there might be a better pattern
+        # if there is a surrounding `delimiter` it could be handled
+        # here, or before the `_decode_pixel_path` call
+        if index < end - 1:
+            if data.read(len(delimiter)) != delimiter:
+                raise DatafileDecodeError
+        return item
 
     @staticmethod
     def _encode_chunk(chunk: WorldChunkData) -> bytes:
@@ -452,14 +459,10 @@ class Datafile:
         if data.read(1) != b'\00':
             raise DatafileDecodeError
 
-        # XXX: there might be a better pattern
-        pixel_paths: list[PixelPath, ...] = []
-        for _ in range(pixel_paths_count - 1):
-            pixel_paths.append(Datafile._decode_pixel_path(data))
-            if data.read(1) != b'\00':
-                raise DatafileDecodeError
-        else:
-            pixel_paths.append(Datafile._decode_pixel_path(data))
+        pixel_paths: list[PixelPath, ...] = [
+            Datafile._read_list_item(data, i, pixel_paths_count, b'\00', Datafile._decode_pixel_path)
+            for i in range(pixel_paths_count)
+        ]
 
         if data.read(1) != b'\00':
             raise DatafileDecodeError
