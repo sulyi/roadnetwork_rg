@@ -232,6 +232,44 @@ class ExponentialZCompositeFunction(MarkovChainMonteCarloCompositeFunction):
         return rate
 
 
+class LinearZCompositeFunction(SpatialPoissonPointProcessCompositeFunction):
+
+    def __init__(self, kernel_mean: float, potential_mean: float, city_sizes: int) -> None:
+        self._city_sizes = city_sizes
+        self._expected = kernel_mean * (.5 + 1 / city_sizes) * potential_mean
+
+    def get(self, value, kernel, potential):
+        rate = potential * kernel * ((value[2] + 1) / (self._city_sizes + 1))
+        return rate
+
+    @property
+    def expected(self):
+        return self._expected
+
+
+class ScalarCompositeFunction(SpatialPoissonPointProcessCompositeFunction):
+
+    def __init__(self, kernel_mean: float, potential_mean: float) -> None:
+        self._expected = kernel_mean * potential_mean
+
+    def get(self, value, kernel, potential):
+        return potential * kernel
+
+    @property
+    def expected(self):
+        return self._expected
+
+
+class HomogenousCompositeFunction(SpatialPoissonPointProcessCompositeFunction):
+
+    def get(self, value, kernel, potential):
+        return potential
+
+    @property
+    def expected(self):
+        return 1
+
+
 class MarkovChainMonteCarloIntensityFunction(IntensityFunction):
     """It is an implementation of :class:`.IntensityFunction` used by
     :class:`~.point_process.MarkovChainMonteCarlo`.
