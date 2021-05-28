@@ -554,6 +554,8 @@ class WorldGenerator:
 
     @classmethod
     def save(cls, instance: WorldGenerator, filename: Union[str, bytes], key: bytes) -> None:
+        if isinstance(instance, cls):
+            raise ValueError("Argument is not an %s object" % cls.__class__.__name__)
         instance.write(filename, key)
 
     @classmethod
