@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import warnings
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Set, Tuple, Union
 
 from PIL import Image, ImageDraw, ImageStat
 
-from .common import (HeightMapConfig, SeedType, WorldChunkData, WorldConfig, WorldData,
-                     WorldRenderOptions, get_safe_seed)
+from .common import (HeightMapConfig, PixelPath, PointType, SeedType, WorldChunkData, WorldConfig,
+                     WorldData, WorldRenderOptions, get_safe_seed)
 from .data import colour_palette
 from .datafile import Datafile
 from .height_map import HeightMap
@@ -22,6 +22,55 @@ default_world_config = WorldConfig(chunk_size=256, height=1., roughness=.5,
 """It is the default configuration for :class:`WorldGenerator` initialization."""
 default_render_options = WorldRenderOptions()
 """It is the default render options for :meth:`WorldGenerator.render` method."""
+
+
+def filter_roads(targets: List[PointType, ...], paths: Dict[Tuple[PointType, PointType], PixelPath]
+                 ) -> Set[Tuple[PointType, PointType], ...]:
+    """Selects cheapest road until all target are connected.
+
+    :param targets: It is a list of points to be connected.
+    :type targets: :class:`list` [:attr:`.PointType`, ...]
+    :param paths: It is a dictionary of available paths.
+    :type paths: :class:`dict` [:class:`tuple` [:attr:`.PointType`, :attr:`.PointType`],
+        :class:`.PixelPath`]
+    :return: It is a set of keys corresponding to selected paths.
+    :rtype: :class:`set` [:class:`tuple` [:attr:`.PointType`, :attr:`.PointType`], ...]
+    """
+    sorted_paths = sorted(paths, key=lambda path: paths[path].cost, reverse=True)
+    lookup = {key: 0 for key in targets}
+    available = 1
+    q = {0: targets.copy()}
+    result = set()
+    while True:
+        cheapest = sorted_paths.pop()
+        result.add(cheapest)
+        if lookup[cheapest[0]] == 0 and lookup[cheapest[1]] == 0:
+            q[available] = [*cheapest]
+            q[0].remove(cheapest[0])
+            q[0].remove(cheapest[1])
+            lookup[cheapest[0]] = available
+            lookup[cheapest[1]] = available
+            available += 1
+            if not q[0]:
+                q.pop(0)
+        elif lookup[cheapest[0]] == 0 or lookup[cheapest[1]] == 0:
+            source, target = cheapest if lookup[cheapest[0]] == 0 else reversed(cheapest)
+            q[0].remove(source)
+            q[lookup[target]].append(source)
+            lookup[source] = lookup[target]
+            if not q[0]:
+                q.pop(0)
+        elif lookup[cheapest[0]] != lookup[cheapest[1]]:
+            target, source = sorted(cheapest, key=lookup.get)
+            q_index = lookup[source]
+            q[lookup[target]].extend(q[lookup[source]])
+            for city in q[lookup[source]]:
+                lookup[city] = lookup[target]
+            q.pop(q_index)
+
+        if len(q) == 1:
+            break
+    return result
 
 
 class WorldGenerator:
@@ -45,6 +94,7 @@ class WorldGenerator:
         config.check()
         self._config = config
         self._chunks: Dict[Tuple[int, int], WorldChunkData] = {}
+        self._selected_paths: Dict[Tuple[int, int], Set[Tuple[PointType, PointType], ...]] = {}
 
         # for i/o compatibility truncate seed to 255
         self._seed = seed if isinstance(seed, int) or seed is None else seed[:255]
@@ -127,6 +177,12 @@ class WorldGenerator:
 
         self._config = config
         self._chunks = {(chunk.offset_x, chunk.offset_y): chunk for chunk in data.chunks}
+        # FIXME: add selected paths to io
+        self._selected_paths = {
+            (chunk.offset_x, chunk.offset_y): filter_roads(chunk.cities,
+                                                           chunk.pixel_paths)
+            for chunk in data.chunks
+        }
 
         self._seed = seed
         self._safe_seed = data.safe_seed
@@ -164,6 +220,10 @@ class WorldGenerator:
         chunk = WorldChunk(chunk_x, chunk_y, self._config, seed=self._safe_seed,
                            bit_length=self._config.bit_length)
         chunk_data = chunk.generate()
+
+        self._selected_paths[chunk_x, chunk_y] = filter_roads(chunk_data.cities,
+                                                              chunk_data.pixel_paths)
+
         self._chunks[chunk_x, chunk_y] = chunk_data
 
     def render(self, *, options: WorldRenderOptions = default_render_options) -> Image.Image:
@@ -194,7 +254,7 @@ class WorldGenerator:
 
         draw = ImageDraw.Draw(draw_im)
 
-        for chunk in self._chunks.values():
+        for key, chunk in self._chunks.items():
             cx = (chunk.offset_x - min_x) * self._config.chunk_size
             cy = (chunk.offset_y - min_y) * self._config.chunk_size
 
@@ -224,7 +284,7 @@ class WorldGenerator:
                 )
 
             # draw roads
-            image = self._render_draw_roads(chunk, options)
+            image = self._render_draw_roads(chunk, self._selected_paths[key], options)
             draw_im.paste(image, (cx, cy), mask=image)
 
         atlas_im.paste(draw_im, mask=draw_im)
@@ -252,18 +312,18 @@ class WorldGenerator:
         return alpha
 
     @staticmethod
-    def _render_draw_roads(chunk: WorldChunkData, options: WorldRenderOptions) -> Image.Image:
+    def _render_draw_roads(chunk: WorldChunkData, selected_paths: Set[Tuple[PointType, PointType]],
+                           options: WorldRenderOptions) -> Image.Image:
+        image = Image.new('RGBA', chunk.height_map.size, 0)
         if options.show_roads:
             # NOTE: avoiding `Image.Image.putpixel`
             path_data = [0] * (chunk.height_map.size[0] * chunk.height_map.size[1])
-            for path in chunk.pixel_paths.values():
-                for point_x, point_y in path.pixels:
+            for path in selected_paths:
+                for point_x, point_y in chunk.pixel_paths[path].pixels:
                     path_data[point_x + point_y * chunk.height_map.size[0]] = 255
             image = Image.new('RGBA', chunk.height_map.size, 0)
             image.putalpha(Image.frombytes('L', chunk.height_map.size,
                                            bytes(path_data)))
-        else:
-            image = Image.new('RGBA', chunk.height_map.size)
         return image
 
     @staticmethod
