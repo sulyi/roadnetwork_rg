@@ -131,6 +131,9 @@ class SpatialPoissonPointProcessIntensityFunction(MarkovChainMonteCarloIntensity
                  potential_func: SpatialPoissonPointProcessPotentialFunction,
                  composite_func: SpatialPoissonPointProcessCompositeFunction) -> None:
         super().__init__(rate, kernel_image, potential_func, composite_func)
+        # just to carry typehints!
+        self._composite_function = composite_func
+        self._potential_function = potential_func
 
     @property
     def rate(self):
