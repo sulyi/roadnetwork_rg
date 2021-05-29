@@ -576,7 +576,7 @@ class WorldGenerator:
 
     @property
     def safe_seed(self):
-        return self._seed
+        return self._safe_seed
 
     def get_chunks(self):
         return self._chunks.copy()
