@@ -80,7 +80,7 @@ class AdaptivePotentialFunction(MarkovChainMonteCarloPotentialFunction):
             p = 1 / 3
             s = ceil(2 ** .5 * radius * (log(510 * radius / (self._city_sizes + 1))) ** (.5 / p))
 
-            def super_gauss(x, y, sigma, power):
+            def super_gauss(x: int, y: int, sigma: int, power: float):
                 a = 255 * sigma / (self._city_sizes + 1)
                 return a * exp(-((x ** 2 + y ** 2) / 2 / sigma ** 2) ** power)
 

@@ -508,7 +508,7 @@ class Datafile:
             raise DatafileDecodeError
 
     @staticmethod
-    def _read_magick(file):
+    def _read_magick(file: BinaryIO) -> tuple[bytes, int]:
         compatible_versions = (package_version, *Datafile.__compatible_versions)
         try:
             magic, vm, vn, vo, checksum, offset = struct.unpack(
@@ -524,7 +524,7 @@ class Datafile:
         return checksum, offset
 
     @staticmethod
-    def _read_header(file, offset, checksum):
+    def _read_header(file: BinaryIO, offset: int, checksum: bytes) -> tuple[int, bytes]:
         header = file.read(offset)
         if checksum != hashlib.sha512(header).digest():
             raise DatafileDecodeError("Invalid headed checksum")
@@ -571,14 +571,14 @@ class WorldGenerator:
         return self._seed if self._seed is not None else self._safe_seed
 
     @property
-    def actual_seed(self):
+    def actual_seed(self) -> SeedType:
         return self._seed
 
     @property
-    def safe_seed(self):
+    def safe_seed(self) -> int:
         return self._safe_seed
 
-    def get_chunks(self):
+    def get_chunks(self) -> list[WorldChunkData, ...]:
         return self._chunks.copy()
 
     def read(self, filename: Union[str, bytes], key: bytes) -> None:
@@ -671,7 +671,7 @@ class WorldGenerator:
         return im
 
     @staticmethod
-    def _render_potential_map(chunk, options):
+    def _render_potential_map(chunk: WorldChunkData, options: WorldRenderOptions) -> Image.Image:
         if options.show_potential_map:
             alpha = Image.new('RGBA', chunk.potential_map.size, 0)
             alpha.putalpha(chunk.potential_map)
@@ -680,7 +680,7 @@ class WorldGenerator:
         return alpha
 
     @staticmethod
-    def _render_draw_roads(chunk, options):
+    def _render_draw_roads(chunk: WorldChunkData, options: WorldRenderOptions) -> Image.Image:
         if options.show_roads:
             # XXX: avoiding `Image.Image.putpixel`
             path_data = [0] * (chunk.height_map.size[0] * chunk.height_map.size[1])

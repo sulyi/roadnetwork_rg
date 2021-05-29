@@ -52,7 +52,7 @@ class HeightMap:
         return self._bit_length
 
     # XXX: hot-spot
-    def _get_random_value(self, x, y) -> float:
+    def _get_random_value(self, x: int, y: int) -> float:
         # uniform over [-1, 1] inclusive range
         at = (x ^ y << (self._bit_length >> 1)) ^ self._seed
         h = hashlib.sha256(at.to_bytes((self._bit_length >> 3) + 1, 'big', signed=True))
