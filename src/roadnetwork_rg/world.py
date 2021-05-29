@@ -747,12 +747,14 @@ class WorldChunk:
     def generate(self) -> WorldChunkData:
         height_map_image = self.height_map.generate()
 
+        intensity_function = AdaptivePotentialFunction(self.config.chunk_size,
+                                                       self.config.city_sizes)
         cities = [
             *MarkovChainMonteCarlo(
                 MarkovChainMonteCarloIntensityFunction(
                     self.config.city_rate,
                     height_map_image,
-                    AdaptivePotentialFunction(self.config.chunk_size, self.config.city_sizes),
+                    intensity_function,
                     ExponentialZCompositeFunction()
                 ),
                 (
@@ -773,10 +775,7 @@ class WorldChunk:
             self._chunk_y,
             height_map_image,
             cities,
-            AdaptivePotentialFunction(
-                self.config.chunk_size,
-                self.config.city_sizes
-            ).potential_map,
+            intensity_function.potential_map,
             paths
         )
         return world_data
