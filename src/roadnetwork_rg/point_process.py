@@ -63,8 +63,8 @@ class MarkovChainMonteCarlo(PointProcess):
             candidate = tuple(self._rng.integers([0] * len(self.size), self.size))
             if isinstance(self.rate, IntensityFunction):
                 # non-homogeneous
-                d = self._rng.uniform(0, 1)
-                if self.rate.is_accepted(candidate, d):
+                thinning = self._rng.uniform(0, 1)
+                if self.rate.is_accepted(candidate, thinning):
                     count += 1
                     yield candidate
             else:
@@ -82,8 +82,8 @@ class SpatialPoissonPointProcess(PointProcess):
             candidate = tuple(self._rng.integers([0] * len(self.size), self.size))
             if isinstance(self.rate, IntensityFunction):
                 # non-homogeneous
-                d = self._rng.uniform(0, 1)
-                if self.rate.is_accepted(candidate, d):
+                thinning = self._rng.uniform(0, 1)
+                if self.rate.is_accepted(candidate, thinning):
                     yield candidate
             else:
                 # homogeneous

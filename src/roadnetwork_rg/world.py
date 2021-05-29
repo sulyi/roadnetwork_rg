@@ -476,7 +476,10 @@ class Datafile:
     def decode_pixel_path(data: BinaryIO) -> tuple[tuple[PointType, PointType], PixelPath]:
         try:
             cost: float
-            cost, sx, sy, sz, tx, ty, tz, pixels_length = struct.unpack(
+            (cost,
+             source_x, source_y, source_z,
+             target_x, target_y, target_z,
+             pixels_length) = struct.unpack(
                 '<d HHH HHH H',
                 data.read(22)
             )
@@ -487,7 +490,8 @@ class Datafile:
             pixels: list[tuple[int, int], ...] = pickle.loads(data.read(pixels_length))
         except pickle.UnpicklingError as err:
             raise DatafileDecodeError("Failed to decode pixels") from err
-        key: tuple[PointType, PointType] = ((sx, sy, sz), (tx, ty, tz))
+        key: tuple[PointType, PointType] = ((source_x, source_y, source_z),
+                                            (target_x, target_y, target_z))
         return key, PixelPath(cost, pixels)
 
     @staticmethod
@@ -511,7 +515,7 @@ class Datafile:
     def _read_magick(file: BinaryIO) -> tuple[bytes, int]:
         compatible_versions = (package_version, *Datafile.__compatible_versions)
         try:
-            magic, vm, vn, vo, checksum, offset = struct.unpack(
+            magic, vmajor, vminor, vpatch, checksum, offset = struct.unpack(
                 '<10s3B%dsH' % Datafile.__header_checksum_length,
                 file.read(79)
             )
@@ -519,7 +523,7 @@ class Datafile:
             raise DatafileDecodeError("Failed to decode magic") from err
         if magic != Datafile.__magic:
             raise DatafileDecodeError("Argument filename has unrecognised format")
-        if (vm, vn, vo) not in compatible_versions:
+        if (vmajor, vminor, vpatch) not in compatible_versions:
             raise DatafileDecodeError("Argument filename has a non-compatible version")
         return checksum, offset
 
@@ -652,8 +656,8 @@ class WorldGenerator:
                 draw.multiline_text((cx, cy), msg, fill=self.__text_color)
 
             # draw roads
-            im = self._render_draw_roads(chunk, options)
-            draw_im.paste(im, (cx, cy), mask=im)
+            image = self._render_draw_roads(chunk, options)
+            draw_im.paste(image, (cx, cy), mask=image)
 
         atlas_im.paste(draw_im, mask=draw_im)
         return atlas_im
@@ -662,13 +666,13 @@ class WorldGenerator:
     def _render_height_map(chunk: WorldChunkData, options: WorldRenderOptions) -> Image.Image:
         if options.show_height_map:
             if options.colour_height_map:
-                im = chunk.height_map.convert('P')
-                im.putpalette(colour_palette)
+                image = chunk.height_map.convert('P')
+                image.putpalette(colour_palette)
             else:
-                im = chunk.height_map
+                image = chunk.height_map
         else:
-            im = Image.new('RGBA', chunk.height_map.size)
-        return im
+            image = Image.new('RGBA', chunk.height_map.size)
+        return image
 
     @staticmethod
     def _render_potential_map(chunk: WorldChunkData, options: WorldRenderOptions) -> Image.Image:
@@ -687,12 +691,12 @@ class WorldGenerator:
             for path in chunk.pixel_paths.values():
                 for point_x, point_y in path.pixels:
                     path_data[point_x + point_y * chunk.height_map.size[0]] = 255
-            im = Image.new('RGBA', chunk.height_map.size, 0)
-            im.putalpha(Image.frombytes('L', chunk.height_map.size,
+            image = Image.new('RGBA', chunk.height_map.size, 0)
+            image.putalpha(Image.frombytes('L', chunk.height_map.size,
                                         bytes(path_data)))
         else:
-            im = Image.new('RGBA', chunk.height_map.size)
-        return im
+            image = Image.new('RGBA', chunk.height_map.size)
+        return image
 
     @staticmethod
     def clear_potential_cache() -> None:

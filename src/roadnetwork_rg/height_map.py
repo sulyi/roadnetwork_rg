@@ -55,9 +55,9 @@ class HeightMap:
     def _get_random_value(self, x: int, y: int) -> float:
         # uniform over [-1, 1] inclusive range
         at = (x ^ y << (self._bit_length >> 1)) ^ self._seed
-        h = hashlib.sha256(at.to_bytes((self._bit_length >> 3) + 1, 'big', signed=True))
-        max_value = (1 << (h.digest_size << 3)) - 1
-        value = int.from_bytes(h.digest(), 'big') / max_value * 2 - 1
+        hashed = hashlib.sha256(at.to_bytes((self._bit_length >> 3) + 1, 'big', signed=True))
+        max_value = (1 << (hashed.digest_size << 3)) - 1
+        value = int.from_bytes(hashed.digest(), 'big') / max_value * 2 - 1
         return value
 
     def generate(self) -> Image.Image:
@@ -87,7 +87,7 @@ class HeightMap:
             image = image.resize((length, length), resample=Image.LINEAR)
             fim = image.filter(k_diagonal)
 
-            r = [127] * (length * length)
+            displacement = [127] * (length * length)
             mask = [0] * (length * length)
 
             for i in range(1, length, 2):
@@ -96,36 +96,38 @@ class HeightMap:
                     pixel = int(height * value) + 127
                     # fail-safe
                     if 0 < pixel < 255:
-                        r[i + j * length] = pixel
+                        displacement[i + j * length] = pixel
                     elif pixel > 255:
-                        r[i + j * length] = 255
+                        displacement[i + j * length] = 255
                     else:
-                        r[i + j * length] = 0
+                        displacement[i + j * length] = 0
                     mask[i + j * length] = 255
 
-            fim = ImageChops.add(fim, Image.frombytes('L', (length, length), bytes(r)), offset=-127)
+            fim = ImageChops.add(fim, Image.frombytes('L', (length, length),
+                                                      bytes(displacement)), offset=-127)
             image.paste(fim, mask=Image.frombytes('L', (length, length), bytes(mask)))
 
             # diamond step
             fim = image.filter(k_cross)
 
-            r = [127] * (length * length)
+            displacement = [127] * (length * length)
             mask = [0] * (length * length)
 
-            for p in range(1, 2 * length, 2):
-                for q in range(min(p + 1, length) - 1, max(0, p - length + 1) - 1, - 1):
-                    value = self._get_random_value(q * sub_size + cx, (p - q) * sub_size + cy)
+            for i in range(1, 2 * length, 2):
+                for j in range(min(i + 1, length) - 1, max(0, i - length + 1) - 1, - 1):
+                    value = self._get_random_value(j * sub_size + cx, (i - j) * sub_size + cy)
                     pixel = int(height * value) + 127
                     # fail-safe
                     if 0 < pixel < 255:
-                        r[q + (p - q) * length] = pixel
+                        displacement[j + (i - j) * length] = pixel
                     elif pixel > 255:
-                        r[q + (p - q) * length] = 255
+                        displacement[j + (i - j) * length] = 255
                     else:
-                        r[q + (p - q) * length] = 0
-                    mask[q + (p - q) * length] = 255
+                        displacement[j + (i - j) * length] = 0
+                    mask[j + (i - j) * length] = 255
 
-            fim = ImageChops.add(fim, Image.frombytes('L', (length, length), bytes(r)), offset=-127)
+            fim = ImageChops.add(fim, Image.frombytes('L', (length, length),
+                                                      bytes(displacement)), offset=-127)
             image.paste(fim, mask=Image.frombytes('L', (length, length), bytes(mask)))
 
         return image.crop((0, 0, self._size, self._size))

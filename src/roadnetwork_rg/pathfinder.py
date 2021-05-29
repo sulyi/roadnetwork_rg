@@ -37,8 +37,8 @@ class Node:
 
 def find_shortest_paths(graph: Image.Image, source: PointType, targets: Iterable[PointType, ...]
                         ) -> dict[tuple[PointType, PointType], PixelPath]:
-    sx, sy = graph.size
-    nodes = {(x, y): Node(x, y) for x in range(sx) for y in range(sy)}
+    width, height = graph.size
+    nodes = {(x, y): Node(x, y) for x in range(width) for y in range(height)}
     nodes[source[:2]].distance = 0.
     nodes[source[:2]].open = True
 
@@ -50,19 +50,19 @@ def find_shortest_paths(graph: Image.Image, source: PointType, targets: Iterable
     d = 2 ** .5
 
     while new_nodes:
-        u = new_nodes.pop(0)
+        node = new_nodes.pop(0)
         new_distances.pop(0)
-        u.open = False
+        node.open = False
 
-        u_value = graph[u.x + sx * u.y]
-        for dx, dy, h_cost in ((-1, -1, d), (0, -1, 1.), (1, -1, d),
-                               (-1, 0, 1.), (1, 0, 1.),
-                               (-1, 1, d), (0, 1, 1.), (1, 1, d)):
-            nx, ny = u.x + dx, u.y + dy
-            if 0 <= nx < sx and 0 <= ny < sy:
-                neighbour = nodes[nx, ny]
-                v_cost = abs(u_value - graph[nx + sx * ny])
-                alt = u.distance + v_cost + h_cost
+        u_value = graph[node.x + width * node.y]
+        for d_x, d_y, h_cost in ((-1, -1, d), (0, -1, 1.), (1, -1, d),
+                                 (-1, 0, 1.), (1, 0, 1.),
+                                 (-1, 1, d), (0, 1, 1.), (1, 1, d)):
+            n_x, n_y = node.x + d_x, node.y + d_y
+            if 0 <= n_x < width and 0 <= n_y < height:
+                neighbour = nodes[n_x, n_y]
+                v_cost = abs(u_value - graph[n_x + width * n_y])
+                alt = node.distance + v_cost + h_cost
                 if alt < neighbour.distance:
                     if neighbour.open:
                         start = bisect.bisect_left(new_distances, neighbour.distance)
@@ -70,7 +70,7 @@ def find_shortest_paths(graph: Image.Image, source: PointType, targets: Iterable
                         new_nodes.pop(index)
                         new_distances.pop(index)
                     neighbour.distance = alt
-                    neighbour.parent = u.x, u.y
+                    neighbour.parent = node.x, node.y
                     neighbour.open = True
                     index = bisect.bisect(new_distances, alt)
                     new_distances.insert(index, alt)

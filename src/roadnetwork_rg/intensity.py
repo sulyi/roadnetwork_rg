@@ -78,16 +78,16 @@ class AdaptivePotentialFunction(MarkovChainMonteCarloPotentialFunction):
     def _get_monopole_potential(self, radius: int) -> Image.Image:
         if radius not in self._monopole_potential_cache:
             p = 1 / 3
-            s = ceil(2 ** .5 * radius * (log(510 * radius / (self._city_sizes + 1))) ** (.5 / p))
+            size = ceil(2 ** .5 * radius * (log(510 * radius / (self._city_sizes + 1))) ** (.5 / p))
 
             def super_gauss(x: int, y: int, sigma: int, power: float):
                 a = 255 * sigma / (self._city_sizes + 1)
                 return a * exp(-((x ** 2 + y ** 2) / 2 / sigma ** 2) ** power)
 
             potential_image = Image.frombytes(
-                'L', (2 * s, 2 * s),
+                'L', (2 * size, 2 * size),
                 bytes(round(super_gauss(x, y, radius, p))
-                      for x in range(-s, s) for y in range(-s, s))
+                      for x in range(-size, size) for y in range(-size, size))
             )
             self._monopole_potential_cache[radius] = potential_image
         return self._monopole_potential_cache[radius]
