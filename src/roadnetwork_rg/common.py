@@ -8,7 +8,8 @@ PointType = tuple[int, int, int]
 
 def get_safe_seed(seed: Any, bit_length: int) -> int:
     if not isinstance(bit_length, int):
-        raise TypeError("Argument 'bit_length' should be integer number, not '%s'" % type(bit_length).__name__)
+        raise TypeError("Argument 'bit_length' should be integer number, not '%s'" %
+                        type(bit_length).__name__)
     if bit_length <= 0:
         raise ValueError("Argument 'bit_length' should be positive")
     if bit_length > 64:
@@ -23,5 +24,6 @@ def get_safe_seed(seed: Any, bit_length: int) -> int:
             seed += hashlib.sha512(seed).digest()
             seed = int.from_bytes(seed, 'big')
         else:
-            raise TypeError("The only supported seed types are: None, int, str, bytes, and bytearray.")
+            raise TypeError("The only supported seed types are: "
+                            "None, int, str, bytes, and bytearray")
     return seed & (1 << bit_length) - 1  # masked

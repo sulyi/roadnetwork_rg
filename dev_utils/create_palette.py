@@ -1,9 +1,11 @@
+import os
+
 from itertools import chain, repeat
 
-palette_gradient = []
-with open('palette.txt', 'r') as txt:
-    for line in txt:
-        palette_gradient.append(line.strip())
+filename = os.path.join(os.path.dirname(__file__), 'palette.txt')
+
+with open(filename, 'r') as txt:
+    palette_gradient = [line.strip() for line in txt]
 
 
 def _interpolate(f_co, t_co, interval):
@@ -13,8 +15,16 @@ def _interpolate(f_co, t_co, interval):
 
 
 def get_palette(gradient):
-    converted_colours = [(int(c[1:3], base=16), int(c[3:5], base=16), int(c[5:7], base=16)) for c in gradient]
-    palette = list(chain(*chain(
-        *(repeat(c, 8) for i in range(8) for c in _interpolate(converted_colours[i], converted_colours[i + 1], 4))
-    )))
+    rgb_colours = [
+        (int(c[1:3], base=16),
+         int(c[3:5], base=16),
+         int(c[5:7], base=16)) for c in gradient
+    ]
+    palette = bytes(
+        chain(*chain(
+            *(repeat(c, 8)
+              for i in range(8) for c in _interpolate(rgb_colours[i], rgb_colours[i + 1], 4)
+              )
+        ))
+    )
     return palette

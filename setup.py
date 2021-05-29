@@ -2,19 +2,19 @@ from setuptools import setup
 
 from src import roadnetwork_rg
 
-name = 'roadnetwork_rg'
+NAME = 'roadnetwork_rg'
 requires = ['Pillow', 'numpy']
 
 setup(
-    name=name,
+    name=NAME,
     version=roadnetwork_rg.__version__,
-    packages=[name],
+    packages=[NAME],
     package_data={
-        name: ['data/colourmap.palette'],
+        NAME: ['data/colourmap.palette'],
     },
     include_package_data=True,
     package_dir={'': 'src',
-                 name: 'src/roadnetwork_rg'},
+                 NAME: 'src/roadnetwork_rg'},
     url='',
     license='',
     author='Ákos Sülyi',

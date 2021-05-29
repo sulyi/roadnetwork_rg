@@ -6,7 +6,7 @@ import pickle
 import struct
 from dataclasses import dataclass, field
 from io import BytesIO
-from typing import Union, Callable, TypeVar
+from typing import Union, Callable, TypeVar, BinaryIO
 
 from PIL import Image, ImageDraw, ImageStat
 
@@ -63,18 +63,17 @@ class WorldChunkData:
     pixel_paths: dict[tuple[PointType, PointType], PixelPath] = field(compare=False)
 
 
-default_world_config = WorldConfig(chunk_size=256, height=1., roughness=.5, city_rate=32, city_sizes=8)
+default_world_config = WorldConfig(chunk_size=256, height=1., roughness=.5,
+                                   city_rate=32, city_sizes=8)
 default_render_options = WorldRenderOptions()
 
 
 class DatafileDecodeError(Exception):
     """File corruption found"""
-    pass
 
 
 class DatafileEncodingError(Exception):
     """Unexpected data"""
-    pass
 
 
 class Datafile:
@@ -138,6 +137,7 @@ class Datafile:
     # if 2 bytes of short is enough for length of cities (note when pickled)
     # if 2 bytes of short is enough for length of pixels (note when pickled)
 
+    __compatible_versions = ((0, 1, 0),)
     __magic = '#D-MG#WG-D'.encode('ascii')
     __header_checksum_length = 64  # from `hashlib` `sha512` method `digest_size`
     __data_signature_length = 64  # from `hmac` `digest_size` with `sha512` method
@@ -146,10 +146,9 @@ class Datafile:
         self._data: bytes = b''
 
     @classmethod
-    def save(cls, filename: Union[str, bytes], key: bytes,
-             seed: SeedType, safe_seed: int, config: WorldConfig, chunks: list[WorldChunkData, ...]) -> None:
+    def save(cls, filename: Union[str, bytes], key: bytes, world: WorldGenerator) -> None:
         file = cls()
-        file.set_data(seed, safe_seed, config, chunks)
+        file.set_data(world.config, world.actual_seed, world.safe_seed, world.get_chunks())
         file.write(filename, key)
 
     @classmethod
@@ -158,7 +157,8 @@ class Datafile:
         instance.read(filename, key)
         return instance
 
-    def set_data(self, seed: SeedType, safe_seed: int, config: WorldConfig, chunks: list[WorldChunkData, ...]) -> None:
+    def set_data(self, config: WorldConfig, seed: SeedType, safe_seed: int,
+                 chunks: list[WorldChunkData, ...]) -> None:
         # IDEA: use 2 bit `seed_type` instead byte?
         if seed is None:
             seed_type = 0
@@ -176,8 +176,8 @@ class Datafile:
         seed = seed[:255]  # first 255 bytes (if larger)
         try:
             config = pickle.dumps(list(config.__dict__.values()))
-        except pickle.PicklingError as e:
-            raise DatafileEncodingError("Failed to encode config", e)
+        except pickle.PicklingError as err:
+            raise DatafileEncodingError("Failed to encode config") from err
 
         if len(seed) > 255:
             raise DatafileEncodingError("Too large seed")
@@ -198,8 +198,8 @@ class Datafile:
                 # pad 1 byte
                 len(chunks)  # 2 bytes
             )
-        except struct.error as e:
-            raise DatafileEncodingError("Failed to encode config", e)
+        except struct.error as err:
+            raise DatafileEncodingError("Failed to encode config") from err
 
         self._data = b'\00'.join((
             config_pack,
@@ -214,29 +214,23 @@ class Datafile:
                 '<BB',
                 data.read(2)
             )
-        except struct.error as e:
-            raise DatafileDecodeError("Failed to decode  seed type and length", e)
+        except struct.error as err:
+            raise DatafileDecodeError("Failed to decode  seed type and length") from err
+
+        try:
+            seed, = struct.unpack(
+                '<%ds' % seed_length,
+                data.read(seed_length)
+            )
+        except struct.error as err:
+            raise DatafileDecodeError("Failed to decode seed") from err
 
         seed: SeedType
         if seed_type == 0:  # None
             seed = None
         elif seed_type == 1:  # int
-            try:
-                seed, = struct.unpack(
-                    '<%ds' % seed_length,
-                    data.read(seed_length)
-                )
-            except struct.error as e:
-                raise DatafileDecodeError("Failed to decode seed", e)
             seed = int.from_bytes(seed, 'little')
         else:
-            try:
-                seed, = struct.unpack(
-                    '<%ds' % seed_length,
-                    data.read(seed_length)
-                )
-            except struct.error as e:
-                raise DatafileDecodeError("Failed to decode seed", e)
             if seed_type == 2:  # str
                 seed: str = seed.decode('ascii')
             elif seed_type == 3:  # bytes
@@ -246,8 +240,7 @@ class Datafile:
             else:
                 raise DatafileDecodeError("Unrecognised seed type")
 
-        if data.read(1) != b'\00':
-            raise DatafileDecodeError
+        self._check_delimiter(data)
 
         try:
             safe_seed: int
@@ -255,27 +248,25 @@ class Datafile:
                 '<QxB',
                 data.read(10)
             )
-        except struct.error as e:
-            raise DatafileDecodeError("Failed to decode safe_seed and length of config", e)
+        except struct.error as err:
+            raise DatafileDecodeError("Failed to decode safe_seed and length of config") from err
 
         try:
             config: WorldConfig = WorldConfig(*pickle.loads(data.read(config_length)))
-        except pickle.UnpicklingError as e:
-            raise DatafileDecodeError("Failed to decode config", e)
+        except pickle.UnpicklingError as err:
+            raise DatafileDecodeError("Failed to decode config") from err
 
-        if data.read(1) != b'\00':
-            raise DatafileDecodeError
+        self._check_delimiter(data)
 
         try:
             chunks_count, = struct.unpack(
                 '<H',
                 data.read(2)
             )
-        except struct.error as e:
-            raise DatafileDecodeError("Failed to decode length of chunks", e)
+        except struct.error as err:
+            raise DatafileDecodeError("Failed to decode length of chunks") from err
 
-        if data.read(1) != b'\00':
-            raise DatafileDecodeError
+        self._check_delimiter(data)
 
         chunks: list[WorldChunkData, ...] = [
             Datafile._read_list_item(data, i, chunks_count, b'\00', Datafile.decode_chunk)
@@ -303,8 +294,8 @@ class Datafile:
                     len(self._data),  # 4 bytes
                     signature,  # 64 bytes
                 )
-            except struct.error as e:
-                raise DatafileEncodingError("Failed to encode header", e)
+            except struct.error as err:
+                raise DatafileEncodingError("Failed to encode header") from err
 
             checksum = hashlib.sha512(header).digest()
             # fail-safe (overkill)
@@ -319,8 +310,8 @@ class Datafile:
                     checksum,  # 64 bytes
                     len(header),  # 2 bytes
                 )
-            except struct.error as e:
-                raise DatafileEncodingError("Failed to encode magic", e)
+            except struct.error as err:
+                raise DatafileEncodingError("Failed to encode magic") from err
 
             file.write(b'\00'.join((
                 magic,
@@ -331,36 +322,12 @@ class Datafile:
             )))
 
     def read(self, filename: Union[str, bytes], key: bytes) -> None:
-        compatible_versions = ((0, 1, 0), package_version)
         with open(filename, 'rb') as file:
-            try:
-                magic, vm, vn, vo, checksum, offset = struct.unpack(
-                    '<10s3B%dsH' % self.__header_checksum_length,
-                    file.read(79)
-                )
-            except struct.error as e:
-                raise DatafileDecodeError("Failed to decode magic", e)
+            checksum, offset = self._read_magick(file)
+            self._check_delimiter(file)
+            content_length, signature = self._read_header(file, offset, checksum)
 
-            if magic != self.__magic:
-                raise DatafileDecodeError("Argument filename has unrecognised format")
-            if (vm, vn, vo) not in compatible_versions:
-                raise DatafileDecodeError("Argument filename has a non-compatible version")
-            if file.read(1) != b'\00':
-                raise DatafileDecodeError
-            header = file.read(offset)
-            if checksum != hashlib.sha512(header).digest():
-                raise DatafileDecodeError("Invalid headed checksum")
-
-            try:
-                content_length, signature = struct.unpack(
-                    '<L%ds' % self.__data_signature_length,
-                    header
-                )
-            except struct.error as e:
-                raise DatafileDecodeError("Failed to decode header", e)
-
-            if file.read(1) != b'\00':
-                raise DatafileDecodeError
+            self._check_delimiter(file)
             data = file.read(content_length)
             if signature != hmac.new(key, data, hashlib.sha512).digest():
                 raise DatafileDecodeError("Invalid data signature")
@@ -370,8 +337,8 @@ class Datafile:
     def encode_chunk(chunk: WorldChunkData) -> bytes:
         try:
             cities = pickle.dumps(chunk.cities)
-        except pickle.PicklingError as e:
-            raise DatafileEncodingError("Failed to encode cities", e)
+        except pickle.PicklingError as err:
+            raise DatafileEncodingError("Failed to encode cities") from err
         if len(cities) > 65535:
             raise DatafileEncodingError("Too large cities")
 
@@ -407,13 +374,14 @@ class Datafile:
                 len(potential_map),  # 2 bytes
                 potential_map  # varied
             )
-        except struct.error as e:
-            raise DatafileEncodingError("Failed to encode chunk", e)
+        except struct.error as err:
+            raise DatafileEncodingError("Failed to encode chunk") from err
 
         data = b'\00'.join((
             chunk_pack,
             # separator 1 byte
-            b'\00'.join(Datafile.encode_pixel_path(key, path) for key, path in chunk.pixel_paths.items()),
+            b'\00'.join(Datafile.encode_pixel_path(key, path)
+                        for key, path in chunk.pixel_paths.items()),
             # separator 1 byte
             height_map_pack,
             # separator 1 byte
@@ -422,7 +390,7 @@ class Datafile:
         return data
 
     @staticmethod
-    def decode_chunk(data: BytesIO) -> WorldChunkData:
+    def decode_chunk(data: BinaryIO) -> WorldChunkData:
         try:
             x: int
             y: int
@@ -430,35 +398,32 @@ class Datafile:
                 '<iiH',
                 data.read(10)
             )
-        except struct.error as e:
-            raise DatafileDecodeError("Failed to decode x, y, length of cities of chunk", e)
+        except struct.error as err:
+            raise DatafileDecodeError("Failed to decode x, y, length of cities of chunk") from err
 
         try:
             cities: list[PointType, ...] = pickle.loads(data.read(cities_length))
-        except pickle.UnpicklingError as e:
-            raise DatafileDecodeError("Failed to decode cities", e)
+        except pickle.UnpicklingError as err:
+            raise DatafileDecodeError("Failed to decode cities") from err
 
-        if data.read(1) != b'\00':
-            raise DatafileDecodeError
+        Datafile._check_delimiter(data)
 
         try:
             pixel_paths_count, = struct.unpack(
                 '<H',
                 data.read(2)
             )
-        except struct.error as e:
-            raise DatafileDecodeError("Failed to decode length of pixel_paths", e)
+        except struct.error as err:
+            raise DatafileDecodeError("Failed to decode length of pixel_paths") from err
 
-        if data.read(1) != b'\00':
-            raise DatafileDecodeError
+        Datafile._check_delimiter(data)
 
         pixel_paths: dict[tuple[PointType, PointType], PixelPath] = dict(
             Datafile._read_list_item(data, i, pixel_paths_count, b'\00', Datafile.decode_pixel_path)
             for i in range(pixel_paths_count)
         )
 
-        if data.read(1) != b'\00':
-            raise DatafileDecodeError
+        Datafile._check_delimiter(data)
 
         try:
             height_map_length, = struct.unpack(
@@ -466,19 +431,18 @@ class Datafile:
                 data.read(4)
             )
             height_map: Image.Image = Image.open(BytesIO(data.read(height_map_length)))
-        except struct.error as e:
-            raise DatafileDecodeError("Failed to decode length of height_map", e)
+        except struct.error as err:
+            raise DatafileDecodeError("Failed to decode length of height_map") from err
 
-        if data.read(1) != b'\00':
-            raise DatafileDecodeError
+        Datafile._check_delimiter(data)
 
         try:
             potential_map_length, = struct.unpack(
                 '<L',
                 data.read(4)
             )
-        except struct.error as e:
-            raise DatafileDecodeError("Failed to decode length of potential_map", e)
+        except struct.error as err:
+            raise DatafileDecodeError("Failed to decode length of potential_map") from err
 
         potential_map: Image.Image = Image.open(BytesIO(data.read(potential_map_length)))
 
@@ -488,8 +452,8 @@ class Datafile:
     def encode_pixel_path(key: tuple[PointType, PointType], path: PixelPath) -> bytes:
         try:
             pixels = pickle.dumps(path.pixels)
-        except pickle.PicklingError as e:
-            raise DatafileEncodingError("Failed to encode pixels", e)
+        except pickle.PicklingError as err:
+            raise DatafileEncodingError("Failed to encode pixels") from err
         if len(pixels) > 65535:
             raise DatafileEncodingError("Too large pixels")
 
@@ -503,31 +467,32 @@ class Datafile:
                 len(pixels),  # 2 bytes
                 pixels  # varied
             )
-        except struct.error as e:
-            raise DatafileEncodingError("Failed to encode PixelPath", e)
+        except struct.error as err:
+            raise DatafileEncodingError("Failed to encode PixelPath") from err
 
         return data
 
     @staticmethod
-    def decode_pixel_path(data: BytesIO) -> tuple[tuple[PointType, PointType], PixelPath]:
+    def decode_pixel_path(data: BinaryIO) -> tuple[tuple[PointType, PointType], PixelPath]:
         try:
             cost: float
             cost, sx, sy, sz, tx, ty, tz, pixels_length = struct.unpack(
                 '<d HHH HHH H',
                 data.read(22)
             )
-        except struct.error as e:
-            raise DatafileDecodeError("Failed to decode PixelPath cost and length of pixels", e)
+        except struct.error as err:
+            raise DatafileDecodeError("Failed to decode"
+                                      " PixelPath cost and length of pixels") from err
         try:
             pixels: list[tuple[int, int], ...] = pickle.loads(data.read(pixels_length))
-        except pickle.UnpicklingError as e:
-            raise DatafileDecodeError("Failed to decode pixels", e)
+        except pickle.UnpicklingError as err:
+            raise DatafileDecodeError("Failed to decode pixels") from err
         key: tuple[PointType, PointType] = ((sx, sy, sz), (tx, ty, tz))
         return key, PixelPath(cost, pixels)
 
     @staticmethod
-    def _read_list_item(data: BytesIO, index: int, end: int, delimiter: bytes,
-                        item_decoder: Callable[[BytesIO], T]) -> T:
+    def _read_list_item(data: BinaryIO, index: int, end: int, delimiter: bytes,
+                        item_decoder: Callable[[BinaryIO], T]) -> T:
         item = item_decoder(data)
         # XXX: there might be a better pattern
         # if there is a surrounding `delimiter` it could be handled
@@ -537,15 +502,56 @@ class Datafile:
                 raise DatafileDecodeError
         return item
 
+    @staticmethod
+    def _check_delimiter(data: BinaryIO) -> None:
+        if data.read(1) != b'\00':
+            raise DatafileDecodeError
+
+    @staticmethod
+    def _read_magick(file):
+        compatible_versions = (package_version, *Datafile.__compatible_versions)
+        try:
+            magic, vm, vn, vo, checksum, offset = struct.unpack(
+                '<10s3B%dsH' % Datafile.__header_checksum_length,
+                file.read(79)
+            )
+        except struct.error as err:
+            raise DatafileDecodeError("Failed to decode magic") from err
+        if magic != Datafile.__magic:
+            raise DatafileDecodeError("Argument filename has unrecognised format")
+        if (vm, vn, vo) not in compatible_versions:
+            raise DatafileDecodeError("Argument filename has a non-compatible version")
+        return checksum, offset
+
+    @staticmethod
+    def _read_header(file, offset, checksum):
+        header = file.read(offset)
+        if checksum != hashlib.sha512(header).digest():
+            raise DatafileDecodeError("Invalid headed checksum")
+        try:
+            content_length, signature = struct.unpack(
+                '<L%ds' % Datafile.__data_signature_length,
+                header
+            )
+        except struct.error as err:
+            raise DatafileDecodeError("Failed to decode header") from err
+        return content_length, signature
+
 
 class WorldGenerator:
+    __city_r = 2
+    __city_colour = (255, 0, 0)
+    __text_color = (0, 0, 0)
+    __city_border = (0, 0, 0)
 
-    def __init__(self, *, config: WorldConfig = default_world_config, seed: SeedType = None) -> None:
+    def __init__(self, *, config: WorldConfig = default_world_config,
+                 seed: SeedType = None) -> None:
         config.check()
         self.config = config
         self._chunks: list[WorldChunkData, ...] = []
 
-        self._seed = seed if isinstance(seed, int) or seed is None else seed[:255]  # for i/o compatibility
+        # for i/o compatibility truncate seed to 255
+        self._seed = seed if isinstance(seed, int) or seed is None else seed[:255]
         self._safe_seed = get_safe_seed(seed, self.config.bit_length)
 
     @classmethod
@@ -564,14 +570,25 @@ class WorldGenerator:
     def seed(self) -> SeedType:
         return self._seed if self._seed is not None else self._safe_seed
 
+    @property
+    def actual_seed(self):
+        return self._seed
+
+    @property
+    def safe_seed(self):
+        return self._seed
+
+    def get_chunks(self):
+        return self._chunks.copy()
+
     def read(self, filename: Union[str, bytes], key: bytes) -> None:
         seed, safe_seed, config, chunks = Datafile.load(filename, key).get_data()
         try:
             config.check()
-        except (ValueError, TypeError) as e:
+        except (ValueError, TypeError) as err:
             # XXX: Config check warning
             config = default_world_config
-            print("Failed `config` check, set to default", e)
+            print("Failed `config` check, set to default", err)
         if seed is not None and get_safe_seed(seed, config.bit_length) == safe_seed:
             # XXX: Seed mismatch warning
             seed = None
@@ -583,35 +600,25 @@ class WorldGenerator:
         self._safe_seed = safe_seed
 
     def write(self, filename: Union[str, bytes], key: bytes) -> None:
-        Datafile.save(filename, key,
-                      self._seed, self._safe_seed, self.config, self._chunks)
+        Datafile.save(filename, key, self)
 
     def add_chunk(self, chunk_x: int, chunk_y: int) -> None:
-        chunk = WorldChunk(chunk_x, chunk_y, self.config.chunk_size, self.config.height, self.config.roughness,
-                           self.config.city_rate, self.config.city_sizes,
-                           seed=self._safe_seed, bit_length=self.config.bit_length)
+        chunk = WorldChunk(chunk_x, chunk_y, self.config, seed=self._safe_seed,
+                           bit_length=self.config.bit_length)
         chunk_data = chunk.generate()
         self._chunks.append(chunk_data)
 
     def render(self, *, options: WorldRenderOptions = default_render_options) -> Image.Image:
         if not self._chunks:
             raise IndexError("There are no chunks added to render")
-        if not any((options.show_debug, options.show_height_map, options.show_cities, options.show_roads,
-                    options.show_potential_map)):
+        if not any((options.show_debug, options.show_height_map, options.show_cities,
+                    options.show_roads, options.show_potential_map)):
             raise ValueError("Nothing to render with given 'option' argument")
 
-        x_max = max(self._chunks, key=lambda item: item.x).x
-        x_min = min(self._chunks, key=lambda item: item.x).x
-        y_max = max(self._chunks, key=lambda item: item.y).y
-        y_min = min(self._chunks, key=lambda item: item.y).y
-
-        width = (x_max - x_min + 1) * self.config.chunk_size
-        height = (y_max - y_min + 1) * self.config.chunk_size
-
-        city_r = 2
-        city_colour = (255, 0, 0)
-        city_border = (0, 0, 0)
-        text_color = (0, 0, 0)
+        width = (max(self._chunks, key=lambda item: item.x).x -
+                 min(self._chunks, key=lambda item: item.x).x + 1) * self.config.chunk_size
+        height = (max(self._chunks, key=lambda item: item.y).y -
+                  min(self._chunks, key=lambda item: item.y).y + 1) * self.config.chunk_size
 
         atlas_im = Image.new('RGBA', (width, height))
         draw_im = Image.new('RGBA', (width, height))
@@ -619,30 +626,20 @@ class WorldGenerator:
         draw = ImageDraw.Draw(draw_im)
 
         for chunk in self._chunks:
-            cx = (chunk.x - x_min) * self.config.chunk_size
-            cy = (chunk.y - y_min) * self.config.chunk_size
+            cx = (chunk.x - min(self._chunks, key=lambda item: item.x).x) * self.config.chunk_size
+            cy = (chunk.y - min(self._chunks, key=lambda item: item.y).y) * self.config.chunk_size
 
             # concatenate height maps
-            if options.show_height_map:
-                if options.colour_height_map:
-                    im = chunk.height_map.convert('P')
-                    im.putpalette(colour_palette)
-                else:
-                    im = chunk.height_map
-                atlas_im.paste(im, (cx, cy))
-
+            atlas_im.paste(self._render_height_map(chunk, options), (cx, cy))
             # overlay potential field
-            if options.show_potential_map:
-                alpha = Image.new('RGBA', (self.config.chunk_size, self.config.chunk_size), 0)
-                alpha.putalpha(chunk.potential_map)
-                atlas_im.alpha_composite(alpha, (cx, cy))
+            atlas_im.alpha_composite(self._render_potential_map(chunk, options), (cx, cy))
 
             # place cities
             if options.show_cities:
                 for x, y, z in chunk.cities:
-                    draw.ellipse((cx + x - city_r - z, cy + y - city_r - z,
-                                  cx + x + city_r + z, cy + y + city_r + z),
-                                 fill=city_colour, outline=city_border, width=1)
+                    draw.ellipse((cx + x - self.__city_r - z, cy + y - self.__city_r - z,
+                                  cx + x + self.__city_r + z, cy + y + self.__city_r + z),
+                                 fill=self.__city_colour, outline=self.__city_border, width=1)
 
             # put message in top left corner
             if options.show_debug:
@@ -652,21 +649,50 @@ class WorldGenerator:
                     f"mean: {(255 - ImageStat.Stat(chunk.height_map).mean.pop()) / 255:.3f}",
                     f"sizes: {self.config.city_sizes}")
                 )
-                draw.multiline_text((cx, cy), msg, fill=text_color)
+                draw.multiline_text((cx, cy), msg, fill=self.__text_color)
 
             # draw roads
-            if options.show_roads:
-                # XXX: avoiding `Image.Image.putpixel`
-                path_data = [0] * (self.config.chunk_size * self.config.chunk_size)
-                for path in chunk.pixel_paths.values():
-                    for point_x, point_y in path.pixels:
-                        path_data[point_x + point_y * self.config.chunk_size] = 255
-                im = Image.new('RGBA', (self.config.chunk_size, self.config.chunk_size), 0)
-                im.putalpha(Image.frombytes('L', (self.config.chunk_size, self.config.chunk_size), bytes(path_data)))
-                draw_im.paste(im, (cx, cy), mask=im)
+            im = self._render_draw_roads(chunk, options)
+            draw_im.paste(im, (cx, cy), mask=im)
 
         atlas_im.paste(draw_im, mask=draw_im)
         return atlas_im
+
+    @staticmethod
+    def _render_height_map(chunk: WorldChunkData, options: WorldRenderOptions) -> Image.Image:
+        if options.show_height_map:
+            if options.colour_height_map:
+                im = chunk.height_map.convert('P')
+                im.putpalette(colour_palette)
+            else:
+                im = chunk.height_map
+        else:
+            im = Image.new('RGBA', chunk.height_map.size)
+        return im
+
+    @staticmethod
+    def _render_potential_map(chunk, options):
+        if options.show_potential_map:
+            alpha = Image.new('RGBA', chunk.potential_map.size, 0)
+            alpha.putalpha(chunk.potential_map)
+        else:
+            alpha = Image.new('RGBA', chunk.height_map.size)
+        return alpha
+
+    @staticmethod
+    def _render_draw_roads(chunk, options):
+        if options.show_roads:
+            # XXX: avoiding `Image.Image.putpixel`
+            path_data = [0] * (chunk.height_map.size[0] * chunk.height_map.size[1])
+            for path in chunk.pixel_paths.values():
+                for point_x, point_y in path.pixels:
+                    path_data[point_x + point_y * chunk.height_map.size[0]] = 255
+            im = Image.new('RGBA', chunk.height_map.size, 0)
+            im.putalpha(Image.frombytes('L', chunk.height_map.size,
+                                        bytes(path_data)))
+        else:
+            im = Image.new('RGBA', chunk.height_map.size)
+        return im
 
     @staticmethod
     def clear_potential_cache() -> None:
@@ -675,41 +701,44 @@ class WorldGenerator:
 
 class WorldChunk:
 
-    def __init__(self, chunk_x: int, chunk_y: int, size: int, height: float, roughness: float,
-                 city_rate: int, city_sizes: int, *,
-                 seed: SeedType = None, bit_length: int = 64) -> None:
-        self.check(city_rate, city_sizes)
+    def __init__(self, chunk_x: int, chunk_y: int, config: WorldConfig, *, seed: SeedType = None,
+                 bit_length: int = 64) -> None:
+        self.check(config.city_rate, config.city_sizes)
 
         self._chunk_x = chunk_x
         self._chunk_y = chunk_y
 
-        self._height_map = HeightMap(chunk_x, chunk_y, size, height, roughness, seed=seed, bit_length=bit_length)
-        self._size = self._height_map.size
-
-        self.city_sizes = city_sizes
-        self.city_rate = city_rate
+        self._height_map = HeightMap(chunk_x, chunk_y, config.chunk_size,
+                                     config.height, config.roughness, seed=seed,
+                                     bit_length=bit_length)
+        if config.chunk_size != self._height_map.size:
+            # XXX: shouldn't happen
+            raise Exception("Size mismatch")
+        self.config = config
 
         self._seed = get_safe_seed(seed, bit_length)
-        x = self._chunk_x * self._size
-        y = self._chunk_y * self._size
+        x = self._chunk_x * self.config.chunk_size
+        y = self._chunk_y * self.config.chunk_size
         seed = (x ^ y << (bit_length >> 1)) ^ self._seed
         self._local_seed = seed & ((1 << bit_length) - 1)
 
     @staticmethod
     def check(city_rate: int, city_sizes: int) -> None:
         if not isinstance(city_rate, int):
-            raise TypeError("Argument 'city_rate' should be integer number, not '%s'" % type(city_rate).__name__)
+            raise TypeError("Argument 'city_rate' should be integer number, not '%s'" %
+                            type(city_rate).__name__)
         if city_rate <= 0:
             raise ValueError("Argument 'city_rate' should be positive")
 
         if not isinstance(city_sizes, int):
-            raise TypeError("Argument 'city_sizes' should be integer number, not '%s'" % type(city_sizes).__name__)
+            raise TypeError("Argument 'city_sizes' should be integer number, not '%s'" %
+                            type(city_sizes).__name__)
         if city_sizes <= 0:
             raise ValueError("Argument 'city_sizes' should be positive")
 
     @property
     def size(self) -> int:
-        return self._size
+        return self.config.chunk_size
 
     @property
     def height_map(self) -> HeightMap:
@@ -718,19 +747,36 @@ class WorldChunk:
     def generate(self) -> WorldChunkData:
         height_map_image = self.height_map.generate()
 
-        potential_function = AdaptivePotentialFunction(self._size, self.city_sizes)
-        intensity_function = MarkovChainMonteCarloIntensityFunction(
-            self.city_rate, height_map_image, potential_function, ExponentialZCompositeFunction()
-        )
-        volume = (self._size, self._size, self.city_sizes + 1)  # exclusive high
-        mcmc = MarkovChainMonteCarlo(intensity_function, volume, self._local_seed)
-        cities = [point for point in mcmc]
+        cities = [
+            *MarkovChainMonteCarlo(
+                MarkovChainMonteCarloIntensityFunction(
+                    self.config.city_rate,
+                    height_map_image,
+                    AdaptivePotentialFunction(self.config.chunk_size, self.config.city_sizes),
+                    ExponentialZCompositeFunction()
+                ),
+                (
+                    self.config.chunk_size,
+                    self.config.chunk_size,
+                    self.config.city_sizes + 1  # exclusive high
+                ),
+                self._local_seed
+            )
+        ]
 
         paths = {}
         for i, source in enumerate(cities[:-1], 1):
             paths.update(find_shortest_paths(height_map_image, source, cities[i:]))
 
         world_data = WorldChunkData(
-            self._chunk_x, self._chunk_y, height_map_image, cities, potential_function.potential_map, paths
+            self._chunk_x,
+            self._chunk_y,
+            height_map_image,
+            cities,
+            AdaptivePotentialFunction(
+                self.config.chunk_size,
+                self.config.city_sizes
+            ).potential_map,
+            paths
         )
         return world_data

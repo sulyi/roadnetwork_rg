@@ -9,7 +9,7 @@ from .point_process import IntensityFunction
 # Abstract classes
 
 
-class MarkovChainMonteCarloPotentialFunction(object):
+class MarkovChainMonteCarloPotentialFunction:
     def get(self, value: tuple[int, int, int]) -> float:
         raise NotImplementedError
 
@@ -29,7 +29,7 @@ class SpatialPoissonPointProcessPotentialFunction(MarkovChainMonteCarloPotential
         raise NotImplementedError
 
 
-class MarkovChainMonteCarloCompositeFunction(object):
+class MarkovChainMonteCarloCompositeFunction:
     def get(self, value: tuple[int, int, int], kernel: float, potential: float) -> float:
         raise NotImplementedError
 
@@ -63,7 +63,7 @@ class AdaptivePotentialFunction(MarkovChainMonteCarloPotentialFunction):
         return self._potential_image
 
     def get(self, value):
-        x, y, z = value
+        x, y, _z = value
         pixel = (255 - self._potential_image.getpixel((x, y))) / 255
         return pixel
 
@@ -71,22 +71,26 @@ class AdaptivePotentialFunction(MarkovChainMonteCarloPotentialFunction):
         x, y, z = value
         chop = Image.new('L', self._potential_image.size, 0)
         potential_image = self._get_monopole_potential(z + 1)
-        s, s = potential_image.size
-        x0 = y0 = s // 2
+        x0 = y0 = potential_image.size[0] // 2
         chop.paste(potential_image, (x - x0, y - y0))
         self._potential_image = ImageChops.add(self._potential_image, chop)
 
-    def _get_monopole_potential(self, r: int) -> Image.Image:
-        if r not in self._monopole_potential_cache:
+    def _get_monopole_potential(self, radius: int) -> Image.Image:
+        if radius not in self._monopole_potential_cache:
             p = 1 / 3
-            s = ceil(2 ** .5 * r * (log(510 * r / (self._city_sizes + 1))) ** (.5 / p))
+            s = ceil(2 ** .5 * radius * (log(510 * radius / (self._city_sizes + 1))) ** (.5 / p))
+
+            def super_gauss(x, y, sigma, power):
+                a = 255 * sigma / (self._city_sizes + 1)
+                return a * exp(-((x ** 2 + y ** 2) / 2 / sigma ** 2) ** power)
+
             potential_image = Image.frombytes(
                 'L', (2 * s, 2 * s),
-                bytes(round(255 * r / (self._city_sizes + 1) * exp(-((x ** 2 + y ** 2) / 2 / r ** 2) ** p))
+                bytes(round(super_gauss(x, y, radius, p))
                       for x in range(-s, s) for y in range(-s, s))
             )
-            self._monopole_potential_cache[r] = potential_image
-        return self._monopole_potential_cache[r]
+            self._monopole_potential_cache[radius] = potential_image
+        return self._monopole_potential_cache[radius]
 
 
 class ExponentialZCompositeFunction(MarkovChainMonteCarloCompositeFunction):
@@ -113,7 +117,7 @@ class MarkovChainMonteCarloIntensityFunction(IntensityFunction):
         return self._rate
 
     def is_accepted(self, value: tuple[int, int, int], threshold: float) -> bool:
-        x, y, z = value
+        x, y, _z = value
         p = self._potential_function.get(value)
         k = (255 - self._kernel_image.getpixel((x, y))) / 255
         if threshold <= self._composite_function.get(value, k, p):

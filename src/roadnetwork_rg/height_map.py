@@ -5,7 +5,7 @@ from PIL import Image, ImageFilter, ImageChops
 from .common import get_safe_seed, SeedType
 
 
-class HeightMap(object):
+class HeightMap:
 
     def __init__(self, offset_x: int, offset_y: int, size: int, height: float, roughness: float, *,
                  seed: SeedType = None, bit_length: int = 64) -> None:
@@ -26,17 +26,20 @@ class HeightMap(object):
     @staticmethod
     def check(size: int, height: float, roughness: float) -> None:
         if not isinstance(size, int):
-            raise TypeError("Argument 'size' should be integer number, not '%s'" % type(size).__name__)
+            raise TypeError("Argument 'size' should be integer number, not '%s'" %
+                            type(size).__name__)
         if size <= 0:
             raise ValueError("Argument 'size' should be positive")
 
         if not isinstance(height, (float, int)):
-            raise TypeError("Argument 'height' should be a number, not '%s'" % type(height).__name__)
+            raise TypeError("Argument 'height' should be a number, not '%s'" %
+                            type(height).__name__)
         if not 0 <= height <= 1:
             raise ValueError("Argument 'height' should be in [0, 1] inclusive range")
 
         if not isinstance(roughness, (float, int)):
-            raise TypeError("Argument 'roughness' should be a number, not '%s'" % type(roughness).__name__)
+            raise TypeError("Argument 'roughness' should be a number, not '%s'" %
+                            type(roughness).__name__)
         if not 0 <= roughness <= 1:
             raise ValueError("Argument 'roughness' should be in [0, 1] inclusive range")
 
@@ -68,13 +71,14 @@ class HeightMap(object):
         length = 2
         image = Image.frombytes('L', (length, length),
                                 bytes(127 + int(self._get_random_value(x + cx, y + cy) * height)
-                                      for x, y in ((0, 0), (sub_size, 0), (0, sub_size), (sub_size, sub_size)))
+                                      for x, y in ((0, 0), (sub_size, 0),
+                                                   (0, sub_size), (sub_size, sub_size)))
                                 )
 
         k_diagonal = ImageFilter.Kernel((3, 3), [1, 0, 1, 0, 0, 0, 1, 0, 1])
         k_cross = ImageFilter.Kernel((3, 3), [0, 1, 0, 1, 0, 1, 0, 1, 0])
 
-        for step in range(self._steps):
+        for _ in range(self._steps):
             height *= self._roughness
 
             # square step

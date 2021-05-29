@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import bisect
-from collections import Iterable
-from typing import Union
+from typing import Union, Iterable
 
 from PIL import Image
 
@@ -66,7 +65,8 @@ def find_shortest_paths(graph: Image.Image, source: PointType, targets: Iterable
                 alt = u.distance + v_cost + h_cost
                 if alt < neighbour.distance:
                     if neighbour.open:
-                        index = new_nodes.index(neighbour, bisect.bisect_left(new_distances, neighbour.distance))
+                        start = bisect.bisect_left(new_distances, neighbour.distance)
+                        index = new_nodes.index(neighbour, start)
                         new_nodes.pop(index)
                         new_distances.pop(index)
                     neighbour.distance = alt
@@ -85,7 +85,8 @@ def find_shortest_paths(graph: Image.Image, source: PointType, targets: Iterable
     return paths
 
 
-def backtrack(predecessors: dict[tuple[int, int]: Node], current: tuple[int, int]) -> list[tuple[int, int], ...]:
+def backtrack(predecessors: dict[tuple[int, int]: Node],
+              current: tuple[int, int]) -> list[tuple[int, int], ...]:
     total_path = []
     while True:
         current = predecessors[current].parent
