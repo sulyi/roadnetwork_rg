@@ -229,7 +229,8 @@ class Datafile:
         seed: SeedType
         if seed_type == 0:  # None
             seed = None
-            # FIXME: error if seed_length is not 0
+            if seed_length != 0:
+                raise DatafileDecodeError("Non-zero seed length of `None` seed")
         elif seed_type == 1:  # int
             seed = int.from_bytes(seed, 'little')
         else:
