@@ -187,7 +187,7 @@ class Datafile:
 
         try:
             config_pack = struct.pack(
-                '<BB%dsxQxB%dsxH' % (len(seed), len(config)),
+                '<B B %ds x Q x B %ds x H' % (len(seed), len(config)),
                 seed_type,  # 1 byte
                 len(seed),  # 1 byte
                 seed,  # varied
@@ -212,7 +212,7 @@ class Datafile:
         data = BytesIO(self._data)
         try:
             seed_type, seed_length = struct.unpack(
-                '<BB',
+                '<B B',
                 data.read(2)
             )
         except struct.error as err:
@@ -246,7 +246,7 @@ class Datafile:
         try:
             safe_seed: int
             safe_seed, config_length = struct.unpack(
-                '<QxB',
+                '<Q x B',
                 data.read(10)
             )
         except struct.error as err:
@@ -291,7 +291,7 @@ class Datafile:
 
             try:
                 header = struct.pack(
-                    '<L%ds' % self.__data_signature_length,
+                    '<L %ds' % self.__data_signature_length,
                     len(self._data),  # 4 bytes
                     signature,  # 64 bytes
                 )
@@ -305,7 +305,7 @@ class Datafile:
 
             try:
                 magic = struct.pack(
-                    '<10s3B%dsH' % self.__header_checksum_length,
+                    '<10s BBB %ds H' % self.__header_checksum_length,
                     self.__magic,  # 10 bytes
                     *package_version,  # 3 bytes
                     checksum,  # 64 bytes
@@ -324,7 +324,7 @@ class Datafile:
 
     def read(self, filename: Union[str, bytes], key: bytes) -> None:
         with open(filename, 'rb') as file:
-            checksum, offset = self._read_magick(file)
+            checksum, offset = self._read_magic(file)
             self._check_delimiter(file)
             content_length, signature = self._read_header(file, offset, checksum)
 
@@ -357,7 +357,7 @@ class Datafile:
 
         try:
             chunk_pack = struct.pack(
-                '<iiH%dsxH' % len(cities),
+                '<i i H %ds x H' % len(cities),
                 chunk.x,  # 4 bytes
                 chunk.y,  # 4 bytes
                 len(cities),  # 2 bytes
@@ -366,12 +366,12 @@ class Datafile:
                 len(chunk.pixel_paths)  # 2 bytes
             )
             height_map_pack = struct.pack(
-                '<L%ds' % len(height_map),
+                '<L %ds' % len(height_map),
                 len(height_map),  # 2 bytes
                 height_map  # varied
             )
             potential_map_pack = struct.pack(
-                '<L%ds' % len(potential_map),
+                '<L %ds' % len(potential_map),
                 len(potential_map),  # 2 bytes
                 potential_map  # varied
             )
@@ -396,7 +396,7 @@ class Datafile:
             x: int
             y: int
             x, y, cities_length = struct.unpack(
-                '<iiH',
+                '<i i H',
                 data.read(10)
             )
         except struct.error as err:
@@ -461,7 +461,7 @@ class Datafile:
         source, target = key
         try:
             data = struct.pack(
-                '<d HHH HHH H%ds' % len(pixels),
+                '<d HHH HHH H %ds' % len(pixels),
                 path.cost,  # 8 bytes
                 *source,
                 *target,
@@ -480,7 +480,8 @@ class Datafile:
             (cost,
              source_x, source_y, source_z,
              target_x, target_y, target_z,
-             pixels_length) = struct.unpack(
+             pixels_length
+             ) = struct.unpack(
                 '<d HHH HHH H',
                 data.read(22)
             )
@@ -513,11 +514,14 @@ class Datafile:
             raise DatafileDecodeError
 
     @staticmethod
-    def _read_magick(file: BinaryIO) -> tuple[bytes, int]:
+    def _read_magic(file: BinaryIO) -> tuple[bytes, int]:
         compatible_versions = (package_version, *Datafile.__compatible_versions)
         try:
-            magic, vmajor, vminor, vpatch, checksum, offset = struct.unpack(
-                '<10s3B%dsH' % Datafile.__header_checksum_length,
+            (magic,
+             vmajor, vminor, vpatch,
+             checksum,
+             offset) = struct.unpack(
+                '<10s BBB %ds H' % Datafile.__header_checksum_length,
                 file.read(79)
             )
         except struct.error as err:
@@ -535,7 +539,7 @@ class Datafile:
             raise DatafileDecodeError("Invalid headed checksum")
         try:
             content_length, signature = struct.unpack(
-                '<L%ds' % Datafile.__data_signature_length,
+                '<L %ds' % Datafile.__data_signature_length,
                 header
             )
         except struct.error as err:
