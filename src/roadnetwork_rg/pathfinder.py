@@ -1,23 +1,11 @@
 from __future__ import annotations
 
 import bisect
-from typing import Union, Iterable
+from typing import Iterable, Union
 
 from PIL import Image
 
-from .common import PointType
-
-
-class PixelPath:
-    def __init__(self, cost: float, pixels: list[tuple[int, int]]) -> None:
-        self.cost = cost
-        self.pixels = pixels
-
-    def __repr__(self) -> str:
-        return "%s(%d, %s)" % (self.__class__.__name__, self.cost, self.pixels)
-
-    def __eq__(self, other: PixelPath) -> bool:
-        return self is other or self.cost == other.cost and self.pixels == other.pixels
+from .common import PixelPath, PointType
 
 
 class Node:

@@ -1,4 +1,4 @@
-from math import ceil, log, exp
+from math import ceil, exp, log
 from typing import Union
 
 from PIL import Image, ImageStat, ImageChops

@@ -1,4 +1,4 @@
-from typing import Union, Generator, Iterator, TypeVar, Generic
+from typing import Generator, Generic, Iterator, TypeVar, Union
 
 import numpy as np
 

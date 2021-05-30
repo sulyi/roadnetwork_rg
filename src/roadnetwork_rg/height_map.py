@@ -2,14 +2,14 @@ import hashlib
 
 from PIL import Image, ImageFilter, ImageChops
 
-from .common import get_safe_seed, SeedType
+from .common import SeedType, get_safe_seed, height_map_check
 
 
 class HeightMap:
 
     def __init__(self, offset_x: int, offset_y: int, size: int, height: float, roughness: float, *,
                  seed: SeedType = None, bit_length: int = 64) -> None:
-        self.check(size, height, roughness)
+        height_map_check(size, height, roughness)
 
         self._steps = size.bit_length() - 1  # log2 w/o math.log2
         self._size = 1 << self._steps
@@ -22,26 +22,6 @@ class HeightMap:
         self._offset_y = offset_y
 
         self._seed = get_safe_seed(seed, bit_length)
-
-    @staticmethod
-    def check(size: int, height: float, roughness: float) -> None:
-        if not isinstance(size, int):
-            raise TypeError("Argument 'size' should be integer number, not '%s'" %
-                            type(size).__name__)
-        if size <= 0:
-            raise ValueError("Argument 'size' should be positive")
-
-        if not isinstance(height, (float, int)):
-            raise TypeError("Argument 'height' should be a number, not '%s'" %
-                            type(height).__name__)
-        if not 0 <= height <= 1:
-            raise ValueError("Argument 'height' should be in [0, 1] inclusive range")
-
-        if not isinstance(roughness, (float, int)):
-            raise TypeError("Argument 'roughness' should be a number, not '%s'" %
-                            type(roughness).__name__)
-        if not 0 <= roughness <= 1:
-            raise ValueError("Argument 'roughness' should be in [0, 1] inclusive range")
 
     @property
     def size(self) -> int:

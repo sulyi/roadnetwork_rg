@@ -4,69 +4,14 @@ import hashlib
 import hmac
 import pickle
 import struct
-import warnings
-from dataclasses import dataclass, field
 from io import BytesIO
-from typing import Union, Callable, TypeVar, BinaryIO
+from typing import BinaryIO, Callable, Union, TypeVar
 
-from PIL import Image, ImageDraw, ImageStat
+from PIL import Image
 
-from . import __version_info__ as package_version
-from .common import get_safe_seed, SeedType, PointType
-from .data import colour_palette
-from .height_map import HeightMap
-from .intensity import AdaptivePotentialFunction, ExponentialZCompositeFunction, \
-    MarkovChainMonteCarloIntensityFunction
-from .pathfinder import find_shortest_paths, PixelPath
-from .point_process import MarkovChainMonteCarlo
+from .common import PixelPath, PointType, SeedType, WorldChunkData, WorldConfig, WorldData
 
 T = TypeVar('T')
-
-
-@dataclass(frozen=True)
-class WorldConfig:
-    chunk_size: int
-    height: float
-    roughness: float
-    city_rate: int
-    city_sizes: int = 1
-    bit_length: int = 64
-
-    def check(self) -> None:
-        HeightMap.check(self.chunk_size, self.height, self.roughness)
-        WorldChunk.check(self.city_rate, self.city_sizes)
-
-        # early validation
-        if self.chunk_size & self.chunk_size - 1 != 0:
-            raise ValueError("Argument 'chunk_size' should be power of two")
-
-        if self.bit_length & 1:
-            raise ValueError("Argument 'bit_length' should be even")
-
-
-@dataclass(frozen=True)
-class WorldRenderOptions:
-    show_debug: bool = False
-    show_height_map: bool = True
-    colour_height_map: bool = True
-    show_cities: bool = True
-    show_roads: bool = True
-    show_potential_map: bool = False
-
-
-@dataclass(order=True, frozen=True)
-class WorldChunkData:
-    x: int
-    y: int
-    height_map: Image.Image = field(compare=False)
-    cities: list[PointType, ...] = field(compare=False)
-    potential_map: Image.Image = field(compare=False)
-    pixel_paths: dict[tuple[PointType, PointType], PixelPath] = field(compare=False)
-
-
-default_world_config = WorldConfig(chunk_size=256, height=1., roughness=.5,
-                                   city_rate=32, city_sizes=8)
-default_render_options = WorldRenderOptions()
 
 
 class DatafileDecodeError(Exception):
@@ -138,7 +83,8 @@ class Datafile:
     # if 2 bytes of short is enough for length of cities (note when pickled)
     # if 2 bytes of short is enough for length of pixels (note when pickled)
 
-    __compatible_versions = ((0, 1, 0),)
+    __version = (0, 1, 0)
+    __compatible_versions = ()
     __magic = '#D-MG#WG-D'.encode('ascii')
     __header_checksum_length = 64  # from `hashlib` `sha512` method `digest_size`
     __data_signature_length = 64  # from `hmac` `digest_size` with `sha512` method
@@ -146,37 +92,27 @@ class Datafile:
     def __init__(self) -> None:
         self._data: bytes = b''
 
-    @classmethod
-    def save(cls, filename: Union[str, bytes], key: bytes, world: WorldGenerator) -> None:
-        file = cls()
-        file.set_data(world.config, world.actual_seed, world.safe_seed, world.get_chunks())
-        file.write(filename, key)
-
-    @classmethod
-    def load(cls, filename: Union[str, bytes], key: bytes) -> Datafile:
-        instance = cls()
-        instance.read(filename, key)
-        return instance
-
-    def set_data(self, config: WorldConfig, seed: SeedType, safe_seed: int,
-                 chunks: list[WorldChunkData, ...]) -> None:
+    def set_data(self, world: WorldData) -> None:
         # IDEA: use 2 bit `seed_type` instead byte?
-        if seed is None:
+        if world.seed is None:
             seed_type = 0
             seed = b''
-        elif isinstance(seed, int):
+        elif isinstance(world.seed, int):
             seed_type = 1
-            seed = seed.to_bytes((seed.bit_length() + 7) // 8, byteorder='little')
-        elif isinstance(seed, str):
+            seed = world.seed.to_bytes((world.seed.bit_length() + 7) // 8, byteorder='little')
+        elif isinstance(world.seed, str):
             seed_type = 2
-            seed = seed.encode('ascii')
-        elif isinstance(seed, bytes):
-            seed_type = 3
+            seed = world.seed.encode('ascii')
+        elif isinstance(world.seed, (bytes, bytearray)):
+            seed_type = 3 if isinstance(world.seed, bytes) else 4
+            seed = world.seed
         else:
-            seed_type = 4
+            raise TypeError("Unsupported seed type of %s,\n"
+                            "it should be either None, int, str, bytes, or bytearray" %
+                            type(world.seed).__name__)
         seed = seed[:255]  # first 255 bytes (if larger)
         try:
-            config = pickle.dumps(list(config.__dict__.values()))
+            config = pickle.dumps(list(world.config.__dict__.values()))
         except pickle.PicklingError as err:
             raise DatafileEncodingError("Failed to encode config") from err
 
@@ -192,12 +128,12 @@ class Datafile:
                 len(seed),  # 1 byte
                 seed,  # varied
                 # pad 1 byte
-                safe_seed,  # 8 bytes
+                world.safe_seed,  # 8 bytes
                 # pad 1 byte
                 len(config),  # 1 byte
                 config,  # 43 bytes
                 # pad 1 byte
-                len(chunks)  # 2 bytes
+                len(world.chunks)  # 2 bytes
             )
         except struct.error as err:
             raise DatafileEncodingError("Failed to encode config") from err
@@ -205,10 +141,10 @@ class Datafile:
         self._data = b'\00'.join((
             config_pack,
             # separator 1 byte
-            b'\00'.join(self.encode_chunk(chunk) for chunk in chunks)
+            b'\00'.join(self.encode_chunk(chunk) for chunk in world.chunks)
         ))
 
-    def get_data(self) -> tuple[SeedType, int, WorldConfig, list[WorldChunkData, ...]]:
+    def get_data(self) -> WorldData:
         data = BytesIO(self._data)
         try:
             seed_type, seed_length = struct.unpack(
@@ -276,7 +212,7 @@ class Datafile:
             for i in range(chunks_count)
         ]
 
-        return seed, safe_seed, config, chunks
+        return WorldData(config, seed, safe_seed, chunks)
 
     def clear_data(self) -> None:
         self._data = b''
@@ -309,7 +245,7 @@ class Datafile:
                 magic = struct.pack(
                     '<10s BBB %ds H' % self.__header_checksum_length,
                     self.__magic,  # 10 bytes
-                    *package_version,  # 3 bytes
+                    *Datafile.__version,  # 3 bytes
                     checksum,  # 64 bytes
                     len(header),  # 2 bytes
                 )
@@ -335,6 +271,22 @@ class Datafile:
             if signature != hmac.new(key, data, hashlib.sha512).digest():
                 raise DatafileDecodeError("Invalid data signature")
             self._data = data
+
+    @classmethod
+    def get_version(cls):
+        return cls.__version
+
+    @classmethod
+    def save(cls, filename: Union[str, bytes], key: bytes, world: WorldData) -> None:
+        file = cls()
+        file.set_data(world)
+        file.write(filename, key)
+
+    @classmethod
+    def load(cls, filename: Union[str, bytes], key: bytes) -> Datafile:
+        instance = cls()
+        instance.read(filename, key)
+        return instance
 
     @staticmethod
     def encode_chunk(chunk: WorldChunkData) -> bytes:
@@ -517,7 +469,7 @@ class Datafile:
 
     @staticmethod
     def _read_magic(file: BinaryIO) -> tuple[bytes, int]:
-        compatible_versions = (package_version, *Datafile.__compatible_versions)
+        compatible_versions = Datafile.__compatible_versions + (Datafile.__version,)
         try:
             (magic,
              vmajor, vminor, vpatch,
@@ -547,243 +499,3 @@ class Datafile:
         except struct.error as err:
             raise DatafileDecodeError("Failed to decode header") from err
         return content_length, signature
-
-
-class WorldGenerator:
-    __city_r = 2
-    __city_colour = (255, 0, 0)
-    __text_color = (0, 0, 0)
-    __city_border = (0, 0, 0)
-
-    def __init__(self, *, config: WorldConfig = default_world_config,
-                 seed: SeedType = None) -> None:
-        config.check()
-        self.config = config
-        self._chunks: list[WorldChunkData, ...] = []
-
-        # for i/o compatibility truncate seed to 255
-        self._seed = seed if isinstance(seed, int) or seed is None else seed[:255]
-        self._safe_seed = get_safe_seed(seed, self.config.bit_length)
-
-    @classmethod
-    def save(cls, instance: WorldGenerator, filename: Union[str, bytes], key: bytes) -> None:
-        if not isinstance(instance, cls):
-            raise ValueError("Argument is not an %s object" % cls.__name__)
-        instance.write(filename, key)
-
-    @classmethod
-    def load(cls, filename: Union[str, bytes], key: bytes) -> WorldGenerator:
-        instance = cls.__new__(cls)
-        instance.read(filename, key)
-        return instance
-
-    @property
-    def seed(self) -> SeedType:
-        return self._seed if self._seed is not None else self._safe_seed
-
-    @property
-    def actual_seed(self) -> SeedType:
-        return self._seed
-
-    @property
-    def safe_seed(self) -> int:
-        return self._safe_seed
-
-    def get_chunks(self) -> list[WorldChunkData, ...]:
-        return self._chunks.copy()
-
-    def read(self, filename: Union[str, bytes], key: bytes) -> None:
-        seed, safe_seed, config, chunks = Datafile.load(filename, key).get_data()
-        try:
-            config.check()
-        except (ValueError, TypeError) as err:
-            config = default_world_config
-            warnings.warn("Failed `config` check, set to default, due\n\t:%s" % err)
-        if seed is not None and get_safe_seed(seed, config.bit_length) == safe_seed:
-            seed = None
-            warnings.warn("Mismatching seed and safe_seed, seed is discarded")
-        self.config = config
-        self._chunks = chunks
-
-        self._seed = seed
-        self._safe_seed = safe_seed
-
-    def write(self, filename: Union[str, bytes], key: bytes) -> None:
-        Datafile.save(filename, key, self)
-
-    def add_chunk(self, chunk_x: int, chunk_y: int) -> None:
-        chunk = WorldChunk(chunk_x, chunk_y, self.config, seed=self._safe_seed,
-                           bit_length=self.config.bit_length)
-        chunk_data = chunk.generate()
-        self._chunks.append(chunk_data)
-
-    def render(self, *, options: WorldRenderOptions = default_render_options) -> Image.Image:
-        if not self._chunks:
-            raise IndexError("There are no chunks added to render")
-        if not any((options.show_debug, options.show_height_map, options.show_cities,
-                    options.show_roads, options.show_potential_map)):
-            raise ValueError("Nothing to render with given 'option' argument")
-
-        width = (max(self._chunks, key=lambda item: item.x).x -
-                 min(self._chunks, key=lambda item: item.x).x + 1) * self.config.chunk_size
-        height = (max(self._chunks, key=lambda item: item.y).y -
-                  min(self._chunks, key=lambda item: item.y).y + 1) * self.config.chunk_size
-
-        atlas_im = Image.new('RGBA', (width, height))
-        draw_im = Image.new('RGBA', (width, height))
-
-        draw = ImageDraw.Draw(draw_im)
-
-        for chunk in self._chunks:
-            cx = (chunk.x - min(self._chunks, key=lambda item: item.x).x) * self.config.chunk_size
-            cy = (chunk.y - min(self._chunks, key=lambda item: item.y).y) * self.config.chunk_size
-
-            # concatenate height maps
-            atlas_im.paste(self._render_height_map(chunk, options), (cx, cy))
-            # overlay potential field
-            atlas_im.alpha_composite(self._render_potential_map(chunk, options), (cx, cy))
-
-            # place cities
-            if options.show_cities:
-                for x, y, z in chunk.cities:
-                    draw.ellipse((cx + x - self.__city_r - z, cy + y - self.__city_r - z,
-                                  cx + x + self.__city_r + z, cy + y + self.__city_r + z),
-                                 fill=self.__city_colour, outline=self.__city_border, width=1)
-
-            # put message in top left corner
-            if options.show_debug:
-                msg = '\n'.join((
-                    f"count: {len(chunk.cities)}",
-                    f"expected: {self.config.city_rate}",
-                    f"mean: {(255 - ImageStat.Stat(chunk.height_map).mean.pop()) / 255:.3f}",
-                    f"sizes: {self.config.city_sizes}")
-                )
-                draw.multiline_text((cx, cy), msg, fill=self.__text_color)
-
-            # draw roads
-            image = self._render_draw_roads(chunk, options)
-            draw_im.paste(image, (cx, cy), mask=image)
-
-        atlas_im.paste(draw_im, mask=draw_im)
-        return atlas_im
-
-    @staticmethod
-    def _render_height_map(chunk: WorldChunkData, options: WorldRenderOptions) -> Image.Image:
-        if options.show_height_map:
-            if options.colour_height_map:
-                image = chunk.height_map.convert('P')
-                image.putpalette(colour_palette)
-            else:
-                image = chunk.height_map
-        else:
-            image = Image.new('RGBA', chunk.height_map.size)
-        return image
-
-    @staticmethod
-    def _render_potential_map(chunk: WorldChunkData, options: WorldRenderOptions) -> Image.Image:
-        if options.show_potential_map:
-            alpha = Image.new('RGBA', chunk.potential_map.size, 0)
-            alpha.putalpha(chunk.potential_map)
-        else:
-            alpha = Image.new('RGBA', chunk.height_map.size)
-        return alpha
-
-    @staticmethod
-    def _render_draw_roads(chunk: WorldChunkData, options: WorldRenderOptions) -> Image.Image:
-        if options.show_roads:
-            # XXX: avoiding `Image.Image.putpixel`
-            path_data = [0] * (chunk.height_map.size[0] * chunk.height_map.size[1])
-            for path in chunk.pixel_paths.values():
-                for point_x, point_y in path.pixels:
-                    path_data[point_x + point_y * chunk.height_map.size[0]] = 255
-            image = Image.new('RGBA', chunk.height_map.size, 0)
-            image.putalpha(Image.frombytes('L', chunk.height_map.size,
-                                           bytes(path_data)))
-        else:
-            image = Image.new('RGBA', chunk.height_map.size)
-        return image
-
-    @staticmethod
-    def clear_potential_cache() -> None:
-        AdaptivePotentialFunction.clear_cache()
-
-
-class WorldChunk:
-
-    def __init__(self, chunk_x: int, chunk_y: int, config: WorldConfig, *, seed: SeedType = None,
-                 bit_length: int = 64) -> None:
-        self.check(config.city_rate, config.city_sizes)
-
-        self._chunk_x = chunk_x
-        self._chunk_y = chunk_y
-
-        self._height_map = HeightMap(chunk_x, chunk_y, config.chunk_size,
-                                     config.height, config.roughness, seed=seed,
-                                     bit_length=bit_length)
-        if config.chunk_size != self._height_map.size:
-            raise ValueError("Size mismatch")
-        self.config = config
-
-        self._seed = get_safe_seed(seed, bit_length)
-        x = self._chunk_x * self.config.chunk_size
-        y = self._chunk_y * self.config.chunk_size
-        seed = (x ^ y << (bit_length >> 1)) ^ self._seed
-        self._local_seed = seed & ((1 << bit_length) - 1)
-
-    @staticmethod
-    def check(city_rate: int, city_sizes: int) -> None:
-        if not isinstance(city_rate, int):
-            raise TypeError("Argument 'city_rate' should be integer number, not '%s'" %
-                            type(city_rate).__name__)
-        if city_rate <= 0:
-            raise ValueError("Argument 'city_rate' should be positive")
-
-        if not isinstance(city_sizes, int):
-            raise TypeError("Argument 'city_sizes' should be integer number, not '%s'" %
-                            type(city_sizes).__name__)
-        if city_sizes <= 0:
-            raise ValueError("Argument 'city_sizes' should be positive")
-
-    @property
-    def size(self) -> int:
-        return self.config.chunk_size
-
-    @property
-    def height_map(self) -> HeightMap:
-        return self._height_map
-
-    def generate(self) -> WorldChunkData:
-        height_map_image = self.height_map.generate()
-
-        intensity_function = AdaptivePotentialFunction(self.config.chunk_size,
-                                                       self.config.city_sizes)
-        cities = [
-            *MarkovChainMonteCarlo(
-                MarkovChainMonteCarloIntensityFunction(
-                    self.config.city_rate,
-                    height_map_image,
-                    intensity_function,
-                    ExponentialZCompositeFunction()
-                ),
-                (
-                    self.config.chunk_size,
-                    self.config.chunk_size,
-                    self.config.city_sizes + 1  # exclusive high
-                ),
-                self._local_seed
-            )
-        ]
-
-        paths = {}
-        for i, source in enumerate(cities[:-1], 1):
-            paths.update(find_shortest_paths(height_map_image, source, cities[i:]))
-
-        world_data = WorldChunkData(
-            self._chunk_x,
-            self._chunk_y,
-            height_map_image,
-            cities,
-            intensity_function.potential_map,
-            paths
-        )
-        return world_data
