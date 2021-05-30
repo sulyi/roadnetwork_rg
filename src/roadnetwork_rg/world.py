@@ -4,6 +4,7 @@ import hashlib
 import hmac
 import pickle
 import struct
+import warnings
 from dataclasses import dataclass, field
 from io import BytesIO
 from typing import Union, Callable, TypeVar, BinaryIO
@@ -590,13 +591,11 @@ class WorldGenerator:
         try:
             config.check()
         except (ValueError, TypeError) as err:
-            # XXX: Config check warning
             config = default_world_config
-            print("Failed `config` check, set to default", err)
+            warnings.warn("Failed `config` check, set to default, due\n\t:%s" % err)
         if seed is not None and get_safe_seed(seed, config.bit_length) == safe_seed:
-            # XXX: Seed mismatch warning
             seed = None
-            print("Mismatching seed and safe_seed, seed is discarded")
+            warnings.warn("Mismatching seed and safe_seed, seed is discarded")
         self.config = config
         self._chunks = chunks
 
@@ -693,7 +692,7 @@ class WorldGenerator:
                     path_data[point_x + point_y * chunk.height_map.size[0]] = 255
             image = Image.new('RGBA', chunk.height_map.size, 0)
             image.putalpha(Image.frombytes('L', chunk.height_map.size,
-                                        bytes(path_data)))
+                                           bytes(path_data)))
         else:
             image = Image.new('RGBA', chunk.height_map.size)
         return image
@@ -716,8 +715,7 @@ class WorldChunk:
                                      config.height, config.roughness, seed=seed,
                                      bit_length=bit_length)
         if config.chunk_size != self._height_map.size:
-            # XXX: shouldn't happen
-            raise Exception("Size mismatch")
+            raise ValueError("Size mismatch")
         self.config = config
 
         self._seed = get_safe_seed(seed, bit_length)
