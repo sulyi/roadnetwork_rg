@@ -98,13 +98,15 @@ class Datafile:
         self._data: bytes = b''
 
     def set_data(self, world: WorldData) -> None:
-        """Sets data to be saved
+        """Sets binary data.
+
+         Data can be to be saved by :meth:`write` or parsed by :meth:`get_data`.
 
         :param world: Data to be set.
-        :type world: WorldData
+        :type world: :class:`WorldData`
         :raises: `TypeError`, if type of :attr:`world.seed` is not allowed.
             Only  `None`, `int`, `str`, `bytes`, and `bytearray` are supported types
-        :raises: `DatafileEncodingError`
+        :raises: :err:`DatafileEncodingError`
         """
 
         # IDEA: use 2 bit `seed_type` instead byte?
@@ -159,6 +161,14 @@ class Datafile:
         ))
 
     def get_data(self) -> WorldData:
+        """Parses binary data of file.
+
+        Data can be loaded by :meth:`read` or set by :meth:`set_data`.
+
+        :return: Parsed data.
+        :rtype: :class:`WorldData`
+        """
+
         data = BytesIO(self._data)
         try:
             seed_type, seed_length = struct.unpack(
@@ -180,7 +190,7 @@ class Datafile:
         if seed_type == 0:  # None
             seed = None
             if seed_length != 0:
-                raise DatafileDecodeError("Non-zero seed length of `None` seed")
+                raise DatafileDecodeError("Non-zero seed length of None seed")
         elif seed_type == 1:  # int
             seed = int.from_bytes(seed, 'little')
         else:
@@ -229,9 +239,18 @@ class Datafile:
         return WorldData(config, seed, safe_seed, chunks)
 
     def clear_data(self) -> None:
+        """Clears data set for :class:`Datafile` instance."""
         self._data = b''
 
     def write(self, filename: Union[str, bytes], key: bytes) -> None:
+        """Writes data to a file, signs data using hashing algorithm.
+
+        :param filename: It is the name of the destination to where data is saved.
+        :type filename: Union[str, bytes]
+        :param key: Hash key to be used signing data.
+        :type key: bytes (i.g. returned by :meth:`str.encode`)
+        """
+
         if len(self._data) > 4294967295:
             raise DatafileEncodingError("Too large data")
 
@@ -275,6 +294,14 @@ class Datafile:
             )))
 
     def read(self, filename: Union[str, bytes], key: bytes) -> None:
+        """Reads data from file, authenticating data using hashing algorithm
+
+        :param filename: It is the name of the source from where data is read.
+        :type filename: Union[str, bytes]
+        :param key: Hash key to be used authenticating data.
+        :type key: bytes (i.g. returned by :meth:`str.encode`)
+        """
+
         with open(filename, 'rb') as file:
             checksum, offset = self._read_magic(file)
             self._check_delimiter(file)
@@ -288,22 +315,39 @@ class Datafile:
 
     @classmethod
     def get_version(cls):
+        """Gets version of file format."""
         return cls.__version
 
     @classmethod
     def save(cls, filename: Union[str, bytes], key: bytes, world: WorldData) -> None:
+        """Saves data to file.
+
+        Creates an instance, sets data and writes it to destination.
+        (see: :meth:`set_data` and :meth:`write`)
+        """
+
         file = cls()
         file.set_data(world)
         file.write(filename, key)
 
     @classmethod
     def load(cls, filename: Union[str, bytes], key: bytes) -> Datafile:
+        """Loads data from file.
+
+        Creates an instance and reads data. (see: :meth:`read`)
+
+        :return: Created instance.
+        :rtype: :class:`Datafile`
+        """
+
         instance = cls()
         instance.read(filename, key)
         return instance
 
     @staticmethod
     def encode_chunk(chunk: WorldChunkData) -> bytes:
+        """Encodes data chunk."""
+
         try:
             cities = pickle.dumps(chunk.cities)
         except pickle.PicklingError as err:
@@ -360,6 +404,8 @@ class Datafile:
 
     @staticmethod
     def decode_chunk(data: BinaryIO) -> WorldChunkData:
+        """Reads data from buffer and decodes it as chunk data."""
+
         try:
             offset_x: int
             offset_y: int
@@ -421,6 +467,8 @@ class Datafile:
 
     @staticmethod
     def encode_pixel_path(key: tuple[PointType, PointType], path: PixelPath) -> bytes:
+        """Encodes a key-value pair."""
+
         try:
             pixels = pickle.dumps(path.pixels)
         except pickle.PicklingError as err:
@@ -445,6 +493,8 @@ class Datafile:
 
     @staticmethod
     def decode_pixel_path(data: BinaryIO) -> tuple[tuple[PointType, PointType], PixelPath]:
+        """Reads data from buffer and decodes it as a key-value pair."""
+
         try:
             cost: float
             (cost,
