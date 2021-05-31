@@ -1,87 +1,89 @@
 from __future__ import annotations
 
 import bisect
-from typing import Iterable, Union
+from dataclasses import dataclass
+from typing import Union, Sequence
 
 from PIL import Image
 
 from .common import PixelPath, PointType
 
 
+@dataclass
 class Node:
-
-    def __init__(self, x: int, y: int, *, distance: float = float('inf')) -> None:
-        # XXX: 'x' and 'y' being properties would do more harm than good
-        self.x = x
-        self.y = y
-        self.distance = distance
-        self.parent: Union[tuple[int, int], None] = None
-        self.open: bool = False
-
-    def __repr__(self) -> str:
-        return "%s(%d, %d, %s)" % (self.__class__.__name__, self.x, self.y,
-                                   self.distance if self.distance is None else "%d" % self.distance)
+    # XXX: 'x' and 'y' being properties would do more harm than good
+    x: int
+    y: int
+    distance: float = float('inf')
+    parent: Union[tuple[int, int], None] = None
+    open: bool = False
 
 
-def find_shortest_paths(graph: Image.Image, source: PointType, targets: Iterable[PointType, ...]
-                        ) -> dict[tuple[PointType, PointType], PixelPath]:
-    width, height = graph.size
-    nodes = {(x, y): Node(x, y) for x in range(width) for y in range(height)}
-    nodes[source[:2]].distance = 0.
-    nodes[source[:2]].open = True
+class Pathfinder:
+    __neighbours = ((-1, -1, 2 ** .5), (0, -1, 1.), (1, -1, 2 ** .5),
+                    (-1, 0, 1.), (1, 0, 1.),
+                    (-1, 1, 2 ** .5), (0, 1, 1.), (1, 1, 2 ** .5))
 
-    new_nodes = [Node(*source[:2], distance=0.)]
-    new_distances = [0.]
+    def __init__(self, graph: Image.Image, targets: Sequence[PointType, ...]):
+        self._width, self._height = graph.size
+        self._graph = list(graph.tobytes())
+        self._targets = targets
 
-    graph = list(graph.tobytes())
+    def shortest_paths(self, source_index: int) -> dict[tuple[PointType, PointType], PixelPath]:
+        nodes = {(x, y): Node(x, y) for x in range(self._width) for y in range(self._height)}
+        nodes[self._targets[source_index][:2]].distance = 0.
+        nodes[self._targets[source_index][:2]].open = True
 
-    d = 2 ** .5
+        new_nodes = [Node(*self._targets[source_index][:2], distance=0.)]
+        new_distances = [0.]
 
-    while new_nodes:
-        node = new_nodes.pop(0)
-        new_distances.pop(0)
-        node.open = False
+        while new_nodes:
+            node = new_nodes.pop(0)
+            new_distances.pop(0)
+            node.open = False
+            u_value = self._graph[node.x + self._width * node.y]
 
-        u_value = graph[node.x + width * node.y]
-        for d_x, d_y, h_cost in ((-1, -1, d), (0, -1, 1.), (1, -1, d),
-                                 (-1, 0, 1.), (1, 0, 1.),
-                                 (-1, 1, d), (0, 1, 1.), (1, 1, d)):
-            n_x, n_y = node.x + d_x, node.y + d_y
-            if 0 <= n_x < width and 0 <= n_y < height:
-                neighbour = nodes[n_x, n_y]
-                v_cost = abs(u_value - graph[n_x + width * n_y])
-                alt = node.distance + v_cost + h_cost
-                if alt < neighbour.distance:
-                    if neighbour.open:
-                        start = bisect.bisect_left(new_distances, neighbour.distance)
-                        index = new_nodes.index(neighbour, start)
-                        new_nodes.pop(index)
-                        new_distances.pop(index)
-                    neighbour.distance = alt
-                    neighbour.parent = node.x, node.y
-                    neighbour.open = True
-                    index = bisect.bisect(new_distances, alt)
-                    new_distances.insert(index, alt)
-                    new_nodes.insert(index, neighbour)
+            for d_x, d_y, h_cost in self.__neighbours:
+                n_x, n_y = node.x + d_x, node.y + d_y
+                if 0 <= n_x < self._width and 0 <= n_y < self._height:
+                    v_cost = abs(u_value - self._graph[n_x + self._width * n_y])
+                    alt = node.distance + v_cost + h_cost
+                    if alt < nodes[n_x, n_y].distance:
+                        if nodes[n_x, n_y].open:
+                            index = new_nodes.index(
+                                nodes[n_x, n_y],
+                                bisect.bisect_left(new_distances, nodes[n_x, n_y].distance)
+                            )
+                            new_nodes.pop(index)
+                            new_distances.pop(index)
+                        nodes[n_x, n_y].distance = alt
+                        nodes[n_x, n_y].parent = node.x, node.y
+                        nodes[n_x, n_y].open = True
+                        index = bisect.bisect(new_distances, alt)
+                        new_distances.insert(index, alt)
+                        new_nodes.insert(index, nodes[n_x, n_y])
 
-    if {node[:2] for node in targets}.difference(nodes.keys()):
-        # XXX: shouldn't be reachable anyway
-        raise ArithmeticError("Couldn't be found a path to each node")
+        self._check_result(nodes, source_index)
 
-    paths = {(source, target): PixelPath(nodes[target[:2]].distance,
-                                         backtrack(nodes, target[:2])) for target in targets}
-    return paths
+        return {(self._targets[source_index], target): PixelPath(nodes[target[:2]].distance,
+                                                                 self.backtrack(nodes, target[:2]))
+                for target in self._targets[source_index + 1:]}
 
+    def _check_result(self, nodes, source_index):
+        if {node[:2] for node in self._targets[source_index:]}.difference(nodes.keys()):
+            # XXX: shouldn't be reachable anyway
+            raise ArithmeticError("Couldn't be found a path to each node")
 
-def backtrack(predecessors: dict[tuple[int, int]: Node],
-              current: tuple[int, int]) -> list[tuple[int, int], ...]:
-    total_path = []
-    while True:
-        current = predecessors[current].parent
-        if current is not None and predecessors[current].parent in predecessors:
-            # None possible if multiple city in same node (one being the source)
-            total_path.append(current)
-            continue
-        break
-    total_path.reverse()
-    return total_path
+    @staticmethod
+    def backtrack(predecessors: dict[tuple[int, int]: Node],
+                  current: tuple[int, int]) -> list[tuple[int, int], ...]:
+        total_path = []
+        while True:
+            current = predecessors[current].parent
+            if current is not None and predecessors[current].parent in predecessors:
+                # None possible if multiple city in same node (one being the source)
+                total_path.append(current)
+                continue
+            break
+        total_path.reverse()
+        return total_path

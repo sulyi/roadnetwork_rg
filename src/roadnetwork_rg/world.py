@@ -12,7 +12,7 @@ from .datafile import Datafile
 from .height_map import HeightMap
 from .intensity import (AdaptivePotentialFunction, ExponentialZCompositeFunction,
                         MarkovChainMonteCarloIntensityFunction)
-from .pathfinder import find_shortest_paths
+from .pathfinder import Pathfinder
 from .point_process import MarkovChainMonteCarlo
 
 default_world_config = WorldConfig(chunk_size=256, height=1., roughness=.5,
@@ -244,10 +244,10 @@ class WorldChunk:
                 self._local_seed
             )
         ]
-
+        finder = Pathfinder(height_map_image, cities)
         paths = {}
-        for i, source in enumerate(cities[:-1], 1):
-            paths.update(find_shortest_paths(height_map_image, source, cities[i:]))
+        for i in range(len(cities)):
+            paths.update(finder.shortest_paths(i))
 
         world_data = WorldChunkData(
             self._chunk_x,
