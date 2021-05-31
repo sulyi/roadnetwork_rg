@@ -11,7 +11,6 @@ from .common import PixelPath, PointType
 
 @dataclass
 class Node:
-    # NOTE: 'x' and 'y' being properties would do more harm than good
     x: int
     y: int
     distance: float = float('inf')
@@ -68,7 +67,7 @@ class Pathfinder:
         self._check_result(nodes, source_index)
 
         return {(self._targets[source_index], target): PixelPath(nodes[target[:2]].distance,
-                                                                 self.backtrack(nodes, target[:2]))
+                                                                 self._backtrack(nodes, target[:2]))
                 for target in self._targets[source_index + 1:]}
 
     def _check_result(self, nodes, source_index):
@@ -77,8 +76,8 @@ class Pathfinder:
             raise ArithmeticError("Couldn't be found a path to each node")
 
     @staticmethod
-    def backtrack(predecessors: dict[tuple[int, int]: Node],
-                  current: tuple[int, int]) -> list[tuple[int, int], ...]:
+    def _backtrack(predecessors: dict[tuple[int, int]: Node],
+                   current: tuple[int, int]) -> list[tuple[int, int], ...]:
         total_path = []
         while True:
             current = predecessors[current].parent
