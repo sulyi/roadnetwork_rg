@@ -11,40 +11,6 @@ PointType = tuple[int, int, int]
 SeedType = Union[None, int, str, bytes, bytearray]
 
 
-def world_generator_check(city_rate: int, city_sizes: int) -> None:
-    if not isinstance(city_rate, int):
-        raise TypeError("Argument 'city_rate' should be integer number, not '%s'" %
-                        type(city_rate).__name__)
-    if city_rate <= 0:
-        raise ValueError("Argument 'city_rate' should be positive")
-
-    if not isinstance(city_sizes, int):
-        raise TypeError("Argument 'city_sizes' should be integer number, not '%s'" %
-                        type(city_sizes).__name__)
-    if city_sizes <= 0:
-        raise ValueError("Argument 'city_sizes' should be positive")
-
-
-def height_map_check(size: int, height: float, roughness: float) -> None:
-    if not isinstance(size, int):
-        raise TypeError("Argument 'size' should be integer number, not '%s'" %
-                        type(size).__name__)
-    if size <= 0:
-        raise ValueError("Argument 'size' should be positive")
-
-    if not isinstance(height, (float, int)):
-        raise TypeError("Argument 'height' should be a number, not '%s'" %
-                        type(height).__name__)
-    if not 0 <= height <= 1:
-        raise ValueError("Argument 'height' should be in [0, 1] inclusive range")
-
-    if not isinstance(roughness, (float, int)):
-        raise TypeError("Argument 'roughness' should be a number, not '%s'" %
-                        type(roughness).__name__)
-    if not 0 <= roughness <= 1:
-        raise ValueError("Argument 'roughness' should be in [0, 1] inclusive range")
-
-
 def get_safe_seed(seed: Any, bit_length: int) -> int:
     if not isinstance(bit_length, int):
         raise TypeError("Argument 'bit_length' should be integer number, not '%s'" %
@@ -78,15 +44,53 @@ class WorldConfig:
     bit_length: int = 64
 
     def check(self) -> None:
-        height_map_check(self.chunk_size, self.height, self.roughness)
-        world_generator_check(self.city_rate, self.city_sizes)
+        if not isinstance(self.city_rate, int):
+            raise TypeError("Argument 'city_rate' should be integer number, not '%s'" %
+                            type(self.city_rate).__name__)
+        if self.city_rate < 0:
+            raise ValueError("Argument 'city_rate' should be positive")
+
+        if not isinstance(self.city_sizes, int):
+            raise TypeError("Argument 'city_sizes' should be integer number, not '%s'" %
+                            type(self.city_sizes).__name__)
+        if self.city_sizes < 0:
+            raise ValueError("Argument 'city_sizes' should be positive")
+
+        if self.bit_length < 0:
+            raise ValueError("Argument 'bit_length' should be positive")
+        if self.bit_length & 1:
+            raise ValueError("Argument 'bit_length' should be even")
 
         # early validation
         if self.chunk_size & self.chunk_size - 1 != 0:
             raise ValueError("Argument 'chunk_size' should be power of two")
 
-        if self.bit_length & 1:
-            raise ValueError("Argument 'bit_length' should be even")
+
+@dataclass(frozen=True)
+class HeightMapConfig:
+    size: int
+    height: float
+    roughness: float
+
+    def check(self) -> None:
+        """Sanity check of `HeightMapData`"""
+        if not isinstance(self.size, int):
+            raise TypeError("Argument 'size' should be integer number, not '%s'" %
+                            type(self.size).__name__)
+        if self.size < 0:
+            raise ValueError("Argument 'size' should be positive")
+
+        if not isinstance(self.height, (float, int)):
+            raise TypeError("Argument 'height' should be a number, not '%s'" %
+                            type(self.height).__name__)
+        if not 0 <= self.height <= 1:
+            raise ValueError("Argument 'height' should be in [0, 1] inclusive range")
+
+        if not isinstance(self.roughness, (float, int)):
+            raise TypeError("Argument 'roughness' should be a number, not '%s'" %
+                            type(self.roughness).__name__)
+        if not 0 <= self.roughness <= 1:
+            raise ValueError("Argument 'roughness' should be in [0, 1] inclusive range")
 
 
 @dataclass(frozen=True)
@@ -101,8 +105,8 @@ class WorldRenderOptions:
 
 @dataclass(order=True, frozen=True)
 class WorldChunkData:
-    x: int
-    y: int
+    offset_x: int
+    offset_y: int
     height_map: Image.Image = field(compare=False)
     cities: list[PointType, ...] = field(compare=False)
     potential_map: Image.Image = field(compare=False)

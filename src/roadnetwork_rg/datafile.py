@@ -9,7 +9,7 @@ from typing import BinaryIO, Callable, Union, TypeVar
 
 from PIL import Image
 
-from .common import PixelPath, PointType, SeedType, WorldChunkData, WorldConfig, WorldData
+from .common import PixelPath, PointType, SeedType, WorldConfig, WorldChunkData, WorldData
 
 T = TypeVar('T')
 
@@ -112,7 +112,7 @@ class Datafile:
                             type(world.seed).__name__)
         seed = seed[:255]  # first 255 bytes (if larger)
         try:
-            config = pickle.dumps(list(world.config.__dict__.values()))
+            config = pickle.dumps([*world.config.__dict__.values()])
         except pickle.PicklingError as err:
             raise DatafileEncodingError("Failed to encode config") from err
 
@@ -312,8 +312,8 @@ class Datafile:
         try:
             chunk_pack = struct.pack(
                 '<i i H %ds x H' % len(cities),
-                chunk.x,  # 4 bytes
-                chunk.y,  # 4 bytes
+                chunk.offset_x,  # 4 bytes
+                chunk.offset_y,  # 4 bytes
                 len(cities),  # 2 bytes
                 cities,  # varied
                 # pad 1 byte

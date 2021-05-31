@@ -5,13 +5,13 @@ from typing import Union
 
 from PIL import Image, ImageDraw, ImageStat
 
-from .common import (SeedType, WorldChunkData, WorldConfig, WorldData, WorldRenderOptions,
-                     get_safe_seed, world_generator_check)
+from .common import (HeightMapConfig, SeedType, WorldChunkData, WorldConfig, WorldData,
+                     WorldRenderOptions, get_safe_seed)
 from .data import colour_palette
+from .datafile import Datafile
 from .height_map import HeightMap
 from .intensity import (AdaptivePotentialFunction, ExponentialZCompositeFunction,
                         MarkovChainMonteCarloIntensityFunction)
-from .io import Datafile
 from .pathfinder import find_shortest_paths
 from .point_process import MarkovChainMonteCarlo
 
@@ -57,26 +57,35 @@ class WorldGenerator:
 
     def read(self, filename: Union[str, bytes], key: bytes) -> None:
         data = Datafile.load(filename, key).get_data()
-        try:
-            data.config.check()
-        except (ValueError, TypeError) as err:
-            config = default_world_config
-            warnings.warn("Failed `config` check, set to default, due\n\t:%s" % err)
-        else:
-            config = data.config
+        dirty = (data.seed is not None and
+                 data.safe_seed == get_safe_seed(data.seed, data.config.bit_length))
 
-        if (data.seed is not None and
-                data.safe_seed == get_safe_seed(data.seed, data.config.bit_length)):
+        if dirty:
             seed = None
             warnings.warn("Mismatching seed and safe_seed, seed is discarded")
         else:
             seed = data.seed
+
+        try:
+            data.config.check()
+        except (ValueError, TypeError) as err:
+            config = default_world_config
+            warnings.warn("Failed configuration check, due to:")
+            warnings.warn("%s" % err, stacklevel=2)
+            warnings.warn("config set to default config")
+            dirty = True
+        else:
+            config = data.config
 
         self.config = config
         self._chunks = data.chunks
 
         self._seed = seed
         self._safe_seed = data.safe_seed
+
+        if dirty:
+            # FIXME: add specific exception
+            raise Exception("Some error occurred during loading file")
 
     def write(self, filename: Union[str, bytes], key: bytes) -> None:
         Datafile.save(filename, key,
@@ -95,10 +104,12 @@ class WorldGenerator:
                     options.show_roads, options.show_potential_map)):
             raise ValueError("Nothing to render with given 'option' argument")
 
-        width = (max(self._chunks, key=lambda item: item.x).x -
-                 min(self._chunks, key=lambda item: item.x).x + 1) * self.config.chunk_size
-        height = (max(self._chunks, key=lambda item: item.y).y -
-                  min(self._chunks, key=lambda item: item.y).y + 1) * self.config.chunk_size
+        width = ((max(self._chunks, key=lambda item: item.offset_x).offset_x -
+                  min(self._chunks, key=lambda item: item.offset_x).offset_x + 1) *
+                 self.config.chunk_size)
+        height = ((max(self._chunks, key=lambda item: item.offset_y).offset_y -
+                   min(self._chunks, key=lambda item: item.offset_y).offset_y + 1) *
+                  self.config.chunk_size)
 
         atlas_im = Image.new('RGBA', (width, height))
         draw_im = Image.new('RGBA', (width, height))
@@ -106,8 +117,10 @@ class WorldGenerator:
         draw = ImageDraw.Draw(draw_im)
 
         for chunk in self._chunks:
-            cx = (chunk.x - min(self._chunks, key=lambda item: item.x).x) * self.config.chunk_size
-            cy = (chunk.y - min(self._chunks, key=lambda item: item.y).y) * self.config.chunk_size
+            cx = ((chunk.offset_x - min(self._chunks, key=lambda c: c.offset_x).offset_x) *
+                  self.config.chunk_size)
+            cy = ((chunk.offset_y - min(self._chunks, key=lambda c: c.offset_y).offset_y) *
+                  self.config.chunk_size)
 
             # concatenate height maps
             atlas_im.paste(self._render_height_map(chunk, options), (cx, cy))
@@ -183,14 +196,15 @@ class WorldChunk:
 
     def __init__(self, chunk_x: int, chunk_y: int, config: WorldConfig, *, seed: SeedType = None,
                  bit_length: int = 64) -> None:
-        world_generator_check(config.city_rate, config.city_sizes)
+        config.check()
 
         self._chunk_x = chunk_x
         self._chunk_y = chunk_y
 
-        self._height_map = HeightMap(chunk_x, chunk_y, config.chunk_size,
-                                     config.height, config.roughness, seed=seed,
-                                     bit_length=bit_length)
+        self._height_map = HeightMap(chunk_x, chunk_y, HeightMapConfig(config.chunk_size,
+                                                                       config.height,
+                                                                       config.roughness),
+                                     seed=seed, bit_length=bit_length)
         if config.chunk_size != self._height_map.size:
             raise ValueError("Size mismatch")
         self.config = config

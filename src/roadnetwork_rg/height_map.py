@@ -2,20 +2,21 @@ import hashlib
 
 from PIL import Image, ImageFilter, ImageChops
 
-from .common import SeedType, get_safe_seed, height_map_check
+from .common import HeightMapConfig, SeedType, get_safe_seed
 
 
 class HeightMap:
+    k_diagonal = ImageFilter.Kernel((3, 3), [1, 0, 1, 0, 0, 0, 1, 0, 1])
+    k_cross = ImageFilter.Kernel((3, 3), [0, 1, 0, 1, 0, 1, 0, 1, 0])
 
-    def __init__(self, offset_x: int, offset_y: int, size: int, height: float, roughness: float, *,
+    def __init__(self, offset_x: int, offset_y: int, config: HeightMapConfig, *,
                  seed: SeedType = None, bit_length: int = 64) -> None:
-        height_map_check(size, height, roughness)
+        config.check()
 
-        self._steps = size.bit_length() - 1  # log2 w/o math.log2
+        self._steps = config.size.bit_length() - 1  # log2 w/o math.log2
         self._size = 1 << self._steps
 
-        self._roughness = roughness
-        self._height = height
+        self._config = config
         self._bit_length = bit_length >> 1 << 1  # make it even
 
         self._offset_x = offset_x
@@ -46,30 +47,26 @@ class HeightMap:
 
         sub_size = self._size
 
-        height = self._height * 127 - 1
+        height = self._config.height * 127 - 1
 
         length = 2
         image = Image.frombytes('L', (length, length),
-                                bytes(127 + int(self._get_random_value(x + cx, y + cy) * height)
+                                bytes(127 + int(self._get_random_value(x + cx, y + cy) *
+                                                height)
                                       for x, y in ((0, 0), (sub_size, 0),
                                                    (0, sub_size), (sub_size, sub_size)))
                                 )
 
-        k_diagonal = ImageFilter.Kernel((3, 3), [1, 0, 1, 0, 0, 0, 1, 0, 1])
-        k_cross = ImageFilter.Kernel((3, 3), [0, 1, 0, 1, 0, 1, 0, 1, 0])
-
         for _ in range(self._steps):
-            height *= self._roughness
+            height *= self._config.roughness
 
-            # square step
             length += length - 1
             sub_size >>= 1
             image = image.resize((length, length), resample=Image.LINEAR)
-            fim = image.filter(k_diagonal)
-
+            # square step
+            fim = image.filter(self.k_diagonal)
             displacement = [127] * (length * length)
             mask = [0] * (length * length)
-
             for i in range(1, length, 2):
                 for j in range(1, length, 2):
                     value = self._get_random_value(i * sub_size + cx, j * sub_size + cy)
@@ -82,17 +79,15 @@ class HeightMap:
                     else:
                         displacement[i + j * length] = 0
                     mask[i + j * length] = 255
-
             fim = ImageChops.add(fim, Image.frombytes('L', (length, length),
                                                       bytes(displacement)), offset=-127)
-            image.paste(fim, mask=Image.frombytes('L', (length, length), bytes(mask)))
+            mask = Image.frombytes('L', (length, length), bytes(mask))
+            image.paste(fim, mask=mask)
 
             # diamond step
-            fim = image.filter(k_cross)
-
+            fim = image.filter(self.k_cross)
             displacement = [127] * (length * length)
             mask = [0] * (length * length)
-
             for i in range(1, 2 * length, 2):
                 for j in range(min(i + 1, length) - 1, max(0, i - length + 1) - 1, - 1):
                     value = self._get_random_value(j * sub_size + cx, (i - j) * sub_size + cy)
@@ -105,9 +100,9 @@ class HeightMap:
                     else:
                         displacement[j + (i - j) * length] = 0
                     mask[j + (i - j) * length] = 255
-
             fim = ImageChops.add(fim, Image.frombytes('L', (length, length),
                                                       bytes(displacement)), offset=-127)
-            image.paste(fim, mask=Image.frombytes('L', (length, length), bytes(mask)))
+            mask = Image.frombytes('L', (length, length), bytes(mask))
+            image.paste(fim, mask=mask)
 
         return image.crop((0, 0, self._size, self._size))
