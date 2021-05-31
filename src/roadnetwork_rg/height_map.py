@@ -32,7 +32,7 @@ class HeightMap:
     def bit_length(self) -> int:
         return self._bit_length
 
-    # XXX: hot-spot
+    # NOTE: hot-spot
     def _get_random_value(self, x: int, y: int) -> float:
         # uniform over [-1, 1] inclusive range
         at = (x ^ y << (self._bit_length >> 1)) ^ self._seed

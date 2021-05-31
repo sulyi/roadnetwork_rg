@@ -11,7 +11,7 @@ from .common import PixelPath, PointType
 
 @dataclass
 class Node:
-    # XXX: 'x' and 'y' being properties would do more harm than good
+    # NOTE: 'x' and 'y' being properties would do more harm than good
     x: int
     y: int
     distance: float = float('inf')
@@ -73,7 +73,7 @@ class Pathfinder:
 
     def _check_result(self, nodes, source_index):
         if {node[:2] for node in self._targets[source_index:]}.difference(nodes.keys()):
-            # XXX: shouldn't be reachable anyway
+            # NOTE: shouldn't be reachable anyway
             raise ArithmeticError("Couldn't be found a path to each node")
 
     @staticmethod

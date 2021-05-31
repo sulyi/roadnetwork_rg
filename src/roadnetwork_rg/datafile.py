@@ -1,3 +1,5 @@
+"""I/O implementation for :class:`WorldData` used by :class:`WorldGenerator`."""
+
 from __future__ import annotations
 
 import hashlib
@@ -15,15 +17,17 @@ T = TypeVar('T')
 
 
 class DatafileDecodeError(Exception):
-    """File corruption found"""
+    """File corruption found."""
 
 
 class DatafileEncodingError(Exception):
-    """Unexpected data"""
+    """Unexpected data."""
 
 
 class Datafile:
-    """file format:
+    """I/O file handler for :class:`WorldData`.
+
+    file format:
 
     * all numbers are in little endian
 
@@ -76,6 +80,7 @@ class Datafile:
     ============== =================
 
     """
+    # FIXME: add usage
 
     # TODO: decide
     # if EOF is needed, (note signature)
@@ -93,6 +98,15 @@ class Datafile:
         self._data: bytes = b''
 
     def set_data(self, world: WorldData) -> None:
+        """Sets data to be saved
+
+        :param world: Data to be set.
+        :type world: WorldData
+        :raises: `TypeError`, if type of :attr:`world.seed` is not allowed.
+            Only  `None`, `int`, `str`, `bytes`, and `bytearray` are supported types
+        :raises: `DatafileEncodingError`
+        """
+
         # IDEA: use 2 bit `seed_type` instead byte?
         if world.seed is None:
             seed_type = 0
@@ -456,7 +470,7 @@ class Datafile:
     def _read_list_item(data: BinaryIO, index: int, end: int, delimiter: bytes,
                         item_decoder: Callable[[BinaryIO], T]) -> T:
         item = item_decoder(data)
-        # XXX: there might be a better pattern
+        # NOTE: there might be a better pattern
         # if there is a surrounding `delimiter` it could be handled
         # here, or before the `_decode_pixel_path` call
         if index < end - 1:

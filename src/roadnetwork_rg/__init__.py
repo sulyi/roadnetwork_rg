@@ -1,3 +1,12 @@
+"""Generates a road network
+
+WIP
+height map
+cities
+roads
+"""
+# FIXME: docstring
+
 __all__ = ("Datafile", "DatafileDecodeError", "DatafileEncodingError", "HeightMap",
            "HeightMapConfig", "PixelPath", "WorldChunk", "WorldChunkData", "WorldConfig",
            "WorldData", "WorldGenerator", "WorldRenderOptions", "colour_palette", "common",
