@@ -29,6 +29,8 @@ class Pathfinder:
         self._graph = list(graph.tobytes())
         self._targets = targets
 
+    # FIXME: check optimization
+
     def shortest_paths(self, source_index: int) -> dict[tuple[PointType, PointType], PixelPath]:
         nodes = {(x, y): Node(x, y) for x in range(self._width) for y in range(self._height)}
         nodes[self._targets[source_index][:2]].distance = 0.
