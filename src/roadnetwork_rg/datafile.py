@@ -25,9 +25,23 @@ class DatafileEncodingError(Exception):
 
 
 class Datafile:
-    """I/O file handler for :class:`WorldData`.
+    """Implements an I/O file handler for :class:`WorldData`.
 
-    file format:
+
+    **Use cases**::
+
+        Datafile.save(filename, key, data)
+        data = Datafile.load(filename, key)
+
+        file = Datafile()
+        file.set_data(data)
+        file.write(filename, key)
+
+        file = Datafile()
+        file.read(filename, key)
+        data = file2.get_data()
+
+    **File format**
 
     * all numbers are in little endian
 
@@ -78,9 +92,7 @@ class Datafile:
         varied        potential_map (in TIFF format)
      -- 1 byte --   -- separator -- (if not last)
     ============== =================
-
     """
-    # FIXME: add usage
 
     # TODO: decide
     # if EOF is needed, (note signature)
@@ -100,7 +112,7 @@ class Datafile:
     def set_data(self, world: WorldData) -> None:
         """Sets binary data.
 
-         Data can be to be saved by :meth:`write` or parsed by :meth:`get_data`.
+        Data can be to be saved by :meth:`write` or parsed by :meth:`get_data`.
 
         :param world: Data to be set.
         :type world: :class:`WorldData`
