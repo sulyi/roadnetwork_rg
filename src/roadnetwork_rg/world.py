@@ -58,7 +58,7 @@ class WorldGenerator:
     def read(self, filename: Union[str, bytes], key: bytes) -> None:
         data = Datafile.load(filename, key).get_data()
         dirty = (data.seed is not None and
-                 data.safe_seed == get_safe_seed(data.seed, data.config.bit_length))
+                 data.safe_seed != get_safe_seed(data.seed, data.config.bit_length))
 
         if dirty:
             seed = None
