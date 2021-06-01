@@ -347,14 +347,16 @@ class Datafile:
     @staticmethod
     def decode_chunk(data: BinaryIO) -> WorldChunkData:
         try:
-            x: int
-            y: int
-            x, y, cities_length = struct.unpack(
+            offset_x: int
+            offset_y: int
+            offset_x, offset_y, cities_length = struct.unpack(
                 '<i i H',
                 data.read(10)
             )
         except struct.error as err:
-            raise DatafileDecodeError("Failed to decode x, y, length of cities of chunk") from err
+            raise DatafileDecodeError(
+                "Failed to decode offset_x, offset_y and/or length of chunk's cities attribute"
+            ) from err
 
         try:
             cities: list[PointType, ...] = pickle.loads(data.read(cities_length))
@@ -401,7 +403,7 @@ class Datafile:
 
         potential_map: Image.Image = Image.open(BytesIO(data.read(potential_map_length)))
 
-        return WorldChunkData(x, y, height_map, cities, potential_map, pixel_paths)
+        return WorldChunkData(offset_x, offset_y, height_map, cities, potential_map, pixel_paths)
 
     @staticmethod
     def encode_pixel_path(key: tuple[PointType, PointType], path: PixelPath) -> bytes:
