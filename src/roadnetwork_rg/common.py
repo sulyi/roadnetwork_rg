@@ -215,7 +215,7 @@ class WorldData:
 @dataclass(frozen=True)
 class PixelPath:
     # noinspection PyUnresolvedReferences
-    """Boilerplate for :meth:`pathfinder.find_shortest_paths`
+    """Boilerplate for :meth:`pathfinder.Pathfinder.shortest_paths`
 
     :param cost: Total cost of the path, including diagonal and vertical cost.
     :type cost: float
