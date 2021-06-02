@@ -10,15 +10,15 @@ from typing import Any, Union
 from PIL import Image
 
 PointType = tuple[int, int, int]
-"""Type of points (or cities)."""
+"""It is the type of points (or cities)."""
 SeedType = Union[None, int, str, bytes, bytearray]
-"""Type of various seeds."""
+"""It is the type of various seeds."""
 
 # FIXME: remove noinspection comments
 
 
 def get_safe_seed(seed: Any, bit_length: int) -> int:
-    """Creates a safe integer seed
+    """Creates a safe integer seed.
 
     :param seed: Only  `None`, `int`, `str`, `bytes`, and `bytearray` are supported types.
     :type seed: Any (technically)
@@ -52,7 +52,7 @@ def get_safe_seed(seed: Any, bit_length: int) -> int:
 @dataclass(frozen=True)
 class WorldConfig:
     # noinspection PyUnresolvedReferences
-    """Boilerplate for :class:`WorldGenerator`
+    """It is a boilerplate used by :class:`WorldGenerator`.
 
     :param chunk_size: Needs to be power of 2 (see also: :class:`HeightMapConfig`).
     :type chunk_size: int
@@ -76,7 +76,7 @@ class WorldConfig:
     bit_length: int = 64
 
     def check(self) -> None:
-        """Sanity check
+        """Performs sanity check.
 
         also checks :class:`HeightMapConfig`
 
@@ -110,16 +110,17 @@ class WorldConfig:
 @dataclass(frozen=True)
 class HeightMapConfig:
     # noinspection PyUnresolvedReferences
-    """Boilerplate for :class:`HeightMap`
+    """It is a boilerplate used by :class:`HeightMap`.
 
-    :param size: Needs to be positive positive (corresponds to :attr:`WorldConfig.chunk_size`),
-        (see also: :class:`WorldChunk`).
+    :param size: It is the size of height map, needs to be positive positive (corresponds to
+        :attr:`WorldConfig.chunk_size`). Actual value used is the smallest power of two larger or
+        equal to this.
     :type size: int
-    :param height: It's a probability, hence needs to be in [0, 1] (inclusive) range,
-        (see also: :class:`HeightMap`).
+    :param height: It is the amount of displacement in first step, needs to be in [0, 1] (inclusive)
+        range.
     :type height: float
-    :param roughness: It's a probability, hence needs to be in [0, 1] (inclusive) range,
-        (see also: :class:`HeightMap`).
+    :param roughness: It is the ratio by witch amount of displacement is changed in each step, needs
+        to be in [0, 1] inclusive) range.
     :type roughness: float
     """
 
@@ -128,7 +129,7 @@ class HeightMapConfig:
     roughness: float
 
     def check(self) -> None:
-        """Sanity check
+        """Performs sanity check
 
         :raises: `TypeError`, `ValueError`
         """
@@ -154,7 +155,7 @@ class HeightMapConfig:
 
 @dataclass(frozen=True)
 class WorldRenderOptions:
-    """Boilerplate for :meth:`WorldGenerator.render`"""
+    """It is a boilerplate used by :meth:`WorldGenerator.render`."""
 
     show_debug: bool = False
     show_height_map: bool = True
@@ -167,7 +168,7 @@ class WorldRenderOptions:
 @dataclass(order=True, frozen=True)
 class WorldChunkData:
     # noinspection PyUnresolvedReferences
-    """Boilerplate for :class:`WorldChunk` used by :class:`WorldGenerator`
+    """It is a boilerplate used by :class:`WorldChunk` used by :class:`WorldGenerator`.
 
     :param offset_x: *x* coordinate of chunk
     :type offset_x: int
@@ -194,7 +195,7 @@ class WorldChunkData:
 @dataclass(frozen=True)
 class WorldData:
     # noinspection PyUnresolvedReferences
-    """Boilerplate for :class:`WorldGenerator` used by :class:`Datafile`
+    """It is a boilerplate used by :class:`WorldGenerator` used by :class:`Datafile`.
 
     :param config: Value of :attr:`WorldGenerator.config`.
     :type config: :class:`WorldConfig`
@@ -215,7 +216,7 @@ class WorldData:
 @dataclass(frozen=True)
 class PixelPath:
     # noinspection PyUnresolvedReferences
-    """Boilerplate for :meth:`pathfinder.Pathfinder.shortest_paths`
+    """It is a boilerplate used by :meth:`pathfinder.Pathfinder.shortest_paths`.
 
     :param cost: Total cost of the path, including diagonal and vertical cost.
     :type cost: float

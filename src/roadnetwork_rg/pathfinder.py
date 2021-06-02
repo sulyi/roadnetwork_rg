@@ -13,7 +13,7 @@ from .common import PixelPath, PointType
 
 @dataclass
 class Node:
-    """Private dataclass of :meth:`Pathfinder.shortest_paths`"""
+    """It is a private boilerplate used by :meth:`Pathfinder.shortest_paths`."""
     x: int
     y: int
     distance: float = float('inf')
@@ -22,7 +22,7 @@ class Node:
 
 
 class Pathfinder:
-    """Modified implementation of Dijkstra's algorithm
+    """It is a modified implementation of Dijkstra's algorithm.
 
     Performs a flood to find from a source node the shortest paths to a set of target nodes.
     """

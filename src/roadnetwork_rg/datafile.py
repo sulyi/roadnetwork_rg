@@ -1,4 +1,4 @@
-"""I/O implementation for :class:`WorldData` used by :class:`WorldGenerator`."""
+"""Implementation of an I/O class for :class:`WorldData` used by :class:`WorldGenerator`"""
 
 from __future__ import annotations
 
