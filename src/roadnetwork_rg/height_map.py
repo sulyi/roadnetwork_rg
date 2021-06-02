@@ -1,3 +1,5 @@
+"""Terrain generator"""
+
 import hashlib
 
 from PIL import Image, ImageFilter, ImageChops
@@ -6,11 +8,33 @@ from .common import HeightMapConfig, SeedType, get_safe_seed
 
 
 class HeightMap:
+    """It is an implementation of diamond-square algorithm.
+
+    In order to allow persistent map generation uses hash based pRNG.
+    """
+
     k_diagonal = ImageFilter.Kernel((3, 3), [1, 0, 1, 0, 0, 0, 1, 0, 1])
     k_cross = ImageFilter.Kernel((3, 3), [0, 1, 0, 1, 0, 1, 0, 1, 0])
 
     def __init__(self, offset_x: int, offset_y: int, config: HeightMapConfig, *,
                  seed: SeedType = None, bit_length: int = 64) -> None:
+        """Initializes height map generation.
+
+        For more on parameters see also :class:`HeightMapConfig`.
+
+        :param offset_x: It is the map coordinate in the *x* axis.
+        :type offset_x: int
+        :param offset_y: It is the map coordinate in the *y* axis.
+        :type offset_y: int
+        :param config: It contains size, height and roughness.
+        :type config: :class:`HeightMapConfig`
+        :param seed: It is used for *xor*ing joined coordinates before hashing.
+        :type seed: :const:`SeedType`
+        :param bit_length: It is used for shifting *y* coordinate before hashing. Lower part is
+            occupied by *x* coordinate.
+        :type bit_length: int
+        """
+
         config.check()
 
         self._steps = (config.size - 1).bit_length()  # floor(log2(size - 1)) + 1 w/o math
@@ -26,10 +50,14 @@ class HeightMap:
 
     @property
     def size(self) -> int:
+        """It is the actual used size. May differ from :attr:`config.size`."""
+
         return self._size
 
     @property
     def bit_length(self) -> int:
+        """It is the actual bit length used."""
+
         return self._bit_length
 
     # NOTE: hot-spot
@@ -42,6 +70,11 @@ class HeightMap:
         return value
 
     def generate(self) -> Image.Image:
+        """Generates a height map.
+
+        :return: Generated height map.
+        :rtype: :class:`PIL.Image.Image`
+        """
         cx = self._offset_x * self._size
         cy = self._offset_y * self._size
 
