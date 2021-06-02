@@ -13,11 +13,11 @@ class HeightMap:
                  seed: SeedType = None, bit_length: int = 64) -> None:
         config.check()
 
-        self._steps = config.size.bit_length() - 1  # log2 w/o math.log2
+        self._steps = (config.size - 1).bit_length()  # floor(log2(size - 1)) + 1 w/o math
         self._size = 1 << self._steps
 
         self._config = config
-        self._bit_length = bit_length >> 1 << 1  # make it even
+        self._bit_length = bit_length & ((1 << bit_length.bit_length()) - 2)  # make it even
 
         self._offset_x = offset_x
         self._offset_y = offset_y
