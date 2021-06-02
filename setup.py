@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
-import os.path
-
+import pkg_resources
 from setuptools import setup
 
 NAME = 'roadnetwork_rg'
 SRC = 'src'
-exec(open(os.path.join(SRC, NAME, '_version.py'), 'r').read())
+version = pkg_resources.get_distribution(NAME).version
 
 requires = ['Pillow', 'numpy']
 
-# FIXME: lose dirty hacks and use `setup.cfg`
+# FIXME: use `setup.cfg`
 
 # TODO: add following options
 # license
@@ -19,7 +18,7 @@ requires = ['Pillow', 'numpy']
 
 setup(
     name=NAME,
-    version=__version__,
+    version=version,
     packages=[NAME],
     package_data={
         NAME: ['data/colourmap.palette'],
