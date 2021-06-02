@@ -12,66 +12,59 @@ Subpackages
 Submodules
 ----------
 
-roadnetwork\_rg.common module
------------------------------
+.. toctree::
+   :maxdepth: 4
 
-.. automodule:: roadnetwork_rg.common
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-roadnetwork\_rg.datafile module
--------------------------------
-
-.. automodule:: roadnetwork_rg.datafile
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-roadnetwork\_rg.height\_map module
-----------------------------------
-
-.. automodule:: roadnetwork_rg.height_map
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-roadnetwork\_rg.intensity module
---------------------------------
-
-.. automodule:: roadnetwork_rg.intensity
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-roadnetwork\_rg.pathfinder module
----------------------------------
-
-.. automodule:: roadnetwork_rg.pathfinder
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-roadnetwork\_rg.point\_process module
--------------------------------------
-
-.. automodule:: roadnetwork_rg.point_process
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-roadnetwork\_rg.world module
-----------------------------
-
-.. automodule:: roadnetwork_rg.world
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   roadnetwork_rg.common
+   roadnetwork_rg.datafile
+   roadnetwork_rg.height_map
+   roadnetwork_rg.intensity
+   roadnetwork_rg.pathfinder
+   roadnetwork_rg.point_process
+   roadnetwork_rg.world
 
 Module contents
 ---------------
 
 .. automodule:: roadnetwork_rg
-   :members:
+   :members: __version__, __datafile_version__
    :undoc-members:
+   :special-members:
+   :private-members:
    :show-inheritance:
+
+   .. FIXME: find a better way!
+
+   :class:`.Datafile`
+
+   :class:`.DatafileDecodeError`
+
+   :class:`.DatafileEncodingError`
+
+   :class:`.HeightMap`
+
+   :class:`.HeightMapConfig`
+
+   :class:`.PixelPath`
+
+   :attr:`.PointType`
+
+   :data:`.SeedType`
+
+   :class:`.WorldChunk`
+
+   :class:`.WorldChunkData`
+
+   :class:`.WorldConfig`
+
+   :class:`.WorldData`
+
+   :class:`.WorldGenerator`
+
+   :class:`.WorldRenderOptions`
+
+   :data:`.colour_palette`
+
+   :data:`.default_render_options`
+
+   :data:`.default_world_config`

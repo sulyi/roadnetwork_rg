@@ -6,12 +6,11 @@
 Welcome to roadnetwork_rg's documentation!
 ==========================================
 
-
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   modules
+   roadnetwork_rg
 
 Indices and tables
 ==================

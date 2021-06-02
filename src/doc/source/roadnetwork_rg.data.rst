@@ -8,3 +8,7 @@ Module contents
    :members:
    :undoc-members:
    :show-inheritance:
+   :exclude-members: colour_palette
+
+    .. autodata:: colour_palette
+       :no-value:

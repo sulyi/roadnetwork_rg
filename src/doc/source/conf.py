@@ -14,12 +14,18 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('..'))
 
+import roadnetwork_rg
+
 # -- Project information -----------------------------------------------------
 
 project = 'roadnetwork_rg'
 copyright = '2021, Ákos Sülyi'
 author = 'Ákos Sülyi'
 
+version = roadnetwork_rg.__version__
+
+# TODO: git integration
+release = roadnetwork_rg.__version__ + '<gitsha>'
 
 # -- General configuration ---------------------------------------------------
 
@@ -28,20 +34,29 @@ author = 'Ákos Sülyi'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-#    'sphinx.ext.coverage',
     'sphinx.ext.githubpages',
-    'sphinx.ext.inheritance_diagram',
+    'sphinx.ext.intersphinx',
     'sphinx.ext.imgmath',
     'sphinx.ext.viewcode',
 ]
 
-# autodoc_class_signature = "separated"
 add_module_names = False
-autoclass_content = "both"
+autodoc_default_options = {
+    'special-members': '__init__,__iter__,__new__,__next__',
+}
+autoclass_content = 'class'
+autodoc_typehints = 'none'
+# autodoc_typehints = 'description'  # for checking doc coverage
 autodoc_type_aliases = {
     'intensity.RateType': 'roadnetwork_rg.intensity.RateType',
     'PointType': 'roadnetwork_rg.common.PointType',
     'SeedType': 'roadnetwork_rg.common.SeedType'
+}
+
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'numpy': ('https://numpy.org/doc/1.20/', None),
+    'PIL': ('https://pillow.readthedocs.io/en/stable/', None)
 }
 
 # Add any paths that contain templates here, relative to this directory.
@@ -50,7 +65,7 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['*.dat']
+exclude_patterns = ['modules.rst', '*.dat']
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -58,7 +73,7 @@ exclude_patterns = ['*.dat']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'bizstyle'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
