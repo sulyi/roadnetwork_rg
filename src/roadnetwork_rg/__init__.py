@@ -1,8 +1,8 @@
 __all__ = ("Datafile", "DatafileDecodeError", "DatafileEncodingError", "HeightMap",
            "HeightMapConfig", "PixelPath", "WorldChunk", "WorldChunkData", "WorldConfig",
            "WorldData", "WorldGenerator", "WorldRenderOptions", "colour_palette", "common",
-           "datafile_version", "default_render_options", "default_world_config", "intensity",
-           "pathfinder", "point_process")
+           "default_render_options", "default_world_config", "intensity", "pathfinder",
+           "point_process")
 
 # IDEA: generate version patch from git sha
 # https://martin-thoma.com/python-package-versions/
@@ -17,4 +17,4 @@ from .datafile import Datafile, DatafileDecodeError, DatafileEncodingError
 from .height_map import HeightMap
 from .world import WorldChunk, WorldGenerator, default_render_options, default_world_config
 
-datafile_version = Datafile.get_version()
+__datafile_version = Datafile.get_version()
