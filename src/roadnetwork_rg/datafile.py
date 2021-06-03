@@ -100,8 +100,6 @@ class Datafile:
     # if 2 bytes of short is enough for length of cities (note when pickled)
     # if 2 bytes of short is enough for length of pixels (note when pickled)
 
-    # FIXME: missing param description in en/decode and other places
-
     __version = (0, 1, 0)
     __compatible_versions = ()
     __magic = '#D-MG#WG-D'.encode('ascii')
@@ -366,7 +364,13 @@ class Datafile:
 
     @staticmethod
     def encode_chunk(chunk: WorldChunkData) -> bytes:
-        """Encodes data chunk."""
+        """Encodes a chunk.
+
+        :param chunk: It is the object to be encoded.
+        :type chunk: :class:`.WorldChunkData`
+        :return: It is the encoded data.
+        :rtype: :class:`bytes`
+        """
 
         try:
             cities = pickle.dumps(chunk.cities)
@@ -424,7 +428,13 @@ class Datafile:
 
     @staticmethod
     def decode_chunk(data: BinaryIO) -> WorldChunkData:
-        """Reads data from buffer and decodes it as chunk data."""
+        """Reads data and decodes it.
+
+        :param data: It is a buffer from data to be read.
+        :type data: :class:`~typing.BinaryIO`
+        :return: It is the decoded data.
+        :rtype: :class:`.WorldChunkData`
+        """
 
         try:
             offset_x: int
@@ -487,7 +497,15 @@ class Datafile:
 
     @staticmethod
     def encode_pixel_path(key: tuple[PointType, PointType], path: PixelPath) -> bytes:
-        """Encodes a key-value pair."""
+        """Encodes a key-value pair.
+
+        :param key: It is a pair of points corresponding to the ends of *path*.
+        :type key: :class:`tuple` [:attr:`.PointType`, :attr:`.PointType` ]
+        :param path: It is a path between the tow point in *key*.
+        :type path: :class:`.PixelPath`
+        :return: It is the encoded data.
+        :rtype: :class:`bytes`
+        """
 
         try:
             pixels = pickle.dumps(path.pixels)
@@ -513,7 +531,15 @@ class Datafile:
 
     @staticmethod
     def decode_pixel_path(data: BinaryIO) -> tuple[tuple[PointType, PointType], PixelPath]:
-        """Reads data from buffer and decodes it as a key-value pair."""
+        """Reads data and decodes it.
+
+        :param data: It is the buffer from data to be read.
+        :type data: :class:`~typing.BinaryIO`
+        :return: It is a *key-value* pair, *key* is a pair of points corresponding to the ends of
+            the *value* which is a path between them.
+        :rtype: :class:`tuple` [:class:`tuple` [:attr:`.PointType`, :attr:`.PointType` ],
+            :class:`.PixelPath` ]
+        """
 
         try:
             cost: float
