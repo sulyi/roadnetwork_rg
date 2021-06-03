@@ -1,3 +1,5 @@
+"""Implementation of handlers for generating the world"""
+
 from __future__ import annotations
 
 import warnings
@@ -17,7 +19,7 @@ from .point_process import MarkovChainMonteCarlo
 
 default_world_config = WorldConfig(chunk_size=256, height=1., roughness=.5,
                                    city_rate=32, city_sizes=8)
-"""It is the default configuration for :meth:`WorldGenerator.__init__` initialization."""
+"""It is the default configuration for :class:`WorldGenerator` initialization."""
 default_render_options = WorldRenderOptions()
 """It is the default render options for :meth:`WorldGenerator.render` method."""
 
@@ -34,9 +36,10 @@ class WorldGenerator:
                  seed: SeedType = None) -> None:
         """Initializes the generator.
 
-        :param config: It is the configuration used for setting various attributes (see also
-            :class:`.WorldConfig`).
+        :param config: It is the configuration used for setting various variables.
+        :type config: :class:`.WorldConfig`
         :param seed: It is the seed used for initializing pRNG.
+        :type seed: :class:`int`
         """
 
         # FIXME: add `attr` descriptions
@@ -51,28 +54,58 @@ class WorldGenerator:
 
     @classmethod
     def save(cls, instance: WorldGenerator, filename: Union[str, bytes], key: bytes) -> None:
+        """Saves generated data to file.
+
+        see also: :meth:`WorldGenerator.write`
+        """
+
         if not isinstance(instance, cls):
             raise ValueError("Argument is not an %s object" % cls.__name__)
         instance.write(filename, key)
 
     @classmethod
     def load(cls, filename: Union[str, bytes], key: bytes) -> WorldGenerator:
+        """Loads data form a file.
+
+        see also: :meth:`WorldGenerator.read`
+
+        :return: An object containing loaded data.
+        :rtype: :class:`WorldGenerator`
+        """
+
         instance = cls.__new__(cls)
         instance.read(filename, key)
         return instance
 
     @property
     def config(self):
+        """It is the generator's configuration."""
+
         return self._config
 
     @property
     def seed(self) -> SeedType:
+        """It is the seed set or if it is :data:`None` the safe seed actually used by pRNG."""
+
         return self._seed if self._seed is not None else self._safe_seed
 
     def get_chunks(self) -> list[WorldChunkData, ...]:
+        """Provides a list of chunks.
+
+        :returns: A copy of the chunks generated.
+        :rtype: :class:`list` [:class:`.WorldChunkData`, ...]
+        """
+
         return list(self._chunks.values())
 
     def read(self, filename: Union[str, bytes], key: bytes) -> None:
+        """Reads data form a file.
+
+        :param filename: It is the source from where data is loaded.
+        :type filename: :data:`~typing.Union` [:class:`str`, :class:`bytes`]
+        :param key: It is a hashing key used for validating data.
+        :type key: :class:`bytes`
+        """
         data = Datafile.load(filename, key).get_data()
         dirty = (data.seed is not None and
                  data.safe_seed != get_safe_seed(data.seed, data.config.bit_length))
@@ -105,10 +138,27 @@ class WorldGenerator:
             raise Exception("Some error occurred during loading file")
 
     def write(self, filename: Union[str, bytes], key: bytes) -> None:
+        """Writes generated data to file.
+
+        :param filename: It is the destination where data is saved.
+        :type filename: :data:`~typing.Union` [:class:`str`, :class:`bytes`]
+        :param key: It is a hashing key used for signing data.
+        :type key: :class:`bytes`
+        """
+
         Datafile.save(filename, key,
                       WorldData(self._config, self._seed, self._safe_seed, self.get_chunks()))
 
     def add_chunk(self, chunk_x: int, chunk_y: int) -> None:
+        """Generates a new chunk.
+
+        :param chunk_x: It is the **x** coordinate of the new chunk.
+        :type chunk_x: :class:`int`
+        :param chunk_y: It is the **y** coordinate of the new chunk.
+        :type chunk_y: :class:`int`
+        :raises: :exc:`KeyError` If chunk already exists.
+        """
+
         if (chunk_x, chunk_y) in self._chunks:
             warnings.warn("Chunk already exists")
             return
@@ -119,6 +169,13 @@ class WorldGenerator:
         self._chunks[chunk_x, chunk_y] = chunk_data
 
     def render(self, *, options: WorldRenderOptions = default_render_options) -> Image.Image:
+        """Create an image from generated data depending on options`.
+
+        :param options: Defines how data is rendered, defaults to :data:`default_render_options`.
+        :type options: :class:`.WorldRenderOptions`
+        :return: :class:`PIL.Image.Image`
+        """
+
         if not self._chunks:
             raise IndexError("There are no chunks added to render")
         if not any((options.show_debug, options.show_height_map, options.show_cities,
@@ -213,13 +270,28 @@ class WorldGenerator:
 
     @staticmethod
     def clear_potential_cache() -> None:
+        """Empties monopole cache of :class:`.AdaptivePotentialFunction` (see: there)."""
         AdaptivePotentialFunction.clear_cache()
 
 
 class WorldChunk:
+    """It is a handler to generate a new chunk."""
 
     def __init__(self, chunk_x: int, chunk_y: int, config: WorldConfig, *, seed: SeedType = None,
                  bit_length: int = 64) -> None:
+        """Initializes a new chunk.
+
+        :param chunk_x: It is the **x** coordinate of the new chunk.
+        :type chunk_x: :class:`int`
+        :param chunk_y: It is the **y** coordinate of the new chunk.
+        :type chunk_y: :class:`int`
+        :param config: It is the configuration provided by :class:`WorldGenerator`.
+        :type config: :class:`.WorldConfig`
+        :param seed: It is the seed used for initializing pRNG.
+        :type seed: :class:`int`
+        :param bit_length: See: :class:`.HeightMap`.
+        :type bit_length: :class:`int`
+        """
         config.check()
 
         self._chunk_x = chunk_x

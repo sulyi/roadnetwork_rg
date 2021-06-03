@@ -356,7 +356,7 @@ class Datafile:
 
         Creates an instance and reads data. (see: :meth:`read`)
 
-        :return: Created instance.
+        :return: It is the instance created.
         :rtype: :class:`Datafile`
         """
 
