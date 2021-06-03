@@ -17,10 +17,14 @@ from .point_process import MarkovChainMonteCarlo
 
 default_world_config = WorldConfig(chunk_size=256, height=1., roughness=.5,
                                    city_rate=32, city_sizes=8)
+"""It is the default configuration for :meth:`WorldGenerator.__init__` initialization."""
 default_render_options = WorldRenderOptions()
+"""It is the default render options for :meth:`WorldGenerator.render` method."""
 
 
 class WorldGenerator:
+    """It is a handler to generate a map with terrain, cities and roads."""
+
     __city_r = 2
     __city_colour = (255, 0, 0)
     __text_color = (0, 0, 0)
@@ -28,6 +32,15 @@ class WorldGenerator:
 
     def __init__(self, *, config: WorldConfig = default_world_config,
                  seed: SeedType = None) -> None:
+        """Initializes the generator.
+
+        :param config: It is the configuration used for setting various attributes (see also
+            :class:`.WorldConfig`).
+        :param seed: It is the seed used for initializing pRNG.
+        """
+
+        # FIXME: add `attr` descriptions
+
         config.check()
         self._config = config
         self._chunks: dict[tuple[int, int], WorldChunkData, ...] = {}

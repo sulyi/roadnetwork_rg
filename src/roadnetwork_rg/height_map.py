@@ -20,19 +20,19 @@ class HeightMap:
                  seed: SeedType = None, bit_length: int = 64) -> None:
         """Initializes height map generation.
 
-        For more on parameters see also :class:`HeightMapConfig`.
+        For more on parameters see also :class:`.HeightMapConfig`.
 
         :param offset_x: It is the map coordinate in the *x* axis.
-        :type offset_x: int
+        :type offset_x: :class:`int`
         :param offset_y: It is the map coordinate in the *y* axis.
-        :type offset_y: int
+        :type offset_y: :class:`int`
         :param config: It contains size, height and roughness.
-        :type config: :class:`HeightMapConfig`
-        :param seed: It is used for *xor*ing joined coordinates before hashing.
-        :type seed: :const:`SeedType`
+        :type config: :class:`.HeightMapConfig`
+        :param seed: It is used for ``xor`` ing joined coordinates before hashing.
+        :type seed: :data:`.SeedType`
         :param bit_length: It is used for shifting *y* coordinate before hashing. Lower part is
             occupied by *x* coordinate.
-        :type bit_length: int
+        :type bit_length: :class:`int`
         """
 
         config.check()

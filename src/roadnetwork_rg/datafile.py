@@ -1,4 +1,4 @@
-"""Implementation of an I/O class for :class:`WorldData` used by :class:`WorldGenerator`"""
+"""Implementation of an I/O class for :class:`.WorldData` used by :class:`.WorldGenerator`"""
 
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ class DatafileEncodingError(Exception):
 
 
 class Datafile:
-    """Implements an I/O file handler for :class:`WorldData`.
+    """Implements an I/O file handler for :class:`.WorldData`.
 
 
     **Use cases**::
@@ -100,6 +100,8 @@ class Datafile:
     # if 2 bytes of short is enough for length of cities (note when pickled)
     # if 2 bytes of short is enough for length of pixels (note when pickled)
 
+    # FIXME: missing param description in en/decode and other places
+
     __version = (0, 1, 0)
     __compatible_versions = ()
     __magic = '#D-MG#WG-D'.encode('ascii')
@@ -115,10 +117,11 @@ class Datafile:
         Data can be to be saved by :meth:`write` or parsed by :meth:`get_data`.
 
         :param world: Data to be set.
-        :type world: :class:`WorldData`
-        :raises: `TypeError`, if type of :attr:`world.seed` is not allowed.
-            Only  `None`, `int`, `str`, `bytes`, and `bytearray` are supported types
-        :raises: :err:`DatafileEncodingError`
+        :type world: :class:`.WorldData`
+        :raises: :exc:`TypeError`, if type of :attr:`world.seed` is not allowed.
+            Only  :class:`None`, :class:`int`, :class:`str`, :class:`bytes`, and :class:`bytearray`
+            are supported types
+        :raises: :exc:`DatafileEncodingError`
         """
 
         # IDEA: use 2 bit `seed_type` instead byte?
@@ -178,7 +181,7 @@ class Datafile:
         Data can be loaded by :meth:`read` or set by :meth:`set_data`.
 
         :return: Parsed data.
-        :rtype: :class:`WorldData`
+        :rtype: :class:`.WorldData`
         """
 
         data = BytesIO(self._data)
@@ -258,9 +261,9 @@ class Datafile:
         """Writes data to a file, signs data using hashing algorithm.
 
         :param filename: It is the name of the destination to where data is saved.
-        :type filename: Union[str, bytes]
+        :type filename: :data:`~typing.Union` [:class:`str`, :class:`bytes` ]
         :param key: Hash key to be used signing data.
-        :type key: bytes (i.g. returned by :meth:`str.encode`)
+        :type key: :class:`bytes` (i.g. returned by :meth:`str.encode`)
         """
 
         if len(self._data) > 4294967295:
@@ -309,9 +312,9 @@ class Datafile:
         """Reads data from file, authenticating data using hashing algorithm
 
         :param filename: It is the name of the source from where data is read.
-        :type filename: Union[str, bytes]
+        :type filename: :data:`~typing.Union` [:class:`str`, :class:`bytes`]
         :param key: Hash key to be used authenticating data.
-        :type key: bytes (i.g. returned by :meth:`str.encode`)
+        :type key: :class:`bytes` (i.g. returned by :meth:`str.encode`)
         """
 
         with open(filename, 'rb') as file:
@@ -326,9 +329,14 @@ class Datafile:
             self._data = data
 
     @classmethod
-    def get_version(cls):
-        """Gets version of file format."""
-        return cls.__version
+    def get_version(cls) -> str:
+        """Gets version of file format.
+
+        :return: It is a string of the file format's version numbers separated by dots.
+        :rtype: :class:`str`
+        """
+
+        return '.'.join(map(str, cls.__version))
 
     @classmethod
     def save(cls, filename: Union[str, bytes], key: bytes, world: WorldData) -> None:
