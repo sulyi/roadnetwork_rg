@@ -156,9 +156,24 @@ class HeightMapConfig:
 
 @dataclass(frozen=True)
 class WorldRenderOptions:
-    """It is a boilerplate used by :meth:`.WorldGenerator.render`."""
+    # noinspection PyUnresolvedReferences
+    """It is a boilerplate used by :meth:`.WorldGenerator.render`.
 
-    # FIXME: add param descriptions
+    see also: :meth:`.WorldGenerator.render`
+
+    :param show_debug: defaults to :data:`False`
+    :type show_debug: :class:`bool`
+    :param show_height_map: defaults to :data:`True`
+    :type  show_height_map: :class:`bool`
+    :param colour_height_map: defaults to :data:`True`
+    :type  colour_height_map: :class:`bool`
+    :param show_cities: defaults to :data:`True`
+    :type show_cities: :class:`bool`
+    :param show_roads: defaults to :data:`True`
+    :type show_roads: :class:`bool`
+    :param show_potential_map: defaults to :data:`False`
+    :type show_potential_map: :class:`bool`
+    """
 
     show_debug: bool = False
     show_height_map: bool = True
