@@ -253,9 +253,9 @@ class WorldChunk:
             )
         ]
         finder = Pathfinder(height_map_image, cities)
-        paths = {}
-        for i in range(len(cities)):
-            paths.update(finder.shortest_paths(i))
+        paths = {
+            key: path for i in range(len(cities)) for key, path in finder.shortest_paths(i).items()
+        }
 
         world_data = WorldChunkData(
             self._chunk_x,
