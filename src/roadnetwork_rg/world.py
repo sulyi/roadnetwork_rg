@@ -57,7 +57,7 @@ class WorldGenerator:
         return self._seed if self._seed is not None else self._safe_seed
 
     def get_chunks(self) -> list[WorldChunkData, ...]:
-        return self._chunks.copy()
+        return list(self._chunks.values())
 
     def read(self, filename: Union[str, bytes], key: bytes) -> None:
         data = Datafile.load(filename, key).get_data()
@@ -82,7 +82,7 @@ class WorldGenerator:
             config = data.config
 
         self._config = config
-        self._chunks = data.chunks
+        self._chunks = {(chunk.offset_x, chunk.offset_y): chunk for chunk in data.chunks}
 
         self._seed = seed
         self._safe_seed = data.safe_seed
@@ -96,10 +96,14 @@ class WorldGenerator:
                       WorldData(self._config, self._seed, self._safe_seed, self.get_chunks()))
 
     def add_chunk(self, chunk_x: int, chunk_y: int) -> None:
+        if (chunk_x, chunk_y) in self._chunks:
+            warnings.warn("Chunk already exists")
+            return
+
         chunk = WorldChunk(chunk_x, chunk_y, self._config, seed=self._safe_seed,
                            bit_length=self._config.bit_length)
         chunk_data = chunk.generate()
-        self._chunks.append(chunk_data)
+        self._chunks[chunk_x, chunk_y] = chunk_data
 
     def render(self, *, options: WorldRenderOptions = default_render_options) -> Image.Image:
         if not self._chunks:
@@ -108,23 +112,23 @@ class WorldGenerator:
                     options.show_roads, options.show_potential_map)):
             raise ValueError("Nothing to render with given 'option' argument")
 
-        width = ((max(self._chunks, key=lambda item: item.offset_x).offset_x -
-                  min(self._chunks, key=lambda item: item.offset_x).offset_x + 1) *
-                 self.config.chunk_size)
-        height = ((max(self._chunks, key=lambda item: item.offset_y).offset_y -
-                   min(self._chunks, key=lambda item: item.offset_y).offset_y + 1) *
-                  self.config.chunk_size)
+        min_x = min(self._chunks.values(), key=lambda item: item.offset_x).offset_x
+        min_y = min(self._chunks.values(), key=lambda item: item.offset_y).offset_y
 
-        atlas_im = Image.new('RGBA', (width, height))
-        draw_im = Image.new('RGBA', (width, height))
+        size = (
+            (max(self._chunks.values(),
+                 key=lambda item: item.offset_x).offset_x - min_x + 1) * self._config.chunk_size,
+            (max(self._chunks.values(),
+                 key=lambda item: item.offset_y).offset_y - min_y + 1) * self._config.chunk_size
+        )
+        atlas_im = Image.new('RGBA', size)
+        draw_im = Image.new('RGBA', size)
 
         draw = ImageDraw.Draw(draw_im)
 
-        for chunk in self._chunks:
-            cx = ((chunk.offset_x - min(self._chunks, key=lambda c: c.offset_x).offset_x) *
-                  self.config.chunk_size)
-            cy = ((chunk.offset_y - min(self._chunks, key=lambda c: c.offset_y).offset_y) *
-                  self.config.chunk_size)
+        for chunk in self._chunks.values():
+            cx = (chunk.offset_x - min_x) * self._config.chunk_size
+            cy = (chunk.offset_y - min_y) * self._config.chunk_size
 
             # concatenate height maps
             atlas_im.paste(self._render_height_map(chunk, options), (cx, cy))
@@ -140,13 +144,16 @@ class WorldGenerator:
 
             # put message in top left corner
             if options.show_debug:
-                msg = '\n'.join((
-                    f"count: {len(chunk.cities)}",
-                    f"expected: {self.config.city_rate}",
-                    f"mean: {(255 - ImageStat.Stat(chunk.height_map).mean.pop()) / 255:.3f}",
-                    f"sizes: {self.config.city_sizes}")
+                draw.multiline_text(
+                    (cx, cy),
+                    '\n'.join((
+                        f"count: {len(chunk.cities)}",
+                        f"expected: {self._config.city_rate}",
+                        f"mean: {(255 - ImageStat.Stat(chunk.height_map).mean.pop()) / 255:.3f}",
+                        f"sizes: {self._config.city_sizes}")
+                    ),
+                    fill=self.__text_color
                 )
-                draw.multiline_text((cx, cy), msg, fill=self.__text_color)
 
             # draw roads
             image = self._render_draw_roads(chunk, options)
