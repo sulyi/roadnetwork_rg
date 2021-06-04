@@ -29,12 +29,12 @@ class WorldGenerator:
     def __init__(self, *, config: WorldConfig = default_world_config,
                  seed: SeedType = None) -> None:
         config.check()
-        self.config = config
-        self._chunks: list[WorldChunkData, ...] = []
+        self._config = config
+        self._chunks: dict[tuple[int, int], WorldChunkData, ...] = {}
 
         # for i/o compatibility truncate seed to 255
         self._seed = seed if isinstance(seed, int) or seed is None else seed[:255]
-        self._safe_seed = get_safe_seed(seed, self.config.bit_length)
+        self._safe_seed = get_safe_seed(seed, self._config.bit_length)
 
     @classmethod
     def save(cls, instance: WorldGenerator, filename: Union[str, bytes], key: bytes) -> None:
@@ -47,6 +47,10 @@ class WorldGenerator:
         instance = cls.__new__(cls)
         instance.read(filename, key)
         return instance
+
+    @property
+    def config(self):
+        return self._config
 
     @property
     def seed(self) -> SeedType:
@@ -77,7 +81,7 @@ class WorldGenerator:
         else:
             config = data.config
 
-        self.config = config
+        self._config = config
         self._chunks = data.chunks
 
         self._seed = seed
@@ -89,11 +93,11 @@ class WorldGenerator:
 
     def write(self, filename: Union[str, bytes], key: bytes) -> None:
         Datafile.save(filename, key,
-                      WorldData(self.config, self._seed, self._safe_seed, self._chunks))
+                      WorldData(self._config, self._seed, self._safe_seed, self.get_chunks()))
 
     def add_chunk(self, chunk_x: int, chunk_y: int) -> None:
-        chunk = WorldChunk(chunk_x, chunk_y, self.config, seed=self._safe_seed,
-                           bit_length=self.config.bit_length)
+        chunk = WorldChunk(chunk_x, chunk_y, self._config, seed=self._safe_seed,
+                           bit_length=self._config.bit_length)
         chunk_data = chunk.generate()
         self._chunks.append(chunk_data)
 
