@@ -3,6 +3,7 @@ from typing import Union
 
 from PIL import Image, ImageStat, ImageChops
 
+from .common import PointType
 from .point_process import IntensityFunction
 
 
@@ -10,10 +11,10 @@ from .point_process import IntensityFunction
 
 
 class MarkovChainMonteCarloPotentialFunction:
-    def get(self, value: tuple[int, int, int]) -> float:
+    def get(self, value: PointType) -> float:
         raise NotImplementedError
 
-    def update(self, value: tuple[int, int, int]) -> None:
+    def update(self, value: PointType) -> None:
         raise NotImplementedError
 
 
@@ -24,22 +25,43 @@ class SpatialPoissonPointProcessPotentialFunction(MarkovChainMonteCarloPotential
     def update(self, value):
         raise NotImplementedError
 
-    @property
-    def expected(self) -> float:
+    def get_expected(self) -> float:
+        """It is the expected value of the potential function."""
+
         raise NotImplementedError
 
 
 class MarkovChainMonteCarloCompositeFunction:
-    def get(self, value: tuple[int, int, int], kernel: float, potential: float) -> float:
+    def get(self, value: PointType, kernel: float, potential: float) -> float:
         raise NotImplementedError
 
 
 class SpatialPoissonPointProcessCompositeFunction(MarkovChainMonteCarloCompositeFunction):
+    """It is an abstract function for implementing composite functions.
+
+    It is used in :class:`~.point_process.SpatialPoissonPointProcess` method to generate a point
+    process. It is differ from :class:`.MarkovChainMonteCarloCompositeFunction` by having an
+    :meth:`.get_expected` method (see: there).
+    """
+
     def get(self, value, kernel, potential):
         raise NotImplementedError
 
-    @property
-    def expected(self) -> float:
+    def get_expected(self, expected_kernel: float, expected_potential: float) -> float:
+        """It should be the expected value of the implemented arithmetics.
+
+        This allows :class:`.SpatialPoissonPointProcessIntensityFunction` to scale
+        :attr:`~.SpatialPoissonPointProcessIntensityFunction.rate` so that the generated point
+        process remain *similar* to a Poison point process.
+
+        :param expected_kernel: It is the expected value of the kernel function.
+        :type expected_kernel: :class:`float`
+        :param expected_potential: It is the expected value of the potential function.
+        :type expected_potential: :class:`float`
+        :return: It is the expected value of the composite function.
+        :rtype: :class:`float`
+        """
+
         raise NotImplementedError
 
 
@@ -110,13 +132,11 @@ class MarkovChainMonteCarloIntensityFunction(IntensityFunction):
         self._composite_function = composite_func
         self._kernel_image = kernel_image
 
-        self._mean = (255 - ImageStat.Stat(self._kernel_image).mean.pop()) / 255
-
     @property
     def rate(self):
         return self._rate
 
-    def is_accepted(self, value: tuple[int, int, int], threshold: float) -> bool:
+    def is_accepted(self, value: PointType, threshold: float) -> bool:
         x, y, _z = value
         p = self._potential_function.get(value)
         k = (255 - self._kernel_image.getpixel((x, y))) / 255
@@ -131,12 +151,19 @@ class SpatialPoissonPointProcessIntensityFunction(MarkovChainMonteCarloIntensity
                  potential_func: SpatialPoissonPointProcessPotentialFunction,
                  composite_func: SpatialPoissonPointProcessCompositeFunction) -> None:
         super().__init__(rate, kernel_image, potential_func, composite_func)
-        # just to carry typehints!
-        self._composite_function = composite_func
-        self._potential_function = potential_func
+
+        self._mean = (255 - ImageStat.Stat(self._kernel_image).mean.pop()) / 255
 
     @property
     def rate(self):
+        """It is the expected number of points generated.
+
+        :return: It is calculated based on the value set by `rate` during initialization, and the
+            :attr:`~.SpatialPoissonPointProcessCompositeFunction.get_expected` attribute of
+            `composite_func`.
+        :rtype: :class:`float`
+        """
         self._potential_function: SpatialPoissonPointProcessPotentialFunction
         self._composite_function: SpatialPoissonPointProcessCompositeFunction
-        return self._rate / self._composite_function.expected / self._potential_function.expected
+        return self._rate / self._composite_function.get_expected(
+            self._mean, self._potential_function.get_expected())
