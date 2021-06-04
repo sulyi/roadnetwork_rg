@@ -226,16 +226,13 @@ class WorldChunk:
         seed = (x ^ y << (bit_length >> 1)) ^ self._seed
         self._local_seed = seed & ((1 << bit_length) - 1)
 
-    @property
-    def size(self) -> int:
-        return self.config.chunk_size
-
-    @property
-    def height_map(self) -> HeightMap:
-        return self._height_map
-
     def generate(self) -> WorldChunkData:
-        height_map_image = self.height_map.generate()
+        """Generates data for a chunk.
+
+        :return: Contains the data generated.
+        :rtype: :class:`.WorldChunkData`
+        """
+        height_map_image = self._height_map.generate()
 
         intensity_function = AdaptivePotentialFunction(self.config.chunk_size,
                                                        self.config.city_sizes)
