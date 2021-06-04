@@ -61,7 +61,8 @@ class SpatialPoissonPointProcessPotentialFunction(MarkovChainMonteCarloPotential
     def update(self, value):
         raise NotImplementedError
 
-    def get_expected(self) -> float:
+    @property
+    def expected(self) -> float:
         """It is the expected value of the potential function."""
 
         raise NotImplementedError
@@ -95,8 +96,7 @@ class SpatialPoissonPointProcessCompositeFunction(MarkovChainMonteCarloComposite
     """It is an abstract function for implementing composite functions.
 
     It is used in :class:`~.point_process.SpatialPoissonPointProcess` method to generate a point
-    process. It is differ from :class:`.MarkovChainMonteCarloCompositeFunction` by having an
-    :meth:`.get_expected` method (see: there).
+    process. It is differ from parent class by having an :attr:`.expected` method (see: there).
     """
 
     def get(self, value, kernel, potential):
@@ -104,17 +104,14 @@ class SpatialPoissonPointProcessCompositeFunction(MarkovChainMonteCarloComposite
 
         raise NotImplementedError
 
-    def get_expected(self, expected_kernel: float, expected_potential: float) -> float:
+    @property
+    def expected(self) -> float:
         """It should be the expected value of the implemented arithmetics.
 
         This allows :class:`.SpatialPoissonPointProcessIntensityFunction` to scale
         :attr:`~.SpatialPoissonPointProcessIntensityFunction.rate` so that the generated point
         process remain *similar* to a Poison point process.
 
-        :param expected_kernel: It is the expected value of the kernel function.
-        :type expected_kernel: :class:`float`
-        :param expected_potential: It is the expected value of the potential function.
-        :type expected_potential: :class:`float`
         :return: It is the expected value of the composite function.
         :rtype: :class:`float`
         """
@@ -315,5 +312,4 @@ class SpatialPoissonPointProcessIntensityFunction(MarkovChainMonteCarloIntensity
         """
         self._potential_function: SpatialPoissonPointProcessPotentialFunction
         self._composite_function: SpatialPoissonPointProcessCompositeFunction
-        return self._rate / self._composite_function.get_expected(
-            self._mean, self._potential_function.get_expected())
+        return self._rate / self._composite_function.expected
