@@ -8,7 +8,7 @@ version = pkg_resources.get_distribution(NAME).version
 
 requires = ['Pillow', 'numpy']
 
-# FIXME: use `setup.cfg`
+# IDEA: use `setup.cfg`
 
 # TODO: add following options
 # license
