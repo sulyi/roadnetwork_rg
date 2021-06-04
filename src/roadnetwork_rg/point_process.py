@@ -26,7 +26,7 @@ class IntensityFunction:
         raise NotImplementedError
 
     def is_accepted(self, value: T, threshold: float) -> bool:
-        """Checks if a value is expected by thinning of the point process.
+        """Checks if a value is accepted by thinning of the point process.
 
         :param value: It is the candidate, that is either accepted or not.
         :type value: :data:`.T`
