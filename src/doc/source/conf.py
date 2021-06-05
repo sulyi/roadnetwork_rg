@@ -13,8 +13,7 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('..'))
-
-import roadnetwork_rg
+import pkg_resources
 
 # -- Project information -----------------------------------------------------
 
@@ -22,10 +21,7 @@ project = 'roadnetwork_rg'
 copyright = '2021, Ákos Sülyi'
 author = 'Ákos Sülyi'
 
-version = roadnetwork_rg.__version__
-
-# TODO: git integration
-release = roadnetwork_rg.__version__ + '<gitsha>'
+release = pkg_resources.get_distribution(project).version
 
 # -- General configuration ---------------------------------------------------
 
