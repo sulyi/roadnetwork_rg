@@ -14,8 +14,6 @@ PointType = tuple[int, int, int]
 SeedType = Union[None, int, str, bytes, bytearray]
 """It is the type of various seeds."""
 
-# FIXME: remove noinspection comments
-
 
 def get_safe_seed(seed: Any, bit_length: int) -> int:
     """Creates a safe integer seed.
@@ -52,7 +50,6 @@ def get_safe_seed(seed: Any, bit_length: int) -> int:
 
 @dataclass(frozen=True)
 class WorldConfig:
-    # noinspection PyUnresolvedReferences
     """It is a boilerplate used by :class:`.WorldGenerator`.
 
     :param chunk_size: Needs to be power of 2 (see also: :class:`HeightMapConfig`).
@@ -112,7 +109,6 @@ class WorldConfig:
 
 @dataclass(frozen=True)
 class HeightMapConfig:
-    # noinspection PyUnresolvedReferences
     """It is a boilerplate used by :class:`HeightMap`.
 
     :param size: It is the size of height map, needs to be positive positive (corresponds to
@@ -158,7 +154,6 @@ class HeightMapConfig:
 
 @dataclass(frozen=True)
 class WorldRenderOptions:
-    # noinspection PyUnresolvedReferences
     """It is a boilerplate used by :meth:`.WorldGenerator.render`.
 
     see also: :meth:`.WorldGenerator.render`
@@ -193,7 +188,6 @@ class WorldRenderOptions:
 
 @dataclass(order=True, frozen=True)
 class WorldChunkData:
-    # noinspection PyUnresolvedReferences
     """It is a boilerplate used by :class:`.WorldChunk` used by :class:`.WorldGenerator`.
 
     :param offset_x: It is the *x* coordinate of the chunk.
@@ -223,7 +217,6 @@ class WorldChunkData:
 
 @dataclass(frozen=True)
 class WorldData:
-    # noinspection PyUnresolvedReferences
     """It is a boilerplate used by :class:`.WorldGenerator` used by :class:`.Datafile`.
 
     :param config: Value of :attr:`config` of :class:`.WorldGenerator`.
@@ -244,7 +237,6 @@ class WorldData:
 
 @dataclass(frozen=True)
 class PixelPath:
-    # noinspection PyUnresolvedReferences
     """It is a boilerplate used by :meth:`~.pathfinder.Pathfinder.shortest_paths`.
 
     :param cost: Total cost of the path, including diagonal and vertical cost.

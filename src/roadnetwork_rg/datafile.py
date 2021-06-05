@@ -94,12 +94,6 @@ class Datafile:
     ============== =================
     """
 
-    # TODO: decide
-    # if EOF is needed, (note signature)
-    # if header needs other things
-    # if 2 bytes of short is enough for length of cities (note when pickled)
-    # if 2 bytes of short is enough for length of pixels (note when pickled)
-
     __version = (0, 1, 0)
     __compatible_versions = ()
     __magic = '#D-MG#WG-D'.encode('ascii')

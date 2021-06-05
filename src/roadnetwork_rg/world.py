@@ -42,8 +42,6 @@ class WorldGenerator:
         :type seed: :class:`int`
         """
 
-        # FIXME: add `attr` descriptions
-
         config.check()
         self._config = config
         self._chunks: dict[tuple[int, int], WorldChunkData, ...] = {}
@@ -256,7 +254,7 @@ class WorldGenerator:
     @staticmethod
     def _render_draw_roads(chunk: WorldChunkData, options: WorldRenderOptions) -> Image.Image:
         if options.show_roads:
-            # XXX: avoiding `Image.Image.putpixel`
+            # NOTE: avoiding `Image.Image.putpixel`
             path_data = [0] * (chunk.height_map.size[0] * chunk.height_map.size[1])
             for path in chunk.pixel_paths.values():
                 for point_x, point_y in path.pixels:
