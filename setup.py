@@ -1,10 +1,27 @@
 # -*- coding: utf-8 -*-
-import pkg_resources
+import subprocess
+import warnings
+
 from setuptools import setup
+
+from src.roadnetwork_rg import __version__ as version
+
+
+def get_revision():
+    try:
+        tags = (subprocess.check_output(['git', 'describe', '--dirty=-dev'])
+                ).decode('utf-8')[:-1].split('-')
+        return '-'.join((*tags[1:2], *tags[3:]))
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        warnings.warn("Revision number couldn't be determined")
+        return None
+
 
 NAME = 'roadnetwork_rg'
 SRC = 'src'
-version = pkg_resources.get_distribution(NAME).version
+
+rev = get_revision()
+version = version if not rev else ''.join((version, 'rc', rev))
 
 requires = ['Pillow', 'numpy']
 
