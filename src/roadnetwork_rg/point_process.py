@@ -58,7 +58,7 @@ class PointProcess(Iterator[T]):
         Checks the arguments first.
 
         :param rate: It should be non-negative, (if :class:`IntensityFunction` it's
-            :attr:`~IntenityFunction.rate` attribute is used).
+            :attr:`~IntensityFunction.rate` attribute is used).
         :type rate: :const:`RateType`
         :param size: All numbers should be non-negative.
         :type size: :const:`T`
