@@ -5,11 +5,11 @@ from __future__ import annotations
 import hashlib
 import random
 from dataclasses import dataclass, field
-from typing import Any, Union
+from typing import Any, Dict, List, Union, Tuple
 
 from PIL import Image
 
-PointType = tuple[int, int, int]
+PointType = Tuple[int, int, int]
 """It is the type of points (or cities)."""
 SeedType = Union[None, int, str, bytes, bytearray]
 """It is the type of various seeds."""
@@ -210,9 +210,9 @@ class WorldChunkData:
     offset_x: int
     offset_y: int
     height_map: Image.Image = field(compare=False)
-    cities: list[PointType, ...] = field(compare=False)
+    cities: List[PointType, ...] = field(compare=False)
     potential_map: Image.Image = field(compare=False)
-    pixel_paths: dict[tuple[PointType, PointType], PixelPath] = field(compare=False)
+    pixel_paths: Dict[Tuple[PointType, PointType], PixelPath] = field(compare=False)
 
 
 @dataclass(frozen=True)
@@ -232,7 +232,7 @@ class WorldData:
     config: WorldConfig
     seed: SeedType
     safe_seed: int
-    chunks: list[WorldChunkData, ...]
+    chunks: List[WorldChunkData, ...]
 
 
 @dataclass(frozen=True)
@@ -246,4 +246,4 @@ class PixelPath:
     """
 
     cost: float
-    pixels: list[tuple[int, int]]
+    pixels: List[Tuple[int, int]]

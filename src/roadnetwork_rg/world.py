@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Union
+from typing import Dict, List, Tuple, Union
 
 from PIL import Image, ImageDraw, ImageStat
 
@@ -44,7 +44,7 @@ class WorldGenerator:
 
         config.check()
         self._config = config
-        self._chunks: dict[tuple[int, int], WorldChunkData, ...] = {}
+        self._chunks: Dict[Tuple[int, int], WorldChunkData] = {}
 
         # for i/o compatibility truncate seed to 255
         self._seed = seed if isinstance(seed, int) or seed is None else seed[:255]
@@ -87,7 +87,7 @@ class WorldGenerator:
 
         return self._seed if self._seed is not None else self._safe_seed
 
-    def get_chunks(self) -> list[WorldChunkData, ...]:
+    def get_chunks(self) -> List[WorldChunkData, ...]:
         """Provides a list of chunks.
 
         :returns: A copy of the chunks generated.

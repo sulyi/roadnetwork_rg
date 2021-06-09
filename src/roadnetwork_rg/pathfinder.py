@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import bisect
 from dataclasses import dataclass
-from typing import Union, Sequence
+from typing import Dict, List, Sequence, Tuple, Union
 
 from PIL import Image
 
@@ -17,7 +17,7 @@ class Node:
     x: int
     y: int
     distance: float = float('inf')
-    parent: Union[tuple[int, int], None] = None
+    parent: Union[Tuple[int, int], None] = None
     open: bool = False
 
 
@@ -45,7 +45,7 @@ class Pathfinder:
 
     # FIXME: check optimization
 
-    def shortest_paths(self, source_index: int) -> dict[tuple[PointType, PointType], PixelPath]:
+    def shortest_paths(self, source_index: int) -> Dict[Tuple[PointType, PointType], PixelPath]:
         """Floods graph from source to find shortest paths to targets.
 
         :param source_index: Marks source among targets.
@@ -99,8 +99,8 @@ class Pathfinder:
             raise ArithmeticError("Couldn't be found a path to each node")
 
     @staticmethod
-    def _backtrack(predecessors: dict[tuple[int, int]: Node],
-                   current: tuple[int, int]) -> list[tuple[int, int], ...]:
+    def _backtrack(predecessors: Dict[Tuple[int, int]: Node],
+                   current: Tuple[int, int]) -> List[Tuple[int, int], ...]:
         total_path = []
         while True:
             current = predecessors[current].parent

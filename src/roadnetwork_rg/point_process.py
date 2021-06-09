@@ -1,11 +1,10 @@
 """Abstract classes for generating point process and partial implementation of them"""
 
-from collections.abc import Iterator
-from typing import Generator, TypeVar, Union
+from typing import Generator, Iterator, Tuple, TypeVar, Union
 
 import numpy as np
 
-T = TypeVar('T', bound=tuple[int, ...])
+T = TypeVar('T', bound=Tuple[int, ...])
 """It is a generic type of :class:`PointProcess`, bounded by :class:`tuple` [:class:`int`, ...]."""
 
 

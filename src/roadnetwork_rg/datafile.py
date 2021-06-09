@@ -7,7 +7,7 @@ import hmac
 import pickle
 import struct
 from io import BytesIO
-from typing import BinaryIO, Callable, Union, TypeVar
+from typing import BinaryIO, Callable, Dict, List, Tuple, TypeVar, Union
 
 from PIL import Image
 
@@ -238,7 +238,7 @@ class Datafile:
 
         self._check_delimiter(data)
 
-        chunks: list[WorldChunkData, ...] = [
+        chunks: List[WorldChunkData, ...] = [
             Datafile._read_list_item(data, i, chunks_count, b'\00', Datafile.decode_chunk)
             for i in range(chunks_count)
         ]
@@ -443,7 +443,7 @@ class Datafile:
             ) from err
 
         try:
-            cities: list[PointType, ...] = pickle.loads(data.read(cities_length))
+            cities: List[PointType, ...] = pickle.loads(data.read(cities_length))
         except pickle.UnpicklingError as err:
             raise DatafileDecodeError("Failed to decode cities") from err
 
@@ -459,7 +459,7 @@ class Datafile:
 
         Datafile._check_delimiter(data)
 
-        pixel_paths: dict[tuple[PointType, PointType], PixelPath] = dict(
+        pixel_paths: Dict[Tuple[PointType, PointType], PixelPath] = dict(
             Datafile._read_list_item(data, i, pixel_paths_count, b'\00', Datafile.decode_pixel_path)
             for i in range(pixel_paths_count)
         )
@@ -490,7 +490,7 @@ class Datafile:
         return WorldChunkData(offset_x, offset_y, height_map, cities, potential_map, pixel_paths)
 
     @staticmethod
-    def encode_pixel_path(key: tuple[PointType, PointType], path: PixelPath) -> bytes:
+    def encode_pixel_path(key: Tuple[PointType, PointType], path: PixelPath) -> bytes:
         """Encodes a key-value pair.
 
         :param key: It is a pair of points corresponding to the ends of *path*.
@@ -524,7 +524,7 @@ class Datafile:
         return data
 
     @staticmethod
-    def decode_pixel_path(data: BinaryIO) -> tuple[tuple[PointType, PointType], PixelPath]:
+    def decode_pixel_path(data: BinaryIO) -> Tuple[Tuple[PointType, PointType], PixelPath]:
         """Reads data and decodes it.
 
         :param data: It is the buffer from data to be read.
@@ -549,10 +549,10 @@ class Datafile:
             raise DatafileDecodeError("Failed to decode"
                                       " PixelPath cost and length of pixels") from err
         try:
-            pixels: list[tuple[int, int], ...] = pickle.loads(data.read(pixels_length))
+            pixels: List[Tuple[int, int], ...] = pickle.loads(data.read(pixels_length))
         except pickle.UnpicklingError as err:
             raise DatafileDecodeError("Failed to decode pixels") from err
-        key: tuple[PointType, PointType] = ((source_x, source_y, source_z),
+        key: Tuple[PointType, PointType] = ((source_x, source_y, source_z),
                                             (target_x, target_y, target_z))
         return key, PixelPath(cost, pixels)
 
@@ -574,7 +574,7 @@ class Datafile:
             raise DatafileDecodeError
 
     @staticmethod
-    def _read_magic(file: BinaryIO) -> tuple[bytes, int]:
+    def _read_magic(file: BinaryIO) -> Tuple[bytes, int]:
         compatible_versions = Datafile.__compatible_versions + (Datafile.__version,)
         try:
             (magic,
@@ -593,7 +593,7 @@ class Datafile:
         return checksum, offset
 
     @staticmethod
-    def _read_header(file: BinaryIO, offset: int, checksum: bytes) -> tuple[int, bytes]:
+    def _read_header(file: BinaryIO, offset: int, checksum: bytes) -> Tuple[int, bytes]:
         header = file.read(offset)
         if checksum != hashlib.sha512(header).digest():
             raise DatafileDecodeError("Invalid headed checksum")
