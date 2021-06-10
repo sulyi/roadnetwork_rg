@@ -9,9 +9,13 @@ from setuptools import setup
 def get_revision():
     # NOTE: Use annotated (or signed) tags with names void of '-' to mark releases
     try:
-        tags = (subprocess.check_output(['git', 'describe', '--dirty=-dev0'])
-                ).decode('utf-8')[:-1].split('-')
-        return '.'.join((*tags[1:2], *tags[3:]))
+        tag = subprocess.check_output(['git', 'describe', '--long', '--dirty=-dev0']).decode('utf-8')[:-1].split('-')
+        rev = []
+        if tag[1] != '0':
+            rev.append(tag[1])
+        if len(tag) > 3:
+            rev.append(tag[3])
+        return '.'.join(rev)
     except (subprocess.CalledProcessError, FileNotFoundError):
         warnings.warn("Revision number couldn't be determined")
         return None
