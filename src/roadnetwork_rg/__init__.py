@@ -32,7 +32,7 @@ __all__ = ("Datafile", "DatafileDecodeError", "DatafileEncodingError", "HeightMa
            "default_render_options", "default_world_config", "intensity", "get_safe_seed",
            "pathfinder", "point_process")
 
-from . import intensity, pathfinder, point_process
+from . import intensity, pathfinder, point_process, _version
 from .common import (HeightMapConfig, PixelPath, PointType, SeedType, WorldChunkData, WorldConfig,
                      WorldData, WorldRenderOptions, get_safe_seed)
 from .data import colour_palette
@@ -42,6 +42,6 @@ from .world import WorldChunk, WorldGenerator, default_render_options, default_w
 
 __datafile_version__ = Datafile.get_version()
 """Version of :class:`.Datafile` file format"""
-__version__ = '0.1.0'
+__version__ = _version.__version__
 """Version of package"""
 __version_info__ = tuple(int(i) for i in __version__.split('.') if i.isdigit())
