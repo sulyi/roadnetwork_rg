@@ -29,12 +29,12 @@ def filter_roads(targets: List[PointType, ...], paths: Dict[Tuple[PointType, Poi
     """Selects cheapest road until all target are connected.
 
     :param targets: It is a list of points to be connected.
-    :type targets: :class:`list` [:attr:`.PointType`, ...]
+    :type targets: :class:`list` [:data:`.PointType`, ...]
     :param paths: It is a dictionary of available paths.
-    :type paths: :class:`dict` [:class:`tuple` [:attr:`.PointType`, :attr:`.PointType`],
+    :type paths: :class:`dict` [:class:`tuple` [:data:`.PointType`, :data:`.PointType`],
         :class:`.PixelPath`]
     :return: It is a set of keys corresponding to selected paths.
-    :rtype: :class:`set` [:class:`tuple` [:attr:`.PointType`, :attr:`.PointType`], ...]
+    :rtype: :class:`set` [:class:`tuple` [:data:`.PointType`, :data:`.PointType`], ...]
     """
     sorted_paths = sorted(paths, key=lambda path: paths[path].cost, reverse=True)
     lookup = {key: 0 for key in targets}

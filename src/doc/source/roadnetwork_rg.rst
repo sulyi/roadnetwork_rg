@@ -47,7 +47,7 @@ Module contents
 
    :class:`.PixelPath`
 
-   :attr:`.PointType`
+   :data:`.PointType`
 
    :data:`.SeedType`
 

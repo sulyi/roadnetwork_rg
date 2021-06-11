@@ -494,7 +494,7 @@ class Datafile:
         """Encodes a key-value pair.
 
         :param key: It is a pair of points corresponding to the ends of *path*.
-        :type key: :class:`tuple` [:attr:`.PointType`, :attr:`.PointType` ]
+        :type key: :class:`tuple` [:data:`.PointType`, :data:`.PointType` ]
         :param path: It is a path between the tow point in *key*.
         :type path: :class:`.PixelPath`
         :return: It is the encoded data.
@@ -531,7 +531,7 @@ class Datafile:
         :type data: :class:`~typing.BinaryIO`
         :return: It is a *key-value* pair, *key* is a pair of points corresponding to the ends of
             the *value* which is a path between them.
-        :rtype: :class:`tuple` [:class:`tuple` [:attr:`.PointType`, :attr:`.PointType` ],
+        :rtype: :class:`tuple` [:class:`tuple` [:data:`.PointType`, :data:`.PointType` ],
             :class:`.PixelPath` ]
         """
 

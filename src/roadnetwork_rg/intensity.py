@@ -31,7 +31,7 @@ class MarkovChainMonteCarloPotentialFunction:
         """It should implemented the function arithmetics.
 
         :param value: It is the point where the function is computed.
-        :type value: :attr`.PointType`
+        :type value: :data:`.PointType`
         :return: It is the calculated value.
         :rtype: :class:`float`
         """
@@ -42,7 +42,7 @@ class MarkovChainMonteCarloPotentialFunction:
         """It updates the function based on whether the candidate is accepted or rejected.
 
         :param value: It is the candidate where the potential function being updated.
-        :type value: :attr:`.PointType`
+        :type value: :data:`.PointType`
         """
 
         raise NotImplementedError
@@ -63,7 +63,11 @@ class SpatialPoissonPointProcessPotentialFunction(MarkovChainMonteCarloPotential
 
     @property
     def expected(self) -> float:
-        """It is the expected value of the potential function."""
+        """It is the expected value of the potential function.
+
+        :return: It is calculated during initialization.
+        :rtype: :class:`float`
+        """
 
         raise NotImplementedError
 
@@ -80,7 +84,7 @@ class MarkovChainMonteCarloCompositeFunction:
         """The arithmetics used should be implemented by this.
 
         :param value: It is the point at where the function is calculated.
-        :type value: :attr:`.PointType`
+        :type value: :data:`.PointType`
         :param kernel: It is the value of the kernel function at the point `value`.
         :type kernel: :class:`float`
         :param potential: It is the value of the potential function at the point `value`.
@@ -110,7 +114,7 @@ class SpatialPoissonPointProcessCompositeFunction(MarkovChainMonteCarloComposite
 
         This allows :class:`.SpatialPoissonPointProcessIntensityFunction` to scale
         :attr:`~.SpatialPoissonPointProcessIntensityFunction.rate` so that the generated point
-        process remain *similar* to a Poison point process.
+        process has same density.
 
         :return: It is the expected value of the composite function.
         :rtype: :class:`float`
@@ -159,7 +163,7 @@ class AdaptivePotentialFunction(MarkovChainMonteCarloPotentialFunction):
         """It is gives the value of the potential function.
 
         :param value: It is the point where the function is computed.
-        :type value: :attr`.PointType`
+        :type value: :data:`.PointType`
         :return: It is the calculated value.
         :rtype: :class:`float`
         """
@@ -173,13 +177,16 @@ class AdaptivePotentialFunction(MarkovChainMonteCarloPotentialFunction):
 
         Also updates the monopole cache if the monopole has not been previously calculated.
         A monopole is a collection of values the function is updated by superposing them over
-        existing values. A monopole *m* is of a super-Gaussian distribution thus:
+        existing values. A monopole :math:`m` is of a super-Gaussian distribution thus:
 
-            *m* (*x0*, *y0*, *z*) ~ **e** ** (-((*x0* ** 2 + *y0* ** 2) / (2 * *z* ** 2)) ** *p*),
-            where *p* = 1 / 3 and `value` = (*x*, *y*, *z*).
+            :math:`m(x_0, y_0, z) \\sim e^{-{\\left( \\frac{{(x - x_0)}^2 + {(y - y_0)}^2}{2 z^2} \\right)}^p},`
+
+            where :math:`p = { \\frac{1}{3}}`, :math:`x_0, y_0` is the coordinates of the monopole's origin and
+            `value` is :math:`(x, y, z)`.
+
 
         :param value: It is the candidate where the potential function being updated.
-        :type value: :attr:`.PointType`
+        :type value: :data:`.PointType`
         """
 
         x, y, z = value
@@ -213,8 +220,10 @@ class ExponentialZCompositeFunction(MarkovChainMonteCarloCompositeFunction):
     def get(self, value, kernel, potential):
         """It computes the product the following arithmetics:
 
-            `potential` * `kernel` ** *z*,
-            where `value` is (*x*, *y*, *z*).
+            :math:`{\\left( potential \\cdot kernel \\right)} ^ z`,
+
+            where `value` is :math:`(x, y, z)`.
+
 
         See also: :meth:`.MarkovChainMonteCarloCompositeFunction.get()`
         """
@@ -306,7 +315,7 @@ class SpatialPoissonPointProcessIntensityFunction(MarkovChainMonteCarloIntensity
         """It is the expected number of points generated.
 
         :return: It is calculated based on the value set by `rate` during initialization, and the
-            :attr:`~.SpatialPoissonPointProcessCompositeFunction.get_expected` attribute of
+            :attr:`~.SpatialPoissonPointProcessCompositeFunction.expected` attribute of
             `composite_func`.
         :rtype: :class:`float`
         """
