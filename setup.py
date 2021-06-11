@@ -38,12 +38,6 @@ requires = ['Pillow', 'numpy']
 
 # IDEA: use `setup.cfg`
 
-# TODO: add following options
-# license
-# github url
-# platform
-# ...
-
 setup(
     name=NAME,
     version=version,
@@ -54,10 +48,12 @@ setup(
     include_package_data=True,
     package_dir={'': SRC,
                  NAME: '%s/%s' % (SRC, NAME)},
-    url='http://localhost',
-    license='',
+    url='http://sulyi.github.io/roadnetwork_rg',
+    license='',  # FIXME: add license
+    platforms=['Linux'],
     author='Ákos Sülyi',
     author_email='sulyi.gbox@gmail.com',
     description='Generates height map and cities then constructs a sensible road network',
+    long_description='',  # FIXME: add long description
     install_requires=requires
 )
