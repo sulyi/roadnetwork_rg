@@ -177,7 +177,6 @@ class WorldGenerator:
 
         self._config = config
         self._chunks = {(chunk.offset_x, chunk.offset_y): chunk for chunk in data.chunks}
-        # FIXME: add selected paths to io
         self._selected_paths = {
             (chunk.offset_x, chunk.offset_y): filter_roads(chunk.cities,
                                                            chunk.pixel_paths)
