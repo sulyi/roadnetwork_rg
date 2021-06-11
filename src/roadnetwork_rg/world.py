@@ -73,6 +73,10 @@ def filter_roads(targets: List[PointType, ...], paths: Dict[Tuple[PointType, Poi
     return result
 
 
+class WorldDataInconsistencyError(Exception):
+    """WorldData is unsafe"""
+
+
 class WorldGenerator:
     """It is a handler to generate a map with terrain, cities and roads."""
 
@@ -187,8 +191,7 @@ class WorldGenerator:
         self._safe_seed = data.safe_seed
 
         if dirty:
-            # FIXME: add specific exception
-            raise Exception("Some error occurred during loading file")
+            raise WorldDataInconsistencyError("Error loading file")
 
     def write(self, filename: Union[str, bytes], key: bytes) -> None:
         """Writes generated data to file.
