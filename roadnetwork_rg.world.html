@@ -1,0 +1,313 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>roadnetwork_rg.world module &#8212; roadnetwork_rg 0.1.0rc11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="roadnetwork_rg.point_process module" href="roadnetwork_rg.point_process.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="roadnetwork_rg.point_process.html" title="roadnetwork_rg.point_process module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">roadnetwork_rg 0.1.0rc11 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="roadnetwork_rg.html" accesskey="U">roadnetwork_rg package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.world module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-roadnetwork_rg.world">
+<span id="roadnetwork-rg-world-module"></span><h1>roadnetwork_rg.world module<a class="headerlink" href="#module-roadnetwork_rg.world" title="Permalink to this headline">¶</a></h1>
+<p>Implementation of handlers for generating the world</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="roadnetwork_rg.world.WorldChunk">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">WorldChunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bit_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/world.html#WorldChunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.world.WorldChunk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>It is a handler to generate a new chunk.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.world.WorldChunk.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bit_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/world.html#WorldChunk.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.world.WorldChunk.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a new chunk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>chunk_x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – It is the <strong>x</strong> coordinate of the new chunk.</p></li>
+<li><p><strong>chunk_y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – It is the <strong>y</strong> coordinate of the new chunk.</p></li>
+<li><p><strong>config</strong> (<a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.WorldConfig" title="roadnetwork_rg.common.WorldConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">WorldConfig</span></code></a>) – It is the configuration provided by <a class="reference internal" href="#roadnetwork_rg.world.WorldGenerator" title="roadnetwork_rg.world.WorldGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">WorldGenerator</span></code></a>.</p></li>
+<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – It is the seed used for initializing pRNG.</p></li>
+<li><p><strong>bit_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – See: <a class="reference internal" href="roadnetwork_rg.height_map.html#roadnetwork_rg.height_map.HeightMap" title="roadnetwork_rg.height_map.HeightMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">HeightMap</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.world.WorldChunk.generate">
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/world.html#WorldChunk.generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.world.WorldChunk.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates data for a chunk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Contains the data generated.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.WorldChunkData" title="roadnetwork_rg.common.WorldChunkData"><code class="xref py py-class docutils literal notranslate"><span class="pre">WorldChunkData</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="roadnetwork_rg.world.WorldGenerator">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">WorldGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">WorldConfig(chunk_size=256,</span> <span class="pre">height=1.0,</span> <span class="pre">roughness=0.5,</span> <span class="pre">city_rate=32,</span> <span class="pre">city_sizes=8,</span> <span class="pre">bit_length=64)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/world.html#WorldGenerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.world.WorldGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>It is a handler to generate a map with terrain, cities and roads.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.world.WorldGenerator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">WorldConfig(chunk_size=256,</span> <span class="pre">height=1.0,</span> <span class="pre">roughness=0.5,</span> <span class="pre">city_rate=32,</span> <span class="pre">city_sizes=8,</span> <span class="pre">bit_length=64)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/world.html#WorldGenerator.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.world.WorldGenerator.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes the generator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.WorldConfig" title="roadnetwork_rg.common.WorldConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">WorldConfig</span></code></a>) – It is the configuration used for setting various variables.</p></li>
+<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – It is the seed used for initializing pRNG.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.world.WorldGenerator.add_chunk">
+<span class="sig-name descname"><span class="pre">add_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/world.html#WorldGenerator.add_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.world.WorldGenerator.add_chunk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a new chunk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>chunk_x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – It is the <strong>x</strong> coordinate of the new chunk.</p></li>
+<li><p><strong>chunk_y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – It is the <strong>y</strong> coordinate of the new chunk.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#KeyError" title="(in Python v3.9)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> If chunk already exists.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.world.WorldGenerator.clear_potential_cache">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">clear_potential_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/world.html#WorldGenerator.clear_potential_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.world.WorldGenerator.clear_potential_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Empties monopole cache of <a class="reference internal" href="roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.AdaptivePotentialFunction" title="roadnetwork_rg.intensity.AdaptivePotentialFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdaptivePotentialFunction</span></code></a> (see: there).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roadnetwork_rg.world.WorldGenerator.config">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#roadnetwork_rg.world.WorldGenerator.config" title="Permalink to this definition">¶</a></dt>
+<dd><p>It is the generator’s configuration.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.world.WorldGenerator.get_chunks">
+<span class="sig-name descname"><span class="pre">get_chunks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/world.html#WorldGenerator.get_chunks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.world.WorldGenerator.get_chunks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides a list of chunks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A copy of the chunks generated.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a> [<a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.WorldChunkData" title="roadnetwork_rg.common.WorldChunkData"><code class="xref py py-class docutils literal notranslate"><span class="pre">WorldChunkData</span></code></a>, …]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.world.WorldGenerator.load">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/world.html#WorldGenerator.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.world.WorldGenerator.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads data form a file.</p>
+<p>see also: <a class="reference internal" href="#roadnetwork_rg.world.WorldGenerator.read" title="roadnetwork_rg.world.WorldGenerator.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">WorldGenerator.read()</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>An object containing loaded data.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#roadnetwork_rg.world.WorldGenerator" title="roadnetwork_rg.world.WorldGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">WorldGenerator</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.world.WorldGenerator.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/world.html#WorldGenerator.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.world.WorldGenerator.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads data form a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a> [<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]) – It is the source from where data is loaded.</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>) – It is a hashing key used for validating data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.world.WorldGenerator.render">
+<span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">WorldRenderOptions(show_debug=False,</span> <span class="pre">show_height_map=True,</span> <span class="pre">colour_height_map=True,</span> <span class="pre">show_cities=True,</span> <span class="pre">show_roads=True,</span> <span class="pre">show_potential_map=False)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/world.html#WorldGenerator.render"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.world.WorldGenerator.render" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an image from generated data depending on options`.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>options</strong> (<a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.WorldRenderOptions" title="roadnetwork_rg.common.WorldRenderOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">WorldRenderOptions</span></code></a>) – Defines how data is rendered, defaults to <a class="reference internal" href="#roadnetwork_rg.world.default_render_options" title="roadnetwork_rg.world.default_render_options"><code class="xref py py-data docutils literal notranslate"><span class="pre">default_render_options</span></code></a>.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference external" href="https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image" title="(in Pillow (PIL Fork) v8.2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PIL.Image.Image</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.world.WorldGenerator.save">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/world.html#WorldGenerator.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.world.WorldGenerator.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves generated data to file.</p>
+<p>see also: <a class="reference internal" href="#roadnetwork_rg.world.WorldGenerator.write" title="roadnetwork_rg.world.WorldGenerator.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">WorldGenerator.write()</span></code></a></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roadnetwork_rg.world.WorldGenerator.seed">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">seed</span></span><em class="property"><span class="pre">:</span> <span class="pre">SeedType</span></em><a class="headerlink" href="#roadnetwork_rg.world.WorldGenerator.seed" title="Permalink to this definition">¶</a></dt>
+<dd><p>It is the seed set or if it is <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> the safe seed actually used by pRNG.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.world.WorldGenerator.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/world.html#WorldGenerator.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.world.WorldGenerator.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes generated data to file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a> [<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]) – It is the destination where data is saved.</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>) – It is a hashing key used for signing data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="roadnetwork_rg.world.default_render_options">
+<span class="sig-name descname"><span class="pre">default_render_options</span></span><em class="property"> <span class="pre">=</span> <span class="pre">WorldRenderOptions(show_debug=False,</span> <span class="pre">show_height_map=True,</span> <span class="pre">colour_height_map=True,</span> <span class="pre">show_cities=True,</span> <span class="pre">show_roads=True,</span> <span class="pre">show_potential_map=False)</span></em><a class="headerlink" href="#roadnetwork_rg.world.default_render_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>It is the default render options for <a class="reference internal" href="#roadnetwork_rg.world.WorldGenerator.render" title="roadnetwork_rg.world.WorldGenerator.render"><code class="xref py py-meth docutils literal notranslate"><span class="pre">WorldGenerator.render()</span></code></a> method.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="roadnetwork_rg.world.default_world_config">
+<span class="sig-name descname"><span class="pre">default_world_config</span></span><em class="property"> <span class="pre">=</span> <span class="pre">WorldConfig(chunk_size=256,</span> <span class="pre">height=1.0,</span> <span class="pre">roughness=0.5,</span> <span class="pre">city_rate=32,</span> <span class="pre">city_sizes=8,</span> <span class="pre">bit_length=64)</span></em><a class="headerlink" href="#roadnetwork_rg.world.default_world_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>It is the default configuration for <a class="reference internal" href="#roadnetwork_rg.world.WorldGenerator" title="roadnetwork_rg.world.WorldGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">WorldGenerator</span></code></a> initialization.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="roadnetwork_rg.world.filter_roads">
+<span class="sig-name descname"><span class="pre">filter_roads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">paths</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/world.html#filter_roads"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.world.filter_roads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Selects cheapest road until all target are connected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a> [<code class="xref py py-attr docutils literal notranslate"><span class="pre">PointType</span></code>, …]) – It is a list of points to be connected.</p></li>
+<li><p><strong>paths</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> [<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a> [<code class="xref py py-attr docutils literal notranslate"><span class="pre">PointType</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">PointType</span></code>],
+<a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.PixelPath" title="roadnetwork_rg.common.PixelPath"><code class="xref py py-class docutils literal notranslate"><span class="pre">PixelPath</span></code></a>]) – It is a dictionary of available paths.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>It is a set of keys corresponding to selected paths.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code></a> [<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a> [<code class="xref py py-attr docutils literal notranslate"><span class="pre">PointType</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">PointType</span></code>], …]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="roadnetwork_rg.point_process.html"
+                        title="previous chapter">roadnetwork_rg.point_process module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/roadnetwork_rg.world.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="roadnetwork_rg.point_process.html" title="roadnetwork_rg.point_process module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">roadnetwork_rg 0.1.0rc11 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="roadnetwork_rg.html" >roadnetwork_rg package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.world module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Ákos Sülyi.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,269 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>roadnetwork_rg.point_process module &#8212; roadnetwork_rg 0.1.0rc11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="roadnetwork_rg.world module" href="roadnetwork_rg.world.html" />
+    <link rel="prev" title="roadnetwork_rg.pathfinder module" href="roadnetwork_rg.pathfinder.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="roadnetwork_rg.world.html" title="roadnetwork_rg.world module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="roadnetwork_rg.pathfinder.html" title="roadnetwork_rg.pathfinder module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">roadnetwork_rg 0.1.0rc11 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="roadnetwork_rg.html" accesskey="U">roadnetwork_rg package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.point_process module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-roadnetwork_rg.point_process">
+<span id="roadnetwork-rg-point-process-module"></span><h1>roadnetwork_rg.point_process module<a class="headerlink" href="#module-roadnetwork_rg.point_process" title="Permalink to this headline">¶</a></h1>
+<p>Abstract classes for generating point process and partial implementation of them</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="roadnetwork_rg.point_process.IntensityFunction">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">IntensityFunction</span></span><a class="reference internal" href="_modules/roadnetwork_rg/point_process.html#IntensityFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.point_process.IntensityFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>It is an abstract class that provides following interface: <a class="reference internal" href="#roadnetwork_rg.point_process.IntensityFunction.rate" title="roadnetwork_rg.point_process.IntensityFunction.rate"><code class="xref py py-attr docutils literal notranslate"><span class="pre">rate</span></code></a>, <a class="reference internal" href="#roadnetwork_rg.point_process.IntensityFunction.is_accepted" title="roadnetwork_rg.point_process.IntensityFunction.is_accepted"><code class="xref py py-meth docutils literal notranslate"><span class="pre">is_accepted()</span></code></a>
+used by <a class="reference internal" href="#roadnetwork_rg.point_process.PointProcess.__next__" title="roadnetwork_rg.point_process.PointProcess.__next__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">PointProcess.__next__()</span></code></a> method.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.point_process.IntensityFunction.is_accepted">
+<span class="sig-name descname"><span class="pre">is_accepted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/point_process.html#IntensityFunction.is_accepted"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.point_process.IntensityFunction.is_accepted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if a value is accepted by thinning of the point process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<a class="reference internal" href="#roadnetwork_rg.point_process.T" title="roadnetwork_rg.point_process.T"><code class="xref py py-data docutils literal notranslate"><span class="pre">T</span></code></a>) – It is the candidate, that is either accepted or not.</p></li>
+<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – It is a probability, that decides if candidate is accepted.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Result of thinning process.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roadnetwork_rg.point_process.IntensityFunction.rate">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">rate</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#roadnetwork_rg.point_process.IntensityFunction.rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>It is the expected number of points generated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="roadnetwork_rg.point_process.MarkovChainMonteCarlo">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">MarkovChainMonteCarlo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/point_process.html#MarkovChainMonteCarlo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.point_process.MarkovChainMonteCarlo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterator" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code></a>[<a class="reference internal" href="#roadnetwork_rg.point_process.T" title="roadnetwork_rg.point_process.T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">roadnetwork_rg.point_process.T</span></code></a>]</p>
+<p>It is an implementation of Markov chain Monte Carlo method.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="roadnetwork_rg.point_process.PointProcess">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">PointProcess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/point_process.html#PointProcess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.point_process.PointProcess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterator" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code></a>[<a class="reference internal" href="#roadnetwork_rg.point_process.T" title="roadnetwork_rg.point_process.T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">roadnetwork_rg.point_process.T</span></code></a>]</p>
+<p>It is an abstract class for implementing point processes.</p>
+<p>It is a subclass of <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code></a> [<a class="reference internal" href="#roadnetwork_rg.point_process.T" title="roadnetwork_rg.point_process.T"><code class="xref py py-const docutils literal notranslate"><span class="pre">T</span></code></a>] that represents a stream of
+<a class="reference internal" href="#roadnetwork_rg.point_process.T" title="roadnetwork_rg.point_process.T"><code class="xref py py-const docutils literal notranslate"><span class="pre">T</span></code></a> type points generated by a point process. The a generic <a class="reference internal" href="#roadnetwork_rg.point_process.T" title="roadnetwork_rg.point_process.T"><code class="xref py py-const docutils literal notranslate"><span class="pre">T</span></code></a> type is on
+instantiation.</p>
+<p>In order to simulate a point process <code class="xref py py-meth docutils literal notranslate"><span class="pre">_generate()</span></code> should be implemented in a subclass.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.point_process.PointProcess.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/point_process.html#PointProcess.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.point_process.PointProcess.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a new iterator instance.</p>
+<p>A private <code class="xref py py-attr docutils literal notranslate"><span class="pre">_next</span></code> generator that provides the stream of points, is set by
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">_generate()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rate</strong> (<a class="reference internal" href="#roadnetwork_rg.point_process.RateType" title="roadnetwork_rg.point_process.RateType"><code class="xref py py-const docutils literal notranslate"><span class="pre">RateType</span></code></a>) – Non-homogenous processes need to have an <a class="reference internal" href="#roadnetwork_rg.point_process.IntensityFunction" title="roadnetwork_rg.point_process.IntensityFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntensityFunction</span></code></a> object as the value
+of this parameter.
+Homogenous processes might have <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> type (or an
+<a class="reference internal" href="#roadnetwork_rg.point_process.IntensityFunction" title="roadnetwork_rg.point_process.IntensityFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntensityFunction</span></code></a> that’s <a class="reference internal" href="#roadnetwork_rg.point_process.IntensityFunction.rate" title="roadnetwork_rg.point_process.IntensityFunction.rate"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IntensityFunction.rate</span></code></a> is <strong>1</strong> constantly) as
+the value of this.</p></li>
+<li><p><strong>size</strong> (<a class="reference internal" href="#roadnetwork_rg.point_process.T" title="roadnetwork_rg.point_process.T"><code class="xref py py-const docutils literal notranslate"><span class="pre">T</span></code></a>) – It is a <a class="reference internal" href="#roadnetwork_rg.point_process.T" title="roadnetwork_rg.point_process.T"><code class="xref py py-const docutils literal notranslate"><span class="pre">T</span></code></a> type object that describes the dimensions of the bounding box
+in which points are generated.</p></li>
+<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Number used initializing private pRNG instance.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.point_process.PointProcess.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/point_process.html#PointProcess.__iter__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.point_process.PointProcess.__iter__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override of <code class="xref py py-meth docutils literal notranslate"><span class="pre">__iter__()</span></code> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Its own <code class="docutils literal notranslate"><span class="pre">self</span></code>.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code></a> [<a class="reference internal" href="#roadnetwork_rg.point_process.T" title="roadnetwork_rg.point_process.T"><code class="xref py py-const docutils literal notranslate"><span class="pre">T</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.point_process.PointProcess.__new__">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/point_process.html#PointProcess.__new__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.point_process.PointProcess.__new__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a new iterator instance.</p>
+<p>Checks the arguments first.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rate</strong> (<a class="reference internal" href="#roadnetwork_rg.point_process.RateType" title="roadnetwork_rg.point_process.RateType"><code class="xref py py-const docutils literal notranslate"><span class="pre">RateType</span></code></a>) – It should be non-negative, (if <a class="reference internal" href="#roadnetwork_rg.point_process.IntensityFunction" title="roadnetwork_rg.point_process.IntensityFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntensityFunction</span></code></a> it’s
+<a class="reference internal" href="#roadnetwork_rg.point_process.IntensityFunction.rate" title="roadnetwork_rg.point_process.IntensityFunction.rate"><code class="xref py py-attr docutils literal notranslate"><span class="pre">rate</span></code></a> attribute is used).</p></li>
+<li><p><strong>size</strong> (<a class="reference internal" href="#roadnetwork_rg.point_process.T" title="roadnetwork_rg.point_process.T"><code class="xref py py-const docutils literal notranslate"><span class="pre">T</span></code></a>) – All numbers should be non-negative.</p></li>
+<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Has no other limit than its type.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The new instance.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.point_process.PointProcess.__next__">
+<span class="sig-name descname"><span class="pre">__next__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/point_process.html#PointProcess.__next__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.point_process.PointProcess.__next__" title="Permalink to this definition">¶</a></dt>
+<dd><p>It is the override of <code class="xref py py-meth docutils literal notranslate"><span class="pre">__next__()</span></code> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>They are points from private generator.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#roadnetwork_rg.point_process.T" title="roadnetwork_rg.point_process.T"><code class="xref py py-const docutils literal notranslate"><span class="pre">T</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="roadnetwork_rg.point_process.RateType">
+<span class="sig-name descname"><span class="pre">RateType</span></span><a class="headerlink" href="#roadnetwork_rg.point_process.RateType" title="Permalink to this definition">¶</a></dt>
+<dd><p>It is the type of <code class="xref py py-attr docutils literal notranslate"><span class="pre">rate</span></code> attribute of <a class="reference internal" href="#roadnetwork_rg.point_process.PointProcess" title="roadnetwork_rg.point_process.PointProcess"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointProcess</span></code></a>.</p>
+<p>alias of <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference internal" href="#roadnetwork_rg.point_process.IntensityFunction" title="roadnetwork_rg.point_process.IntensityFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">roadnetwork_rg.point_process.IntensityFunction</span></code></a>]</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="roadnetwork_rg.point_process.SpatialPoissonPointProcess">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">SpatialPoissonPointProcess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/point_process.html#SpatialPoissonPointProcess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.point_process.SpatialPoissonPointProcess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterator" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code></a>[<a class="reference internal" href="#roadnetwork_rg.point_process.T" title="roadnetwork_rg.point_process.T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">roadnetwork_rg.point_process.T</span></code></a>]</p>
+<p>It is an implementation spatial point process generation.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="roadnetwork_rg.point_process.T">
+<span class="sig-name descname"><span class="pre">T</span></span><a class="headerlink" href="#roadnetwork_rg.point_process.T" title="Permalink to this definition">¶</a></dt>
+<dd><p>It is a generic type of <a class="reference internal" href="#roadnetwork_rg.point_process.PointProcess" title="roadnetwork_rg.point_process.PointProcess"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointProcess</span></code></a>, bounded by <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a> [<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, …].</p>
+<p>alias of TypeVar(‘T’, bound=<code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple</span></code>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, …])</p>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="roadnetwork_rg.pathfinder.html"
+                        title="previous chapter">roadnetwork_rg.pathfinder module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="roadnetwork_rg.world.html"
+                        title="next chapter">roadnetwork_rg.world module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/roadnetwork_rg.point_process.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="roadnetwork_rg.world.html" title="roadnetwork_rg.world module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="roadnetwork_rg.pathfinder.html" title="roadnetwork_rg.pathfinder module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">roadnetwork_rg 0.1.0rc11 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="roadnetwork_rg.html" >roadnetwork_rg package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.point_process module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Ákos Sülyi.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+    </div>
+  </body>
+</html>

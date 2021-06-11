@@ -1,0 +1,208 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>roadnetwork_rg package &#8212; roadnetwork_rg 0.1.0rc11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="roadnetwork_rg.data package" href="roadnetwork_rg.data.html" />
+    <link rel="prev" title="Welcome to roadnetwork_rg’s documentation!" href="index.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="roadnetwork_rg.data.html" title="roadnetwork_rg.data package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to roadnetwork_rg’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">roadnetwork_rg 0.1.0rc11 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">roadnetwork_rg package</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="roadnetwork-rg-package">
+<h1>roadnetwork_rg package<a class="headerlink" href="#roadnetwork-rg-package" title="Permalink to this headline">¶</a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="roadnetwork_rg.data.html">roadnetwork_rg.data package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="roadnetwork_rg.data.html#module-roadnetwork_rg.data">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="roadnetwork_rg.common.html">roadnetwork_rg.common module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadnetwork_rg.datafile.html">roadnetwork_rg.datafile module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadnetwork_rg.height_map.html">roadnetwork_rg.height_map module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadnetwork_rg.intensity.html">roadnetwork_rg.intensity module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadnetwork_rg.pathfinder.html">roadnetwork_rg.pathfinder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadnetwork_rg.point_process.html">roadnetwork_rg.point_process module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadnetwork_rg.world.html">roadnetwork_rg.world module</a></li>
+</ul>
+</div>
+</section>
+<section id="module-roadnetwork_rg">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-roadnetwork_rg" title="Permalink to this headline">¶</a></h2>
+<p>Generates a road network</p>
+<p>Map is broken up to chunks that are generated in a persistent manner.
+Three steps are taken while generating a map of a road network:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>a height map is generated using diamond-square algorithm, a.k.a. random midpoint displacement</dt><dd><p>algorithm,</p>
+</dd>
+</dl>
+</li>
+<li><p>a set of cities are generated using a spatial point process,</p></li>
+<li><p>shortest roads between the cities are found and filtered based on a heuristic.</p></li>
+</ul>
+<p>Modules include:</p>
+<blockquote>
+<div><dl class="simple">
+<dt><a class="reference internal" href="roadnetwork_rg.intensity.html#module-roadnetwork_rg.intensity" title="roadnetwork_rg.intensity"><code class="xref py py-mod docutils literal notranslate"><span class="pre">roadnetwork_rg.intensity</span></code></a></dt><dd><p>Various implementation of <a class="reference internal" href="roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.IntensityFunction" title="roadnetwork_rg.point_process.IntensityFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">point_process.IntensityFunction</span></code></a> and other classes
+utilized by them.</p>
+</dd>
+<dt><a class="reference internal" href="roadnetwork_rg.pathfinder.html#module-roadnetwork_rg.pathfinder" title="roadnetwork_rg.pathfinder"><code class="xref py py-mod docutils literal notranslate"><span class="pre">roadnetwork_rg.pathfinder</span></code></a></dt><dd><p>A pathfinder algorithm that floods a graph from a source and find shortest paths to all of a
+set of targets.</p>
+</dd>
+<dt><a class="reference internal" href="roadnetwork_rg.point_process.html#module-roadnetwork_rg.point_process" title="roadnetwork_rg.point_process"><code class="xref py py-mod docutils literal notranslate"><span class="pre">roadnetwork_rg.point_process</span></code></a></dt><dd><p>A couple of <code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code> to generate point processes and an abstract
+<a class="reference internal" href="roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.IntensityFunction" title="roadnetwork_rg.point_process.IntensityFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntensityFunction</span></code></a> providing an interface used by them.</p>
+</dd>
+</dl>
+</div></blockquote>
+<p><a class="reference internal" href="roadnetwork_rg.datafile.html#roadnetwork_rg.datafile.Datafile" title="roadnetwork_rg.datafile.Datafile"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datafile</span></code></a></p>
+<p><a class="reference internal" href="roadnetwork_rg.datafile.html#roadnetwork_rg.datafile.DatafileDecodeError" title="roadnetwork_rg.datafile.DatafileDecodeError"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatafileDecodeError</span></code></a></p>
+<p><a class="reference internal" href="roadnetwork_rg.datafile.html#roadnetwork_rg.datafile.DatafileEncodingError" title="roadnetwork_rg.datafile.DatafileEncodingError"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatafileEncodingError</span></code></a></p>
+<p><a class="reference internal" href="roadnetwork_rg.height_map.html#roadnetwork_rg.height_map.HeightMap" title="roadnetwork_rg.height_map.HeightMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">HeightMap</span></code></a></p>
+<p><a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.HeightMapConfig" title="roadnetwork_rg.common.HeightMapConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">HeightMapConfig</span></code></a></p>
+<p><a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.PixelPath" title="roadnetwork_rg.common.PixelPath"><code class="xref py py-class docutils literal notranslate"><span class="pre">PixelPath</span></code></a></p>
+<p><code class="xref py py-attr docutils literal notranslate"><span class="pre">PointType</span></code></p>
+<p><a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.SeedType" title="roadnetwork_rg.common.SeedType"><code class="xref py py-data docutils literal notranslate"><span class="pre">SeedType</span></code></a></p>
+<p><a class="reference internal" href="roadnetwork_rg.world.html#roadnetwork_rg.world.WorldChunk" title="roadnetwork_rg.world.WorldChunk"><code class="xref py py-class docutils literal notranslate"><span class="pre">WorldChunk</span></code></a></p>
+<p><a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.WorldChunkData" title="roadnetwork_rg.common.WorldChunkData"><code class="xref py py-class docutils literal notranslate"><span class="pre">WorldChunkData</span></code></a></p>
+<p><a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.WorldConfig" title="roadnetwork_rg.common.WorldConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">WorldConfig</span></code></a></p>
+<p><a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.WorldData" title="roadnetwork_rg.common.WorldData"><code class="xref py py-class docutils literal notranslate"><span class="pre">WorldData</span></code></a></p>
+<p><a class="reference internal" href="roadnetwork_rg.world.html#roadnetwork_rg.world.WorldGenerator" title="roadnetwork_rg.world.WorldGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">WorldGenerator</span></code></a></p>
+<p><a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.WorldRenderOptions" title="roadnetwork_rg.common.WorldRenderOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">WorldRenderOptions</span></code></a></p>
+<p><a class="reference internal" href="roadnetwork_rg.data.html#roadnetwork_rg.data.colour_palette" title="roadnetwork_rg.data.colour_palette"><code class="xref py py-data docutils literal notranslate"><span class="pre">colour_palette</span></code></a></p>
+<p><a class="reference internal" href="roadnetwork_rg.world.html#roadnetwork_rg.world.default_render_options" title="roadnetwork_rg.world.default_render_options"><code class="xref py py-data docutils literal notranslate"><span class="pre">default_render_options</span></code></a></p>
+<p><a class="reference internal" href="roadnetwork_rg.world.html#roadnetwork_rg.world.default_world_config" title="roadnetwork_rg.world.default_world_config"><code class="xref py py-data docutils literal notranslate"><span class="pre">default_world_config</span></code></a></p>
+<dl class="py data">
+<dt class="sig sig-object py" id="roadnetwork_rg.__datafile_version__">
+<span class="sig-name descname"><span class="pre">__datafile_version__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'0.1.0'</span></em><a class="headerlink" href="#roadnetwork_rg.__datafile_version__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Version of <a class="reference internal" href="roadnetwork_rg.datafile.html#roadnetwork_rg.datafile.Datafile" title="roadnetwork_rg.datafile.Datafile"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datafile</span></code></a> file format</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="roadnetwork_rg.__version__">
+<span class="sig-name descname"><span class="pre">__version__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'0.1.0'</span></em><a class="headerlink" href="#roadnetwork_rg.__version__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Version of package</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">roadnetwork_rg package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-roadnetwork_rg">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to roadnetwork_rg’s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="roadnetwork_rg.data.html"
+                        title="next chapter">roadnetwork_rg.data package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/roadnetwork_rg.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="roadnetwork_rg.data.html" title="roadnetwork_rg.data package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to roadnetwork_rg’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">roadnetwork_rg 0.1.0rc11 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">roadnetwork_rg package</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Ákos Sülyi.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+    </div>
+  </body>
+</html>

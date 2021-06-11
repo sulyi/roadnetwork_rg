@@ -1,0 +1,336 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>roadnetwork_rg.common &#8212; roadnetwork_rg 0.1.0rc11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">roadnetwork_rg 0.1.0rc11 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.common</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for roadnetwork_rg.common</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Commonly used classes and functions&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+
+<span class="n">PointType</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;It is the type of points (or cities).&quot;&quot;&quot;</span>
+<span class="n">SeedType</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;It is the type of various seeds.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="get_safe_seed"><a class="viewcode-back" href="../../roadnetwork_rg.common.html#roadnetwork_rg.common.get_safe_seed">[docs]</a><span class="k">def</span> <span class="nf">get_safe_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">bit_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Creates a safe integer seed.</span>
+
+<span class="sd">    :param seed: Only  :class:`None`, :class:`int`, :class:`str`, :class:`bytes`, and</span>
+<span class="sd">        :class:`bytearray` are supported types.</span>
+<span class="sd">    :type seed: :class:`Any` (technically)</span>
+<span class="sd">    :param bit_length: Needs to be positive and less than 64.</span>
+<span class="sd">    :type bit_length: :class:`int`</span>
+<span class="sd">    :return: A number safe to be used with :mod:`numpy.random` functions.</span>
+<span class="sd">    :raises: :exc:`TypeError`, :exc:`ValueError`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bit_length</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;bit_length&#39; should be integer number, not &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span>
+                        <span class="nb">type</span><span class="p">(</span><span class="n">bit_length</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">bit_length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;bit_length&#39; should be positive&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">bit_length</span> <span class="o">&gt;</span> <span class="mi">64</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;bit_length&#39; should be less than 64&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">seed</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">bit_length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># signed</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+            <span class="n">seed</span> <span class="o">+=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha512</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span>
+            <span class="n">seed</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;The only supported seed types are: &quot;</span>
+                            <span class="s2">&quot;None, int, str, bytes, and bytearray&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">seed</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">bit_length</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>  <span class="c1"># masked</span></div>
+
+
+<div class="viewcode-block" id="WorldConfig"><a class="viewcode-back" href="../../roadnetwork_rg.common.html#roadnetwork_rg.common.WorldConfig">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">WorldConfig</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;It is a boilerplate used by :class:`.WorldGenerator`.</span>
+
+<span class="sd">    :param chunk_size: Needs to be power of 2 (see also: :class:`HeightMapConfig`).</span>
+<span class="sd">    :type chunk_size: :class:`int`</span>
+<span class="sd">    :param height: (see: :class:`HeightMapConfig`)</span>
+<span class="sd">    :type height: :class:`float`</span>
+<span class="sd">    :param roughness: (see: :class:`HeightMapConfig`)</span>
+<span class="sd">    :type roughness: :class:`float`</span>
+<span class="sd">    :param city_rate: It is the expected number of cities, needs to be positive.</span>
+<span class="sd">    :type city_rate: :class:`int`</span>
+<span class="sd">    :param city_sizes: It is the number of sizes cities can take, needs to be positive,</span>
+<span class="sd">        defaults to 1.</span>
+<span class="sd">    :type city_sizes: :class:`int`</span>
+<span class="sd">    :param bit_length: Needs to be positive and even, defaults to 64</span>
+<span class="sd">        (see: :class:`.HeightMap`).</span>
+<span class="sd">    :type bit_length: :class:`int`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">height</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">roughness</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">city_rate</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">city_sizes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">bit_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span>
+
+<div class="viewcode-block" id="WorldConfig.check"><a class="viewcode-back" href="../../roadnetwork_rg.common.html#roadnetwork_rg.common.WorldConfig.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Performs sanity check.</span>
+
+<span class="sd">        also checks :class:`HeightMapConfig`</span>
+
+<span class="sd">        :raises: :exc:`TypeError`, :exc:`ValueError`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">HeightMapConfig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">roughness</span><span class="p">)</span><span class="o">.</span><span class="n">check</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">city_rate</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;city_rate&#39; should be integer number, not &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span>
+                            <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">city_rate</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">city_rate</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;city_rate&#39; should be positive&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">city_sizes</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;city_sizes&#39; should be integer number, not &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span>
+                            <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">city_sizes</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">city_sizes</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;city_sizes&#39; should be positive&quot;</span><span class="p">)</span>
+
+        <span class="c1"># early validation</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bit_length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;bit_length&#39; should be positive&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bit_length</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;bit_length&#39; should be even&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;chunk_size&#39; should be power of two&quot;</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="HeightMapConfig"><a class="viewcode-back" href="../../roadnetwork_rg.common.html#roadnetwork_rg.common.HeightMapConfig">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">HeightMapConfig</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;It is a boilerplate used by :class:`HeightMap`.</span>
+
+<span class="sd">    :param size: It is the size of height map, needs to be positive positive (corresponds to</span>
+<span class="sd">        :attr:`chunk_size` attribute of :class:`WorldConfig`). Actual value used is the smallest</span>
+<span class="sd">        power of two larger or equal to this.</span>
+<span class="sd">    :type size: :class:`int`</span>
+<span class="sd">    :param height: It is the amount of displacement in first step, needs to be in [0, 1] (inclusive)</span>
+<span class="sd">        range.</span>
+<span class="sd">    :type height: :class:`float`</span>
+<span class="sd">    :param roughness: It is the ratio by witch amount of displacement is changed in each step, needs</span>
+<span class="sd">        to be in [0, 1] inclusive) range.</span>
+<span class="sd">    :type roughness: :class:`float`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">size</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">height</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">roughness</span><span class="p">:</span> <span class="nb">float</span>
+
+<div class="viewcode-block" id="HeightMapConfig.check"><a class="viewcode-back" href="../../roadnetwork_rg.common.html#roadnetwork_rg.common.HeightMapConfig.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Performs sanity check</span>
+
+<span class="sd">        :raises: :exc:`TypeError`, :exc:`ValueError`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;size&#39; should be integer number, not &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span>
+                            <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;size&#39; should be positive&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;height&#39; should be a number, not &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span>
+                            <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;height&#39; should be in [0, 1] inclusive range&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">roughness</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;roughness&#39; should be a number, not &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span>
+                            <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">roughness</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">roughness</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;roughness&#39; should be in [0, 1] inclusive range&quot;</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="WorldRenderOptions"><a class="viewcode-back" href="../../roadnetwork_rg.common.html#roadnetwork_rg.common.WorldRenderOptions">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">WorldRenderOptions</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;It is a boilerplate used by :meth:`.WorldGenerator.render`.</span>
+
+<span class="sd">    see also: :meth:`.WorldGenerator.render`</span>
+
+<span class="sd">    :param show_debug: When it is :data:`True` information about each chunk is rendered in</span>
+<span class="sd">        its upper-left corner e.g: number of cities, mean of height map ..., defaults to</span>
+<span class="sd">        :data:`False`.</span>
+<span class="sd">    :type show_debug: :class:`bool`</span>
+<span class="sd">    :param show_height_map:  When it is :data:`True` height map is rendered, defaults to</span>
+<span class="sd">        :data:`True`.</span>
+<span class="sd">    :type  show_height_map: :class:`bool`</span>
+<span class="sd">    :param colour_height_map: When it is :data:`True` the :data:`~.data.colour_palette` is</span>
+<span class="sd">        applied to height map before rendering it, otherwise it is rendered as grayscale image,</span>
+<span class="sd">        defaults to :data:`True`.</span>
+<span class="sd">    :type  colour_height_map: :class:`bool`</span>
+<span class="sd">    :param show_cities: When it is :data:`True` cities are rendered, defaults to :data:`True`.</span>
+<span class="sd">    :type show_cities: :class:`bool`</span>
+<span class="sd">    :param show_roads: When it is :data:`True` roads are rendered, defaults to :data:`True`.</span>
+<span class="sd">    :type show_roads: :class:`bool`</span>
+<span class="sd">    :param show_potential_map: When it is :data:`True` final image is overlaid with</span>
+<span class="sd">        potential map, defaults to :data:`False`.</span>
+<span class="sd">    :type show_potential_map: :class:`bool`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">show_debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">show_height_map</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">colour_height_map</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">show_cities</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">show_roads</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">show_potential_map</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="WorldChunkData"><a class="viewcode-back" href="../../roadnetwork_rg.common.html#roadnetwork_rg.common.WorldChunkData">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">WorldChunkData</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;It is a boilerplate used by :class:`.WorldChunk` used by :class:`.WorldGenerator`.</span>
+
+<span class="sd">    :param offset_x: It is the *x* coordinate of the chunk.</span>
+<span class="sd">    :type offset_x: :class:`int`</span>
+<span class="sd">    :param offset_y: It is the *y* coordinate of the chunk.</span>
+<span class="sd">    :type offset_y: :class:`int`</span>
+<span class="sd">    :param height_map: It is a height map generated by :meth:`.HeightMap.generate`.</span>
+<span class="sd">    :type height_map: :class:`PIL.Image.Image`</span>
+<span class="sd">    :param cities: It is a list of coordinates generated by :class:`~.point_process.PointProcess`.</span>
+<span class="sd">    :type cities: :class:`list` [:const:`PointType`, ...]</span>
+<span class="sd">    :param potential_map: It is a potential map generated by</span>
+<span class="sd">        :class:`~.intensity.AdaptivePotentialFunction`.</span>
+<span class="sd">    :type potential_map: :class:`PIL.Image.Image`</span>
+<span class="sd">    :param pixel_paths: It is a list of coordinates generated by</span>
+<span class="sd">        :meth:`.Pathfinder.shortest_paths`</span>
+<span class="sd">    :type pixel_paths: :class:`dict` [:class:`tuple` [:const:`PointType`, :const:`PointType`],</span>
+<span class="sd">        :class:`PixelPath`]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">offset_x</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">offset_y</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">height_map</span><span class="p">:</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">compare</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">cities</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">PointType</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">compare</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">potential_map</span><span class="p">:</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">compare</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">pixel_paths</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">PointType</span><span class="p">,</span> <span class="n">PointType</span><span class="p">],</span> <span class="n">PixelPath</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">compare</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="WorldData"><a class="viewcode-back" href="../../roadnetwork_rg.common.html#roadnetwork_rg.common.WorldData">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">WorldData</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;It is a boilerplate used by :class:`.WorldGenerator` used by :class:`.Datafile`.</span>
+
+<span class="sd">    :param config: Value of :attr:`config` of :class:`.WorldGenerator`.</span>
+<span class="sd">    :type config: :class:`WorldConfig`</span>
+<span class="sd">    :param seed: Value of :attr:`_seed` of :class:`.WorldGenerator`.</span>
+<span class="sd">    :type seed: :const:`SeedType`</span>
+<span class="sd">    :param safe_seed: Value of :attr:`_safe_seed` of :class:`.WorldGenerator`.</span>
+<span class="sd">    :type safe_seed: :class:`int`</span>
+<span class="sd">    :param chunks: Value of :attr:`_chunks` of :class:`.WorldGenerator`.</span>
+<span class="sd">    :type chunks: :class:`list` [:class:`WorldChunkData`, ...]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">config</span><span class="p">:</span> <span class="n">WorldConfig</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="n">SeedType</span>
+    <span class="n">safe_seed</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">chunks</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">WorldChunkData</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="PixelPath"><a class="viewcode-back" href="../../roadnetwork_rg.common.html#roadnetwork_rg.common.PixelPath">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">PixelPath</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;It is a boilerplate used by :meth:`~.pathfinder.Pathfinder.shortest_paths`.</span>
+
+<span class="sd">    :param cost: Total cost of the path, including diagonal and vertical cost.</span>
+<span class="sd">    :type cost: :class:`float`</span>
+<span class="sd">    :param pixels: A list of each pixel the path contains.</span>
+<span class="sd">    :type pixels: :class:`list` [:class:`tuple` [:class:`int`, :class:`int` ]]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">cost</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">pixels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">roadnetwork_rg 0.1.0rc11 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.common</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Ákos Sülyi.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,402 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>roadnetwork_rg.intensity &#8212; roadnetwork_rg 0.1.0rc11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">roadnetwork_rg 0.1.0rc11 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.intensity</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for roadnetwork_rg.intensity</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Various implementation of :class:`.IntensityFunction`</span>
+
+<span class="sd">It provides some functions to be used for generating non-homogenous a</span>
+<span class="sd">:class:`~.point_process.PointProcess`, (either using</span>
+<span class="sd">:class:`~.point_process.SpatialPoissonPointProcess` or</span>
+<span class="sd">:class:`~.point_process.MarkovChainMonteCarlo` method) by implementing the interface used for</span>
+<span class="sd">thinning points offered by the point process as candidates.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">ceil</span><span class="p">,</span> <span class="n">exp</span><span class="p">,</span> <span class="n">log</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">ImageStat</span><span class="p">,</span> <span class="n">ImageChops</span>
+
+<span class="kn">from</span> <span class="nn">.common</span> <span class="kn">import</span> <span class="n">PointType</span>
+<span class="kn">from</span> <span class="nn">.point_process</span> <span class="kn">import</span> <span class="n">IntensityFunction</span>
+
+
+<span class="c1"># Abstract classes</span>
+
+
+<div class="viewcode-block" id="MarkovChainMonteCarloPotentialFunction"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.MarkovChainMonteCarloPotentialFunction">[docs]</a><span class="k">class</span> <span class="nc">MarkovChainMonteCarloPotentialFunction</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;It is an abstract class for implementing potential functions.</span>
+
+<span class="sd">    A potential function describes the point-wise interaction between the generated points.</span>
+<span class="sd">    It provides an interface used by :class:`MarkovChainMonteCarloIntensityFunction`,</span>
+<span class="sd">    (see also: there).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MarkovChainMonteCarloPotentialFunction.get"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.MarkovChainMonteCarloPotentialFunction.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">PointType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;It should implemented the function arithmetics.</span>
+
+<span class="sd">        :param value: It is the point where the function is computed.</span>
+<span class="sd">        :type value: :attr`.PointType`</span>
+<span class="sd">        :return: It is the calculated value.</span>
+<span class="sd">        :rtype: :class:`float`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="MarkovChainMonteCarloPotentialFunction.update"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.MarkovChainMonteCarloPotentialFunction.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">PointType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;It updates the function based on whether the candidate is accepted or rejected.</span>
+
+<span class="sd">        :param value: It is the candidate where the potential function being updated.</span>
+<span class="sd">        :type value: :attr:`.PointType`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div></div>
+
+
+<div class="viewcode-block" id="SpatialPoissonPointProcessPotentialFunction"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.SpatialPoissonPointProcessPotentialFunction">[docs]</a><span class="k">class</span> <span class="nc">SpatialPoissonPointProcessPotentialFunction</span><span class="p">(</span><span class="n">MarkovChainMonteCarloPotentialFunction</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;It is an abstract class for implementing potential functions.</span>
+
+<span class="sd">    See also: :class:`MarkovChainMonteCarloPotentialFunction`.</span>
+<span class="sd">    It also provides an interface used by :class:`SpatialPoissonPointProcessIntensityFunction`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SpatialPoissonPointProcessPotentialFunction.get"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.SpatialPoissonPointProcessPotentialFunction.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="SpatialPoissonPointProcessPotentialFunction.update"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.SpatialPoissonPointProcessPotentialFunction.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">expected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;It is the expected value of the potential function.&quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<div class="viewcode-block" id="MarkovChainMonteCarloCompositeFunction"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction">[docs]</a><span class="k">class</span> <span class="nc">MarkovChainMonteCarloCompositeFunction</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;It is an abstract function for implementing composite functions.</span>
+
+<span class="sd">    It is used by :class:`.MarkovChainMonteCarloIntensityFunction` to calculate value used for</span>
+<span class="sd">    thinning a point process. A composite function takes two other function a kernel and a potential</span>
+<span class="sd">    function and computes a value based on them according the implemented arithmetics.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MarkovChainMonteCarloCompositeFunction.get"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">PointType</span><span class="p">,</span> <span class="n">kernel</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">potential</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;The arithmetics used should be implemented by this.</span>
+
+<span class="sd">        :param value: It is the point at where the function is calculated.</span>
+<span class="sd">        :type value: :attr:`.PointType`</span>
+<span class="sd">        :param kernel: It is the value of the kernel function at the point `value`.</span>
+<span class="sd">        :type kernel: :class:`float`</span>
+<span class="sd">        :param potential: It is the value of the potential function at the point `value`.</span>
+<span class="sd">        :type potential: :class:`float`</span>
+<span class="sd">        :returns: It is the result of computation.</span>
+<span class="sd">        :rtype: :class:`float`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div></div>
+
+
+<div class="viewcode-block" id="SpatialPoissonPointProcessCompositeFunction"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.SpatialPoissonPointProcessCompositeFunction">[docs]</a><span class="k">class</span> <span class="nc">SpatialPoissonPointProcessCompositeFunction</span><span class="p">(</span><span class="n">MarkovChainMonteCarloCompositeFunction</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;It is an abstract function for implementing composite functions.</span>
+
+<span class="sd">    It is used in :class:`~.point_process.SpatialPoissonPointProcess` method to generate a point</span>
+<span class="sd">    process. It is differ from parent class by having an :attr:`.expected` method (see: there).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SpatialPoissonPointProcessCompositeFunction.get"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.SpatialPoissonPointProcessCompositeFunction.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">potential</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;See: :meth:`.MarkovChainMonteCarloCompositeFunction.get`.&quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">expected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;It should be the expected value of the implemented arithmetics.</span>
+
+<span class="sd">        This allows :class:`.SpatialPoissonPointProcessIntensityFunction` to scale</span>
+<span class="sd">        :attr:`~.SpatialPoissonPointProcessIntensityFunction.rate` so that the generated point</span>
+<span class="sd">        process remain *similar* to a Poison point process.</span>
+
+<span class="sd">        :return: It is the expected value of the composite function.</span>
+<span class="sd">        :rtype: :class:`float`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<span class="c1"># Implementation</span>
+
+
+<div class="viewcode-block" id="AdaptivePotentialFunction"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.AdaptivePotentialFunction">[docs]</a><span class="k">class</span> <span class="nc">AdaptivePotentialFunction</span><span class="p">(</span><span class="n">MarkovChainMonteCarloPotentialFunction</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Implements a potential function that is a super-Gaussian distribution.&quot;&quot;&quot;</span>
+
+    <span class="n">_monopole_potential_cache</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="AdaptivePotentialFunction.__init__"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.AdaptivePotentialFunction.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">city_sizes</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Initializes a potential function.</span>
+
+<span class="sd">        :param size: It is the size of a square bounding window.</span>
+<span class="sd">        :type size: :class:`int`</span>
+<span class="sd">        :param city_sizes: It is the number of levels cities can take.</span>
+<span class="sd">        :type city_sizes: :class:`int`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_city_sizes</span> <span class="o">=</span> <span class="n">city_sizes</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_potential_image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">size</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AdaptivePotentialFunction.clear_cache"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.AdaptivePotentialFunction.clear_cache">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Clears the cached *monopole* values.</span>
+
+<span class="sd">        See: :meth:`update`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_monopole_potential_cache</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">potential_map</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;It is the current values of potential function over the bounding window.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_potential_image</span>
+
+<div class="viewcode-block" id="AdaptivePotentialFunction.get"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.AdaptivePotentialFunction.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;It is gives the value of the potential function.</span>
+
+<span class="sd">        :param value: It is the point where the function is computed.</span>
+<span class="sd">        :type value: :attr`.PointType`</span>
+<span class="sd">        :return: It is the calculated value.</span>
+<span class="sd">        :rtype: :class:`float`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_z</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">pixel</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_potential_image</span><span class="o">.</span><span class="n">getpixel</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)))</span> <span class="o">/</span> <span class="mi">255</span>
+        <span class="k">return</span> <span class="n">pixel</span></div>
+
+<div class="viewcode-block" id="AdaptivePotentialFunction.update"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.AdaptivePotentialFunction.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;It updates the function based on whether the candidate is accepted or rejected.</span>
+
+<span class="sd">        Also updates the monopole cache if the monopole has not been previously calculated.</span>
+<span class="sd">        A monopole is a collection of values the function is updated by superposing them over</span>
+<span class="sd">        existing values. A monopole *m* is of a super-Gaussian distribution thus:</span>
+
+<span class="sd">            *m* (*x0*, *y0*, *z*) ~ **e** ** (-((*x0* ** 2 + *y0* ** 2) / (2 * *z* ** 2)) ** *p*),</span>
+<span class="sd">            where *p* = 1 / 3 and `value` = (*x*, *y*, *z*).</span>
+
+<span class="sd">        :param value: It is the candidate where the potential function being updated.</span>
+<span class="sd">        :type value: :attr:`.PointType`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">chop</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_potential_image</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">potential_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_monopole_potential</span><span class="p">(</span><span class="n">z</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="n">y0</span> <span class="o">=</span> <span class="n">potential_image</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="n">chop</span><span class="o">.</span><span class="n">paste</span><span class="p">(</span><span class="n">potential_image</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x0</span><span class="p">,</span> <span class="n">y</span> <span class="o">-</span> <span class="n">y0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_potential_image</span> <span class="o">=</span> <span class="n">ImageChops</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_potential_image</span><span class="p">,</span> <span class="n">chop</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_monopole_potential</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">radius</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_monopole_potential_cache</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="n">ceil</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="mf">.5</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">*</span> <span class="p">(</span><span class="n">log</span><span class="p">(</span><span class="mi">510</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_city_sizes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span> <span class="o">**</span> <span class="p">(</span><span class="mf">.5</span> <span class="o">/</span> <span class="n">p</span><span class="p">))</span>
+
+            <span class="k">def</span> <span class="nf">super_gauss</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">power</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="mi">255</span> <span class="o">*</span> <span class="n">sigma</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_city_sizes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">a</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">sigma</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="n">power</span><span class="p">)</span>
+
+            <span class="n">potential_image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">frombytes</span><span class="p">(</span>
+                <span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">size</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">size</span><span class="p">),</span>
+                <span class="nb">bytes</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">super_gauss</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span>
+                      <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">size</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">size</span><span class="p">,</span> <span class="n">size</span><span class="p">))</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_monopole_potential_cache</span><span class="p">[</span><span class="n">radius</span><span class="p">]</span> <span class="o">=</span> <span class="n">potential_image</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_monopole_potential_cache</span><span class="p">[</span><span class="n">radius</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="ExponentialZCompositeFunction"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.ExponentialZCompositeFunction">[docs]</a><span class="k">class</span> <span class="nc">ExponentialZCompositeFunction</span><span class="p">(</span><span class="n">MarkovChainMonteCarloCompositeFunction</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;It is the implementation of an exponential function&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ExponentialZCompositeFunction.get"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.ExponentialZCompositeFunction.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">potential</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;It computes the product the following arithmetics:</span>
+
+<span class="sd">            `potential` * `kernel` ** *z*,</span>
+<span class="sd">            where `value` is (*x*, *y*, *z*).</span>
+
+<span class="sd">        See also: :meth:`.MarkovChainMonteCarloCompositeFunction.get()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rate</span> <span class="o">=</span> <span class="p">(</span><span class="n">potential</span> <span class="o">*</span> <span class="n">kernel</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rate</span></div></div>
+
+
+<div class="viewcode-block" id="MarkovChainMonteCarloIntensityFunction"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction">[docs]</a><span class="k">class</span> <span class="nc">MarkovChainMonteCarloIntensityFunction</span><span class="p">(</span><span class="n">IntensityFunction</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;It is an implementation of :class:`.IntensityFunction` used by</span>
+<span class="sd">    :class:`~.point_process.MarkovChainMonteCarlo`.</span>
+
+<span class="sd">    It is used for deciding thinning actions based on a</span>
+<span class="sd">    :class:`MarkovChainMonteCarloCompositeFunction`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MarkovChainMonteCarloIntensityFunction.__init__"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">kernel_image</span><span class="p">:</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">,</span>
+                 <span class="n">potential_func</span><span class="p">:</span> <span class="n">MarkovChainMonteCarloPotentialFunction</span><span class="p">,</span>
+                 <span class="n">composite_func</span><span class="p">:</span> <span class="n">MarkovChainMonteCarloCompositeFunction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Initializes an intensity function.</span>
+
+<span class="sd">        :param rate: See: :class:`~.point_process.PointProcess`.</span>
+<span class="sd">        :type rate: :data:`~typing.Union` [:class:`int`, :class:`float` ]</span>
+<span class="sd">        :param kernel_image: It is an image containing the values of kernel function corresponding</span>
+<span class="sd">            to pixel values in the **x** and **y** coordinates of the image.</span>
+<span class="sd">        :type kernel_image: :class:`PIL.Image.Image`</span>
+<span class="sd">        :param potential_func: It describes the pair-wise interaction of generated points.</span>
+<span class="sd">        :type potential_func: :class:`.MarkovChainMonteCarloPotentialFunction`</span>
+<span class="sd">        :param kernel_image: It contains the values of a kernel function.</span>
+<span class="sd">        :type kernel_image: :class:`PIL.Image.Image`</span>
+<span class="sd">        :param composite_func: It computes the final value of thinning process based of potential</span>
+<span class="sd">            and kernel functions.</span>
+<span class="sd">        :type composite_func: :class:`.MarkovChainMonteCarloCompositeFunction`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rate</span> <span class="o">=</span> <span class="n">rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_potential_function</span> <span class="o">=</span> <span class="n">potential_func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_composite_function</span> <span class="o">=</span> <span class="n">composite_func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kernel_image</span> <span class="o">=</span> <span class="n">kernel_image</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;It is the expected number of points generated.</span>
+
+<span class="sd">        :return: It is the value set by `rate` during initialization.</span>
+<span class="sd">        :rtype: :class:`float`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rate</span>
+
+<div class="viewcode-block" id="MarkovChainMonteCarloIntensityFunction.is_accepted"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction.is_accepted">[docs]</a>    <span class="k">def</span> <span class="nf">is_accepted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">PointType</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_z</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_potential_function</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kernel_image</span><span class="o">.</span><span class="n">getpixel</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)))</span> <span class="o">/</span> <span class="mi">255</span>
+        <span class="k">if</span> <span class="n">threshold</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_composite_function</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_potential_function</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div></div>
+
+
+<div class="viewcode-block" id="SpatialPoissonPointProcessIntensityFunction"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.SpatialPoissonPointProcessIntensityFunction">[docs]</a><span class="k">class</span> <span class="nc">SpatialPoissonPointProcessIntensityFunction</span><span class="p">(</span><span class="n">MarkovChainMonteCarloIntensityFunction</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;It is an implementation of :class:`.IntensityFunction` used by</span>
+<span class="sd">    :class:`~.point_process.SpatialPoissonPointProcess`.</span>
+
+<span class="sd">    See: :class:`.MarkovChainMonteCarloIntensityFunction`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SpatialPoissonPointProcessIntensityFunction.__init__"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.SpatialPoissonPointProcessIntensityFunction.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">kernel_image</span><span class="p">:</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">,</span>
+                 <span class="n">potential_func</span><span class="p">:</span> <span class="n">SpatialPoissonPointProcessPotentialFunction</span><span class="p">,</span>
+                 <span class="n">composite_func</span><span class="p">:</span> <span class="n">SpatialPoissonPointProcessCompositeFunction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Initializes an intensity function.</span>
+
+<span class="sd">        Calculates mean of `kernel_image` to be used by</span>
+<span class="sd">        :class:`SpatialPoissonPointProcessPotentialFunction`.</span>
+
+<span class="sd">        See also: :class:`MarkovChainMonteCarloIntensityFunction`.</span>
+
+<span class="sd">        :param potential_func:  It describes the pair-wise interaction of generated points.</span>
+<span class="sd">        :type potential_func: :class:`.SpatialPoissonPointProcessPotentialFunction`</span>
+<span class="sd">        :param composite_func:  It computes the final value of thinning process based of potential</span>
+<span class="sd">            and kernel functions.</span>
+<span class="sd">        :type composite_func: :class:`.SpatialPoissonPointProcessPotentialFunction`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">rate</span><span class="p">,</span> <span class="n">kernel_image</span><span class="p">,</span> <span class="n">potential_func</span><span class="p">,</span> <span class="n">composite_func</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mean</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span> <span class="o">-</span> <span class="n">ImageStat</span><span class="o">.</span><span class="n">Stat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kernel_image</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="o">.</span><span class="n">pop</span><span class="p">())</span> <span class="o">/</span> <span class="mi">255</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;It is the expected number of points generated.</span>
+
+<span class="sd">        :return: It is calculated based on the value set by `rate` during initialization, and the</span>
+<span class="sd">            :attr:`~.SpatialPoissonPointProcessCompositeFunction.get_expected` attribute of</span>
+<span class="sd">            `composite_func`.</span>
+<span class="sd">        :rtype: :class:`float`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_potential_function</span><span class="p">:</span> <span class="n">SpatialPoissonPointProcessPotentialFunction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_composite_function</span><span class="p">:</span> <span class="n">SpatialPoissonPointProcessCompositeFunction</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rate</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_composite_function</span><span class="o">.</span><span class="n">expected</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">roadnetwork_rg 0.1.0rc11 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.intensity</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Ákos Sülyi.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+    </div>
+  </body>
+</html>

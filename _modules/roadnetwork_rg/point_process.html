@@ -1,0 +1,262 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>roadnetwork_rg.point_process &#8212; roadnetwork_rg 0.1.0rc11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">roadnetwork_rg 0.1.0rc11 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.point_process</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for roadnetwork_rg.point_process</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Abstract classes for generating point process and partial implementation of them&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span>
+<span class="sd">&quot;&quot;&quot;It is a generic type of :class:`PointProcess`, bounded by :class:`tuple` [:class:`int`, ...].&quot;&quot;&quot;</span>
+
+
+<span class="c1"># Abstract classes</span>
+
+
+<div class="viewcode-block" id="IntensityFunction"><a class="viewcode-back" href="../../roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.IntensityFunction">[docs]</a><span class="k">class</span> <span class="nc">IntensityFunction</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;It is an abstract class that provides following interface: :attr:`rate`, :meth:`is_accepted`</span>
+<span class="sd">    used by :meth:`PointProcess.__next__` method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;It is the expected number of points generated.</span>
+
+<span class="sd">        :rtype: :class:`float`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<div class="viewcode-block" id="IntensityFunction.is_accepted"><a class="viewcode-back" href="../../roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.IntensityFunction.is_accepted">[docs]</a>    <span class="k">def</span> <span class="nf">is_accepted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Checks if a value is accepted by thinning of the point process.</span>
+
+<span class="sd">        :param value: It is the candidate, that is either accepted or not.</span>
+<span class="sd">        :type value: :data:`.T`</span>
+<span class="sd">        :param threshold: It is a probability, that decides if candidate is accepted.</span>
+<span class="sd">        :type threshold: :class:`float`</span>
+<span class="sd">        :return: Result of thinning process.</span>
+<span class="sd">        :rtype: :class:`bool`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div></div>
+
+
+<span class="n">RateType</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">IntensityFunction</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;It is the type of :attr:`~PointProcess.rate` attribute of :class:`PointProcess`.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="PointProcess"><a class="viewcode-back" href="../../roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.PointProcess">[docs]</a><span class="k">class</span> <span class="nc">PointProcess</span><span class="p">(</span><span class="n">Iterator</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;It is an abstract class for implementing point processes.</span>
+
+<span class="sd">    It is a subclass of :class:`~collections.abc.Iterator` [:const:`T`] that represents a stream of</span>
+<span class="sd">    :const:`T` type points generated by a point process. The a generic :const:`T` type is on</span>
+<span class="sd">    instantiation.</span>
+
+<span class="sd">    In order to simulate a point process :meth:`_generate` should be implemented in a subclass.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PointProcess.__new__"><a class="viewcode-back" href="../../roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.PointProcess.__new__">[docs]</a>    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="n">RateType</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Constructs a new iterator instance.</span>
+
+<span class="sd">        Checks the arguments first.</span>
+
+<span class="sd">        :param rate: It should be non-negative, (if :class:`IntensityFunction` it&#39;s</span>
+<span class="sd">            :attr:`~IntensityFunction.rate` attribute is used).</span>
+<span class="sd">        :type rate: :const:`RateType`</span>
+<span class="sd">        :param size: All numbers should be non-negative.</span>
+<span class="sd">        :type size: :const:`T`</span>
+<span class="sd">        :param seed: Has no other limit than its type.</span>
+<span class="sd">        :type seed: :class:`int`</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: :class:`~collections.abc.Iterator`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="nb">any</span><span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">size</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;size&#39; should be a tuple of integer numbers, not &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span>
+                            <span class="nb">type</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">dim</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">size</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;size&#39; should be positive&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rate</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">IntensityFunction</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;rate&#39; should be a number or </span><span class="si">%s</span><span class="s2">, not &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span>
+                            <span class="n">IntensityFunction</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">((</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">rate</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="ow">and</span> <span class="n">rate</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">rate</span><span class="p">,</span> <span class="n">IntensityFunction</span><span class="p">)</span> <span class="ow">and</span> <span class="n">rate</span><span class="o">.</span><span class="n">rate</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;rate&#39; should be positive&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;seed&#39; should be integer number, not &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span>
+                            <span class="nb">type</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">PointProcess</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PointProcess.__init__"><a class="viewcode-back" href="../../roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.PointProcess.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="n">RateType</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Initializes a new iterator instance.</span>
+
+<span class="sd">        A private :attr:`_next` generator that provides the stream of points, is set by</span>
+<span class="sd">        :meth:`_generate`.</span>
+
+<span class="sd">        :param rate:</span>
+<span class="sd">            Non-homogenous processes need to have an :class:`IntensityFunction` object as the value</span>
+<span class="sd">            of this parameter.</span>
+<span class="sd">            Homogenous processes might have :class:`int` or :class:`float` type (or an</span>
+<span class="sd">            :class:`IntensityFunction` that&#39;s :attr:`IntensityFunction.rate` is **1** constantly) as</span>
+<span class="sd">            the value of this.</span>
+<span class="sd">        :type rate: :const:`RateType`</span>
+<span class="sd">        :param size:</span>
+<span class="sd">            It is a :const:`T` type object that describes the dimensions of the bounding box</span>
+<span class="sd">            in which points are generated.</span>
+<span class="sd">        :type size: :const:`T`</span>
+<span class="sd">        :param seed: Number used initializing private pRNG instance.</span>
+<span class="sd">        :type seed: :class:`int`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rate</span> <span class="o">=</span> <span class="n">rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">size</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generator</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PointProcess.__next__"><a class="viewcode-back" href="../../roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.PointProcess.__next__">[docs]</a>    <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;It is the override of :meth:`~collections.abc.Iterator.__next__` method.</span>
+
+<span class="sd">        :return: They are points from private generator.</span>
+<span class="sd">        :rtype: :const:`T`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_next</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PointProcess.__iter__"><a class="viewcode-back" href="../../roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.PointProcess.__iter__">[docs]</a>    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Override of :meth:`~collections.abc.Iterator.__iter__` method.</span>
+
+<span class="sd">        :return: Its own ``self``.</span>
+<span class="sd">        :rtype: :class:`~collections.abc.Iterator` [:const:`T`]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+    <span class="k">def</span> <span class="nf">_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<span class="c1"># Implementation</span>
+
+
+<div class="viewcode-block" id="MarkovChainMonteCarlo"><a class="viewcode-back" href="../../roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.MarkovChainMonteCarlo">[docs]</a><span class="k">class</span> <span class="nc">MarkovChainMonteCarlo</span><span class="p">(</span><span class="n">PointProcess</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;It is an implementation of Markov chain Monte Carlo method.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="o">.</span><span class="n">rate</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">,</span> <span class="n">IntensityFunction</span><span class="p">)</span> <span class="k">else</span>
+                              <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">)</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">count</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="p">:</span>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">integers</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">,</span> <span class="n">IntensityFunction</span><span class="p">):</span>
+                <span class="c1"># non-homogeneous</span>
+                <span class="n">thinning</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="o">.</span><span class="n">is_accepted</span><span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="n">thinning</span><span class="p">):</span>
+                    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">yield</span> <span class="n">candidate</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># homogeneous</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">yield</span> <span class="n">candidate</span></div>
+
+
+<div class="viewcode-block" id="SpatialPoissonPointProcess"><a class="viewcode-back" href="../../roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.SpatialPoissonPointProcess">[docs]</a><span class="k">class</span> <span class="nc">SpatialPoissonPointProcess</span><span class="p">(</span><span class="n">PointProcess</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;It is an implementation spatial point process generation.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="o">.</span><span class="n">rate</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">,</span> <span class="n">IntensityFunction</span><span class="p">)</span> <span class="k">else</span>
+                              <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">integers</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">,</span> <span class="n">IntensityFunction</span><span class="p">):</span>
+                <span class="c1"># non-homogeneous</span>
+                <span class="n">thinning</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="o">.</span><span class="n">is_accepted</span><span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="n">thinning</span><span class="p">):</span>
+                    <span class="k">yield</span> <span class="n">candidate</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># homogeneous</span>
+                <span class="k">yield</span> <span class="n">candidate</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">roadnetwork_rg 0.1.0rc11 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.point_process</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Ákos Sülyi.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,483 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>roadnetwork_rg.datafile module &#8212; roadnetwork_rg 0.1.0rc11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="roadnetwork_rg.height_map module" href="roadnetwork_rg.height_map.html" />
+    <link rel="prev" title="roadnetwork_rg.common module" href="roadnetwork_rg.common.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="roadnetwork_rg.height_map.html" title="roadnetwork_rg.height_map module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="roadnetwork_rg.common.html" title="roadnetwork_rg.common module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">roadnetwork_rg 0.1.0rc11 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="roadnetwork_rg.html" accesskey="U">roadnetwork_rg package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.datafile module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-roadnetwork_rg.datafile">
+<span id="roadnetwork-rg-datafile-module"></span><h1>roadnetwork_rg.datafile module<a class="headerlink" href="#module-roadnetwork_rg.datafile" title="Permalink to this headline">¶</a></h1>
+<p>Implementation of an I/O class for <a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.WorldData" title="roadnetwork_rg.common.WorldData"><code class="xref py py-class docutils literal notranslate"><span class="pre">WorldData</span></code></a> used by <a class="reference internal" href="roadnetwork_rg.world.html#roadnetwork_rg.world.WorldGenerator" title="roadnetwork_rg.world.WorldGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">WorldGenerator</span></code></a></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="roadnetwork_rg.datafile.Datafile">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">Datafile</span></span><a class="reference internal" href="_modules/roadnetwork_rg/datafile.html#Datafile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.datafile.Datafile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Implements an I/O file handler for <a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.WorldData" title="roadnetwork_rg.common.WorldData"><code class="xref py py-class docutils literal notranslate"><span class="pre">WorldData</span></code></a>.</p>
+<p><strong>Use cases</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Datafile</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">Datafile</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+
+<span class="n">file</span> <span class="o">=</span> <span class="n">Datafile</span><span class="p">()</span>
+<span class="n">file</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+
+<span class="n">file</span> <span class="o">=</span> <span class="n">Datafile</span><span class="p">()</span>
+<span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">file2</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>File format</strong></p>
+<ul class="simple">
+<li><p>all numbers are in little endian</p></li>
+</ul>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 81%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>size</p></th>
+<th class="head"><p>description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>10 bytes</p></td>
+<td><p>magic number</p></td>
+</tr>
+<tr class="row-odd"><td><p>3 bytes</p></td>
+<td><p>version number</p></td>
+</tr>
+<tr class="row-even"><td><p>64 bytes</p></td>
+<td><p>header checksum</p></td>
+</tr>
+<tr class="row-odd"><td><p>2 bytes</p></td>
+<td><p>data offset</p></td>
+</tr>
+<tr class="row-even"><td><p>– 1 byte –</p></td>
+<td><p>– separator –</p></td>
+</tr>
+<tr class="row-odd"><td><p>header:</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>4 bytes</p></td>
+<td><p>content length (4Gb data max)</p></td>
+</tr>
+<tr class="row-odd"><td><p>64 bytes</p></td>
+<td><p>signature</p></td>
+</tr>
+<tr class="row-even"><td><p>– 1 byte –</p></td>
+<td><p>– separator –</p></td>
+</tr>
+<tr class="row-odd"><td><p>data:</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>1 byte</p></td>
+<td><p>seed type (None:0, int:1, str:2, bytes:3, bytearray:4)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1 byte</p></td>
+<td><p>length of seed</p></td>
+</tr>
+<tr class="row-even"><td><p>varied</p></td>
+<td><p>seed</p></td>
+</tr>
+<tr class="row-odd"><td><p>– 1 byte –</p></td>
+<td><p>–    pad    –</p></td>
+</tr>
+<tr class="row-even"><td><p>8 bytes</p></td>
+<td><p>safe_seed</p></td>
+</tr>
+<tr class="row-odd"><td><p>– 1 byte –</p></td>
+<td><p>–    pad    –</p></td>
+</tr>
+<tr class="row-even"><td><p>1 byte</p></td>
+<td><p>length of config (future proof, currently 43)</p></td>
+</tr>
+<tr class="row-odd"><td><p>varied</p></td>
+<td><p>config (pickled format)</p></td>
+</tr>
+<tr class="row-even"><td><p>– 1 byte –</p></td>
+<td><p>–    pad    –</p></td>
+</tr>
+<tr class="row-odd"><td><p>chunks:</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>2 bytes</p></td>
+<td><p>number of chunks</p></td>
+</tr>
+<tr class="row-odd"><td><p>– 1 byte –</p></td>
+<td><p>– separator –</p></td>
+</tr>
+<tr class="row-even"><td><p>chunk:</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>4 bytes</p></td>
+<td><p>x</p></td>
+</tr>
+<tr class="row-even"><td><p>4 bytes</p></td>
+<td><p>y</p></td>
+</tr>
+<tr class="row-odd"><td><p>2 bytes</p></td>
+<td><p>length of cities</p></td>
+</tr>
+<tr class="row-even"><td><p>varied</p></td>
+<td><p>cities (pickled format)</p></td>
+</tr>
+<tr class="row-odd"><td><p>– 1 byte –</p></td>
+<td><p>–    pad    –</p></td>
+</tr>
+<tr class="row-even"><td><p>2 bytes</p></td>
+<td><p>number of paths</p></td>
+</tr>
+<tr class="row-odd"><td><p>– 1 byte –</p></td>
+<td><p>– separator –</p></td>
+</tr>
+<tr class="row-even"><td><p>pixel_path:</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>8 bytes</p></td>
+<td><p>cost</p></td>
+</tr>
+<tr class="row-even"><td><p>6 byte</p></td>
+<td><p>source (2, 2, 2 byte)</p></td>
+</tr>
+<tr class="row-odd"><td><p>6 byte</p></td>
+<td><p>target (2, 2, 2 byte)</p></td>
+</tr>
+<tr class="row-even"><td><p>2 bytes</p></td>
+<td><p>length of pixels</p></td>
+</tr>
+<tr class="row-odd"><td><p>varied</p></td>
+<td><p>pixels (pickled format)</p></td>
+</tr>
+<tr class="row-even"><td><p>– 1 byte –</p></td>
+<td><p>– separator –</p></td>
+</tr>
+<tr class="row-odd"><td><p>4 bytes</p></td>
+<td><p>length of height_map</p></td>
+</tr>
+<tr class="row-even"><td><p>varied</p></td>
+<td><p>height_map (in TIFF format)</p></td>
+</tr>
+<tr class="row-odd"><td><p>– 1 byte –</p></td>
+<td><p>– separator –</p></td>
+</tr>
+<tr class="row-even"><td><p>4 bytes</p></td>
+<td><p>length of potential_map</p></td>
+</tr>
+<tr class="row-odd"><td><p>varied</p></td>
+<td><p>potential_map (in TIFF format)</p></td>
+</tr>
+<tr class="row-even"><td><p>– 1 byte –</p></td>
+<td><p>– separator – (if not last)</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.datafile.Datafile.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/datafile.html#Datafile.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.datafile.Datafile.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.datafile.Datafile.clear_data">
+<span class="sig-name descname"><span class="pre">clear_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/datafile.html#Datafile.clear_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.datafile.Datafile.clear_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears data set for <a class="reference internal" href="#roadnetwork_rg.datafile.Datafile" title="roadnetwork_rg.datafile.Datafile"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datafile</span></code></a> instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.datafile.Datafile.decode_chunk">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">decode_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/datafile.html#Datafile.decode_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.datafile.Datafile.decode_chunk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads data and decodes it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.BinaryIO" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryIO</span></code></a>) – It is a buffer from data to be read.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>It is the decoded data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.WorldChunkData" title="roadnetwork_rg.common.WorldChunkData"><code class="xref py py-class docutils literal notranslate"><span class="pre">WorldChunkData</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.datafile.Datafile.decode_pixel_path">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">decode_pixel_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/datafile.html#Datafile.decode_pixel_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.datafile.Datafile.decode_pixel_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads data and decodes it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.BinaryIO" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryIO</span></code></a>) – It is the buffer from data to be read.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>It is a <em>key-value</em> pair, <em>key</em> is a pair of points corresponding to the ends of
+the <em>value</em> which is a path between them.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a> [<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a> [<code class="xref py py-attr docutils literal notranslate"><span class="pre">PointType</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">PointType</span></code> ],
+<a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.PixelPath" title="roadnetwork_rg.common.PixelPath"><code class="xref py py-class docutils literal notranslate"><span class="pre">PixelPath</span></code></a> ]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.datafile.Datafile.encode_chunk">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">encode_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/datafile.html#Datafile.encode_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.datafile.Datafile.encode_chunk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encodes a chunk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>chunk</strong> (<a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.WorldChunkData" title="roadnetwork_rg.common.WorldChunkData"><code class="xref py py-class docutils literal notranslate"><span class="pre">WorldChunkData</span></code></a>) – It is the object to be encoded.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>It is the encoded data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.datafile.Datafile.encode_pixel_path">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">encode_pixel_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/datafile.html#Datafile.encode_pixel_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.datafile.Datafile.encode_pixel_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encodes a key-value pair.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a> [<code class="xref py py-attr docutils literal notranslate"><span class="pre">PointType</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">PointType</span></code> ]) – It is a pair of points corresponding to the ends of <em>path</em>.</p></li>
+<li><p><strong>path</strong> (<a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.PixelPath" title="roadnetwork_rg.common.PixelPath"><code class="xref py py-class docutils literal notranslate"><span class="pre">PixelPath</span></code></a>) – It is a path between the tow point in <em>key</em>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>It is the encoded data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.datafile.Datafile.get_data">
+<span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/datafile.html#Datafile.get_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.datafile.Datafile.get_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses binary data of file.</p>
+<p>Data can be loaded by <a class="reference internal" href="#roadnetwork_rg.datafile.Datafile.read" title="roadnetwork_rg.datafile.Datafile.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> or set by <a class="reference internal" href="#roadnetwork_rg.datafile.Datafile.set_data" title="roadnetwork_rg.datafile.Datafile.set_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_data()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Parsed data.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.WorldData" title="roadnetwork_rg.common.WorldData"><code class="xref py py-class docutils literal notranslate"><span class="pre">WorldData</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.datafile.Datafile.get_version">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">get_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/datafile.html#Datafile.get_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.datafile.Datafile.get_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets version of file format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>It is a string of the file format’s version numbers separated by dots.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.datafile.Datafile.load">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/datafile.html#Datafile.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.datafile.Datafile.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads data from file.</p>
+<p>Creates an instance and reads data. (see: <a class="reference internal" href="#roadnetwork_rg.datafile.Datafile.read" title="roadnetwork_rg.datafile.Datafile.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>It is the instance created.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#roadnetwork_rg.datafile.Datafile" title="roadnetwork_rg.datafile.Datafile"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datafile</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.datafile.Datafile.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/datafile.html#Datafile.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.datafile.Datafile.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads data from file, authenticating data using hashing algorithm</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a> [<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]) – It is the name of the source from where data is read.</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> (i.g. returned by <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str.encode" title="(in Python v3.9)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">str.encode()</span></code></a>)) – Hash key to be used authenticating data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.datafile.Datafile.save">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">world</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/datafile.html#Datafile.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.datafile.Datafile.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves data to file.</p>
+<p>Creates an instance, sets data and writes it to destination.
+(see: <a class="reference internal" href="#roadnetwork_rg.datafile.Datafile.set_data" title="roadnetwork_rg.datafile.Datafile.set_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_data()</span></code></a> and <a class="reference internal" href="#roadnetwork_rg.datafile.Datafile.write" title="roadnetwork_rg.datafile.Datafile.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a>)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.datafile.Datafile.set_data">
+<span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">world</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/datafile.html#Datafile.set_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.datafile.Datafile.set_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets binary data.</p>
+<p>Data can be to be saved by <a class="reference internal" href="#roadnetwork_rg.datafile.Datafile.write" title="roadnetwork_rg.datafile.Datafile.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> or parsed by <a class="reference internal" href="#roadnetwork_rg.datafile.Datafile.get_data" title="roadnetwork_rg.datafile.Datafile.get_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_data()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>world</strong> (<a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.WorldData" title="roadnetwork_rg.common.WorldData"><code class="xref py py-class docutils literal notranslate"><span class="pre">WorldData</span></code></a>) – Data to be set.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.9)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>, if type of <code class="xref py py-attr docutils literal notranslate"><span class="pre">world.seed</span></code> is not allowed.
+Only  <code class="xref py py-class docutils literal notranslate"><span class="pre">None</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>, and <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code></a>
+are supported types</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roadnetwork_rg.datafile.DatafileEncodingError" title="roadnetwork_rg.datafile.DatafileEncodingError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DatafileEncodingError</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.datafile.Datafile.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/datafile.html#Datafile.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.datafile.Datafile.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes data to a file, signs data using hashing algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a> [<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> ]) – It is the name of the destination to where data is saved.</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> (i.g. returned by <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str.encode" title="(in Python v3.9)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">str.encode()</span></code></a>)) – Hash key to be used signing data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="roadnetwork_rg.datafile.DatafileDecodeError">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-name descname"><span class="pre">DatafileDecodeError</span></span><a class="reference internal" href="_modules/roadnetwork_rg/datafile.html#DatafileDecodeError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.datafile.DatafileDecodeError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>File corruption found.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="roadnetwork_rg.datafile.DatafileEncodingError">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-name descname"><span class="pre">DatafileEncodingError</span></span><a class="reference internal" href="_modules/roadnetwork_rg/datafile.html#DatafileEncodingError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.datafile.DatafileEncodingError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>Unexpected data.</p>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="roadnetwork_rg.common.html"
+                        title="previous chapter">roadnetwork_rg.common module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="roadnetwork_rg.height_map.html"
+                        title="next chapter">roadnetwork_rg.height_map module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/roadnetwork_rg.datafile.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="roadnetwork_rg.height_map.html" title="roadnetwork_rg.height_map module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="roadnetwork_rg.common.html" title="roadnetwork_rg.common module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">roadnetwork_rg 0.1.0rc11 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="roadnetwork_rg.html" >roadnetwork_rg package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.datafile module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Ákos Sülyi.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+    </div>
+  </body>
+</html>

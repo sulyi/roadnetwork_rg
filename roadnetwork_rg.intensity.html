@@ -1,0 +1,460 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>roadnetwork_rg.intensity module &#8212; roadnetwork_rg 0.1.0rc11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="roadnetwork_rg.pathfinder module" href="roadnetwork_rg.pathfinder.html" />
+    <link rel="prev" title="roadnetwork_rg.height_map module" href="roadnetwork_rg.height_map.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="roadnetwork_rg.pathfinder.html" title="roadnetwork_rg.pathfinder module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="roadnetwork_rg.height_map.html" title="roadnetwork_rg.height_map module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">roadnetwork_rg 0.1.0rc11 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="roadnetwork_rg.html" accesskey="U">roadnetwork_rg package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.intensity module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-roadnetwork_rg.intensity">
+<span id="roadnetwork-rg-intensity-module"></span><h1>roadnetwork_rg.intensity module<a class="headerlink" href="#module-roadnetwork_rg.intensity" title="Permalink to this headline">¶</a></h1>
+<p>Various implementation of <a class="reference internal" href="roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.IntensityFunction" title="roadnetwork_rg.point_process.IntensityFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntensityFunction</span></code></a></p>
+<p>It provides some functions to be used for generating non-homogenous a
+<a class="reference internal" href="roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.PointProcess" title="roadnetwork_rg.point_process.PointProcess"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointProcess</span></code></a>, (either using
+<a class="reference internal" href="roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.SpatialPoissonPointProcess" title="roadnetwork_rg.point_process.SpatialPoissonPointProcess"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialPoissonPointProcess</span></code></a> or
+<a class="reference internal" href="roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.MarkovChainMonteCarlo" title="roadnetwork_rg.point_process.MarkovChainMonteCarlo"><code class="xref py py-class docutils literal notranslate"><span class="pre">MarkovChainMonteCarlo</span></code></a> method) by implementing the interface used for
+thinning points offered by the point process as candidates.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.AdaptivePotentialFunction">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">AdaptivePotentialFunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">city_sizes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#AdaptivePotentialFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.AdaptivePotentialFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloPotentialFunction" title="roadnetwork_rg.intensity.MarkovChainMonteCarloPotentialFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">roadnetwork_rg.intensity.MarkovChainMonteCarloPotentialFunction</span></code></a></p>
+<p>Implements a potential function that is a super-Gaussian distribution.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.AdaptivePotentialFunction.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">city_sizes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#AdaptivePotentialFunction.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.AdaptivePotentialFunction.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a potential function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – It is the size of a square bounding window.</p></li>
+<li><p><strong>city_sizes</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – It is the number of levels cities can take.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.AdaptivePotentialFunction.clear_cache">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">clear_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#AdaptivePotentialFunction.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.AdaptivePotentialFunction.clear_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears the cached <em>monopole</em> values.</p>
+<p>See: <a class="reference internal" href="#roadnetwork_rg.intensity.AdaptivePotentialFunction.update" title="roadnetwork_rg.intensity.AdaptivePotentialFunction.update"><code class="xref py py-meth docutils literal notranslate"><span class="pre">update()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.AdaptivePotentialFunction.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#AdaptivePotentialFunction.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.AdaptivePotentialFunction.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>It is gives the value of the potential function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> (<em>:attr`.PointType`</em>) – It is the point where the function is computed.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>It is the calculated value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.AdaptivePotentialFunction.potential_map">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">potential_map</span></span><em class="property"><span class="pre">:</span> <span class="pre">PIL.Image.Image</span></em><a class="headerlink" href="#roadnetwork_rg.intensity.AdaptivePotentialFunction.potential_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>It is the current values of potential function over the bounding window.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.AdaptivePotentialFunction.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#AdaptivePotentialFunction.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.AdaptivePotentialFunction.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>It updates the function based on whether the candidate is accepted or rejected.</p>
+<p>Also updates the monopole cache if the monopole has not been previously calculated.
+A monopole is a collection of values the function is updated by superposing them over
+existing values. A monopole <em>m</em> is of a super-Gaussian distribution thus:</p>
+<blockquote>
+<div><p><em>m</em> (<em>x0</em>, <em>y0</em>, <em>z</em>) ~ <strong>e</strong> ** (-((<em>x0</em> ** 2 + <em>y0</em> ** 2) / (2 * <em>z</em> ** 2)) ** <em>p</em>),
+where <em>p</em> = 1 / 3 and <cite>value</cite> = (<em>x</em>, <em>y</em>, <em>z</em>).</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> (<code class="xref py py-attr docutils literal notranslate"><span class="pre">PointType</span></code>) – It is the candidate where the potential function being updated.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.ExponentialZCompositeFunction">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">ExponentialZCompositeFunction</span></span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#ExponentialZCompositeFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.ExponentialZCompositeFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction" title="roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction</span></code></a></p>
+<p>It is the implementation of an exponential function</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.ExponentialZCompositeFunction.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">potential</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#ExponentialZCompositeFunction.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.ExponentialZCompositeFunction.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>It computes the product the following arithmetics:</p>
+<blockquote>
+<div><p><cite>potential</cite> * <cite>kernel</cite> ** <em>z</em>,
+where <cite>value</cite> is (<em>x</em>, <em>y</em>, <em>z</em>).</p>
+</div></blockquote>
+<p>See also: <a class="reference internal" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction.get" title="roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MarkovChainMonteCarloCompositeFunction.get()</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">MarkovChainMonteCarloCompositeFunction</span></span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#MarkovChainMonteCarloCompositeFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>It is an abstract function for implementing composite functions.</p>
+<p>It is used by <a class="reference internal" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction" title="roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">MarkovChainMonteCarloIntensityFunction</span></code></a> to calculate value used for
+thinning a point process. A composite function takes two other function a kernel and a potential
+function and computes a value based on them according the implemented arithmetics.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">potential</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#MarkovChainMonteCarloCompositeFunction.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>The arithmetics used should be implemented by this.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<code class="xref py py-attr docutils literal notranslate"><span class="pre">PointType</span></code>) – It is the point at where the function is calculated.</p></li>
+<li><p><strong>kernel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – It is the value of the kernel function at the point <cite>value</cite>.</p></li>
+<li><p><strong>potential</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – It is the value of the potential function at the point <cite>value</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>It is the result of computation.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">MarkovChainMonteCarloIntensityFunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">potential_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">composite_func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#MarkovChainMonteCarloIntensityFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.IntensityFunction" title="roadnetwork_rg.point_process.IntensityFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">roadnetwork_rg.point_process.IntensityFunction</span></code></a></p>
+<p>It is an implementation of <a class="reference internal" href="roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.IntensityFunction" title="roadnetwork_rg.point_process.IntensityFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntensityFunction</span></code></a> used by
+<a class="reference internal" href="roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.MarkovChainMonteCarlo" title="roadnetwork_rg.point_process.MarkovChainMonteCarlo"><code class="xref py py-class docutils literal notranslate"><span class="pre">MarkovChainMonteCarlo</span></code></a>.</p>
+<p>It is used for deciding thinning actions based on a
+<a class="reference internal" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction" title="roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">MarkovChainMonteCarloCompositeFunction</span></code></a>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">potential_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">composite_func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#MarkovChainMonteCarloIntensityFunction.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes an intensity function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rate</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a> [<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> ]) – See: <a class="reference internal" href="roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.PointProcess" title="roadnetwork_rg.point_process.PointProcess"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointProcess</span></code></a>.</p></li>
+<li><p><strong>kernel_image</strong> (<a class="reference external" href="https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image" title="(in Pillow (PIL Fork) v8.2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PIL.Image.Image</span></code></a>) – It is an image containing the values of kernel function corresponding
+to pixel values in the <strong>x</strong> and <strong>y</strong> coordinates of the image.</p></li>
+<li><p><strong>potential_func</strong> (<a class="reference internal" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloPotentialFunction" title="roadnetwork_rg.intensity.MarkovChainMonteCarloPotentialFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">MarkovChainMonteCarloPotentialFunction</span></code></a>) – It describes the pair-wise interaction of generated points.</p></li>
+<li><p><strong>kernel_image</strong> – It contains the values of a kernel function.</p></li>
+<li><p><strong>composite_func</strong> (<a class="reference internal" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction" title="roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">MarkovChainMonteCarloCompositeFunction</span></code></a>) – It computes the final value of thinning process based of potential
+and kernel functions.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction.is_accepted">
+<span class="sig-name descname"><span class="pre">is_accepted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#MarkovChainMonteCarloIntensityFunction.is_accepted"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction.is_accepted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if a value is accepted by thinning of the point process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<a class="reference internal" href="roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.T" title="roadnetwork_rg.point_process.T"><code class="xref py py-data docutils literal notranslate"><span class="pre">T</span></code></a>) – It is the candidate, that is either accepted or not.</p></li>
+<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – It is a probability, that decides if candidate is accepted.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Result of thinning process.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction.rate">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">rate</span></span><a class="headerlink" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction.rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>It is the expected number of points generated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>It is the value set by <cite>rate</cite> during initialization.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.MarkovChainMonteCarloPotentialFunction">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">MarkovChainMonteCarloPotentialFunction</span></span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#MarkovChainMonteCarloPotentialFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloPotentialFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>It is an abstract class for implementing potential functions.</p>
+<p>A potential function describes the point-wise interaction between the generated points.
+It provides an interface used by <a class="reference internal" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction" title="roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">MarkovChainMonteCarloIntensityFunction</span></code></a>,
+(see also: there).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.MarkovChainMonteCarloPotentialFunction.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#MarkovChainMonteCarloPotentialFunction.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloPotentialFunction.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>It should implemented the function arithmetics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> (<em>:attr`.PointType`</em>) – It is the point where the function is computed.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>It is the calculated value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.MarkovChainMonteCarloPotentialFunction.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#MarkovChainMonteCarloPotentialFunction.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloPotentialFunction.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>It updates the function based on whether the candidate is accepted or rejected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> (<code class="xref py py-attr docutils literal notranslate"><span class="pre">PointType</span></code>) – It is the candidate where the potential function being updated.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.SpatialPoissonPointProcessCompositeFunction">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">SpatialPoissonPointProcessCompositeFunction</span></span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#SpatialPoissonPointProcessCompositeFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.SpatialPoissonPointProcessCompositeFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction" title="roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction</span></code></a></p>
+<p>It is an abstract function for implementing composite functions.</p>
+<p>It is used in <a class="reference internal" href="roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.SpatialPoissonPointProcess" title="roadnetwork_rg.point_process.SpatialPoissonPointProcess"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialPoissonPointProcess</span></code></a> method to generate a point
+process. It is differ from parent class by having an <a class="reference internal" href="#roadnetwork_rg.intensity.SpatialPoissonPointProcessCompositeFunction.expected" title="roadnetwork_rg.intensity.SpatialPoissonPointProcessCompositeFunction.expected"><code class="xref py py-attr docutils literal notranslate"><span class="pre">expected</span></code></a> method (see: there).</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.SpatialPoissonPointProcessCompositeFunction.expected">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">expected</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#roadnetwork_rg.intensity.SpatialPoissonPointProcessCompositeFunction.expected" title="Permalink to this definition">¶</a></dt>
+<dd><p>It should be the expected value of the implemented arithmetics.</p>
+<p>This allows <a class="reference internal" href="#roadnetwork_rg.intensity.SpatialPoissonPointProcessIntensityFunction" title="roadnetwork_rg.intensity.SpatialPoissonPointProcessIntensityFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialPoissonPointProcessIntensityFunction</span></code></a> to scale
+<a class="reference internal" href="#roadnetwork_rg.intensity.SpatialPoissonPointProcessIntensityFunction.rate" title="roadnetwork_rg.intensity.SpatialPoissonPointProcessIntensityFunction.rate"><code class="xref py py-attr docutils literal notranslate"><span class="pre">rate</span></code></a> so that the generated point
+process remain <em>similar</em> to a Poison point process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>It is the expected value of the composite function.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.SpatialPoissonPointProcessCompositeFunction.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">potential</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#SpatialPoissonPointProcessCompositeFunction.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.SpatialPoissonPointProcessCompositeFunction.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>See: <a class="reference internal" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction.get" title="roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MarkovChainMonteCarloCompositeFunction.get()</span></code></a>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.SpatialPoissonPointProcessIntensityFunction">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">SpatialPoissonPointProcessIntensityFunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">potential_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">composite_func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#SpatialPoissonPointProcessIntensityFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.SpatialPoissonPointProcessIntensityFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction" title="roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction</span></code></a></p>
+<p>It is an implementation of <a class="reference internal" href="roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.IntensityFunction" title="roadnetwork_rg.point_process.IntensityFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntensityFunction</span></code></a> used by
+<a class="reference internal" href="roadnetwork_rg.point_process.html#roadnetwork_rg.point_process.SpatialPoissonPointProcess" title="roadnetwork_rg.point_process.SpatialPoissonPointProcess"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialPoissonPointProcess</span></code></a>.</p>
+<p>See: <a class="reference internal" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction" title="roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">MarkovChainMonteCarloIntensityFunction</span></code></a>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.SpatialPoissonPointProcessIntensityFunction.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">potential_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">composite_func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#SpatialPoissonPointProcessIntensityFunction.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.SpatialPoissonPointProcessIntensityFunction.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes an intensity function.</p>
+<p>Calculates mean of <cite>kernel_image</cite> to be used by
+<a class="reference internal" href="#roadnetwork_rg.intensity.SpatialPoissonPointProcessPotentialFunction" title="roadnetwork_rg.intensity.SpatialPoissonPointProcessPotentialFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialPoissonPointProcessPotentialFunction</span></code></a>.</p>
+<p>See also: <a class="reference internal" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction" title="roadnetwork_rg.intensity.MarkovChainMonteCarloIntensityFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">MarkovChainMonteCarloIntensityFunction</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>potential_func</strong> (<a class="reference internal" href="#roadnetwork_rg.intensity.SpatialPoissonPointProcessPotentialFunction" title="roadnetwork_rg.intensity.SpatialPoissonPointProcessPotentialFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialPoissonPointProcessPotentialFunction</span></code></a>) – It describes the pair-wise interaction of generated points.</p></li>
+<li><p><strong>composite_func</strong> (<a class="reference internal" href="#roadnetwork_rg.intensity.SpatialPoissonPointProcessPotentialFunction" title="roadnetwork_rg.intensity.SpatialPoissonPointProcessPotentialFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialPoissonPointProcessPotentialFunction</span></code></a>) – It computes the final value of thinning process based of potential
+and kernel functions.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.SpatialPoissonPointProcessIntensityFunction.rate">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">rate</span></span><a class="headerlink" href="#roadnetwork_rg.intensity.SpatialPoissonPointProcessIntensityFunction.rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>It is the expected number of points generated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>It is calculated based on the value set by <cite>rate</cite> during initialization, and the
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">get_expected</span></code> attribute of
+<cite>composite_func</cite>.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.SpatialPoissonPointProcessPotentialFunction">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">SpatialPoissonPointProcessPotentialFunction</span></span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#SpatialPoissonPointProcessPotentialFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.SpatialPoissonPointProcessPotentialFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloPotentialFunction" title="roadnetwork_rg.intensity.MarkovChainMonteCarloPotentialFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">roadnetwork_rg.intensity.MarkovChainMonteCarloPotentialFunction</span></code></a></p>
+<p>It is an abstract class for implementing potential functions.</p>
+<p>See also: <a class="reference internal" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloPotentialFunction" title="roadnetwork_rg.intensity.MarkovChainMonteCarloPotentialFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">MarkovChainMonteCarloPotentialFunction</span></code></a>.
+It also provides an interface used by <a class="reference internal" href="#roadnetwork_rg.intensity.SpatialPoissonPointProcessIntensityFunction" title="roadnetwork_rg.intensity.SpatialPoissonPointProcessIntensityFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialPoissonPointProcessIntensityFunction</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.SpatialPoissonPointProcessPotentialFunction.expected">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">expected</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#roadnetwork_rg.intensity.SpatialPoissonPointProcessPotentialFunction.expected" title="Permalink to this definition">¶</a></dt>
+<dd><p>It is the expected value of the potential function.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.SpatialPoissonPointProcessPotentialFunction.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#SpatialPoissonPointProcessPotentialFunction.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.SpatialPoissonPointProcessPotentialFunction.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>It should implemented the function arithmetics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> (<em>:attr`.PointType`</em>) – It is the point where the function is computed.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>It is the calculated value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.intensity.SpatialPoissonPointProcessPotentialFunction.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#SpatialPoissonPointProcessPotentialFunction.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.SpatialPoissonPointProcessPotentialFunction.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>It updates the function based on whether the candidate is accepted or rejected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> (<code class="xref py py-attr docutils literal notranslate"><span class="pre">PointType</span></code>) – It is the candidate where the potential function being updated.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="roadnetwork_rg.height_map.html"
+                        title="previous chapter">roadnetwork_rg.height_map module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="roadnetwork_rg.pathfinder.html"
+                        title="next chapter">roadnetwork_rg.pathfinder module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/roadnetwork_rg.intensity.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="roadnetwork_rg.pathfinder.html" title="roadnetwork_rg.pathfinder module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="roadnetwork_rg.height_map.html" title="roadnetwork_rg.height_map module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">roadnetwork_rg 0.1.0rc11 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="roadnetwork_rg.html" >roadnetwork_rg package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.intensity module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Ákos Sülyi.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+    </div>
+  </body>
+</html>

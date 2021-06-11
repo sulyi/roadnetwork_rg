@@ -1,0 +1,171 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>roadnetwork_rg.height_map module &#8212; roadnetwork_rg 0.1.0rc11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="roadnetwork_rg.intensity module" href="roadnetwork_rg.intensity.html" />
+    <link rel="prev" title="roadnetwork_rg.datafile module" href="roadnetwork_rg.datafile.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="roadnetwork_rg.intensity.html" title="roadnetwork_rg.intensity module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="roadnetwork_rg.datafile.html" title="roadnetwork_rg.datafile module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">roadnetwork_rg 0.1.0rc11 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="roadnetwork_rg.html" accesskey="U">roadnetwork_rg package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.height_map module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-roadnetwork_rg.height_map">
+<span id="roadnetwork-rg-height-map-module"></span><h1>roadnetwork_rg.height_map module<a class="headerlink" href="#module-roadnetwork_rg.height_map" title="Permalink to this headline">¶</a></h1>
+<p>Terrain generator</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="roadnetwork_rg.height_map.HeightMap">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">HeightMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bit_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/height_map.html#HeightMap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.height_map.HeightMap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>It is an implementation of diamond-square algorithm.</p>
+<p>In order to allow persistent map generation uses hash based pRNG.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.height_map.HeightMap.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bit_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/height_map.html#HeightMap.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.height_map.HeightMap.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes height map generation.</p>
+<p>For more on parameters see also <a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.HeightMapConfig" title="roadnetwork_rg.common.HeightMapConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">HeightMapConfig</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>offset_x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – It is the map coordinate in the <em>x</em> axis.</p></li>
+<li><p><strong>offset_y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – It is the map coordinate in the <em>y</em> axis.</p></li>
+<li><p><strong>config</strong> (<a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.HeightMapConfig" title="roadnetwork_rg.common.HeightMapConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">HeightMapConfig</span></code></a>) – It contains size, height and roughness.</p></li>
+<li><p><strong>seed</strong> (<a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.SeedType" title="roadnetwork_rg.common.SeedType"><code class="xref py py-data docutils literal notranslate"><span class="pre">SeedType</span></code></a>) – It is used for <code class="docutils literal notranslate"><span class="pre">xor</span></code> ing joined coordinates before hashing.</p></li>
+<li><p><strong>bit_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – It is used for shifting <em>y</em> coordinate before hashing. Lower part is
+occupied by <em>x</em> coordinate.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roadnetwork_rg.height_map.HeightMap.bit_length">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">bit_length</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#roadnetwork_rg.height_map.HeightMap.bit_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>It is the actual bit length used.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roadnetwork_rg.height_map.HeightMap.generate">
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/height_map.html#HeightMap.generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.height_map.HeightMap.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a height map.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Generated height map.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image" title="(in Pillow (PIL Fork) v8.2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PIL.Image.Image</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roadnetwork_rg.height_map.HeightMap.size">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">size</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#roadnetwork_rg.height_map.HeightMap.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>It is the actual used size. May differ from <code class="xref py py-attr docutils literal notranslate"><span class="pre">config.size</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="roadnetwork_rg.datafile.html"
+                        title="previous chapter">roadnetwork_rg.datafile module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="roadnetwork_rg.intensity.html"
+                        title="next chapter">roadnetwork_rg.intensity module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/roadnetwork_rg.height_map.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="roadnetwork_rg.intensity.html" title="roadnetwork_rg.intensity module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="roadnetwork_rg.datafile.html" title="roadnetwork_rg.datafile module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">roadnetwork_rg 0.1.0rc11 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="roadnetwork_rg.html" >roadnetwork_rg package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.height_map module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Ákos Sülyi.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+    </div>
+  </body>
+</html>
