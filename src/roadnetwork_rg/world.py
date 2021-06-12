@@ -252,18 +252,32 @@ class WorldGenerator:
                  key=lambda item: item.offset_y).offset_y - min_y + 1) * self._config.chunk_size
         )
         atlas_im = Image.new('RGBA', size)
-        draw_im = Image.new('RGBA', size)
 
-        draw = ImageDraw.Draw(draw_im)
+        draw = ImageDraw.Draw(atlas_im)
 
         for key, chunk in self._chunks.items():
             cx = (chunk.offset_x - min_x) * self._config.chunk_size
             cy = (chunk.offset_y - min_y) * self._config.chunk_size
 
             # concatenate height maps
-            atlas_im.paste(self._render_height_map(chunk, options), (cx, cy))
+            if options.show_height_map:
+                if options.colour_height_map:
+                    image = chunk.height_map.convert('P')
+                    image.putpalette(colour_palette)
+                    atlas_im.paste(image, (cx, cy))
+                else:
+                    atlas_im.paste(chunk.height_map, (cx, cy))
+
             # overlay potential field
-            atlas_im.alpha_composite(self._render_potential_map(chunk, options), (cx, cy))
+            if options.show_potential_map:
+                image = Image.new('RGBA', chunk.potential_map.size, 0)
+                image.putalpha(chunk.potential_map)
+                atlas_im.alpha_composite(image, (cx, cy))
+
+            # draw roads
+            if options.show_roads:
+                image = self._render_draw_roads(chunk, self._selected_paths[key])
+                atlas_im.paste(image, (cx, cy), mask=image)
 
             # place cities
             if options.show_cities:
@@ -285,47 +299,19 @@ class WorldGenerator:
                     fill=self.__text_color
                 )
 
-            # draw roads
-            image = self._render_draw_roads(chunk, self._selected_paths[key], options)
-            draw_im.paste(image, (cx, cy), mask=image)
-
-        atlas_im.paste(draw_im, mask=draw_im)
         return atlas_im
 
     @staticmethod
-    def _render_height_map(chunk: WorldChunkData, options: WorldRenderOptions) -> Image.Image:
-        if options.show_height_map:
-            if options.colour_height_map:
-                image = chunk.height_map.convert('P')
-                image.putpalette(colour_palette)
-            else:
-                image = chunk.height_map
-        else:
-            image = Image.new('RGBA', chunk.height_map.size)
-        return image
-
-    @staticmethod
-    def _render_potential_map(chunk: WorldChunkData, options: WorldRenderOptions) -> Image.Image:
-        if options.show_potential_map:
-            alpha = Image.new('RGBA', chunk.potential_map.size, 0)
-            alpha.putalpha(chunk.potential_map)
-        else:
-            alpha = Image.new('RGBA', chunk.height_map.size)
-        return alpha
-
-    @staticmethod
-    def _render_draw_roads(chunk: WorldChunkData, selected_paths: Set[Tuple[PointType, PointType]],
-                           options: WorldRenderOptions) -> Image.Image:
+    def _render_draw_roads(chunk: WorldChunkData,
+                           selected_paths: Set[Tuple[PointType, PointType]]) -> Image.Image:
+        # NOTE: avoiding `Image.Image.putpixel`
+        path_data = [0] * (chunk.height_map.size[0] * chunk.height_map.size[1])
+        for path in selected_paths:
+            for point_x, point_y in chunk.pixel_paths[path].pixels:
+                path_data[point_x + point_y * chunk.height_map.size[0]] = 255
         image = Image.new('RGBA', chunk.height_map.size, 0)
-        if options.show_roads:
-            # NOTE: avoiding `Image.Image.putpixel`
-            path_data = [0] * (chunk.height_map.size[0] * chunk.height_map.size[1])
-            for path in selected_paths:
-                for point_x, point_y in chunk.pixel_paths[path].pixels:
-                    path_data[point_x + point_y * chunk.height_map.size[0]] = 255
-            image = Image.new('RGBA', chunk.height_map.size, 0)
-            image.putalpha(Image.frombytes('L', chunk.height_map.size,
-                                           bytes(path_data)))
+        image.putalpha(Image.frombytes('L', chunk.height_map.size,
+                                       bytes(path_data)))
         return image
 
     @staticmethod
