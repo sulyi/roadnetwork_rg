@@ -10,7 +10,7 @@ Welcome to roadnetwork_rg's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   roadnetwork_rg
+   modules
 
 Indices and tables
 ==================

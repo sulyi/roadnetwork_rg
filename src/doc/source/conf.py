@@ -31,6 +31,7 @@ release = pkg_resources.get_distribution(project).version
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
     'sphinx.ext.githubpages',
     'sphinx.ext.intersphinx',
     'sphinx.ext.imgmath',
@@ -62,7 +63,7 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['modules.rst', '*.dat']
+exclude_patterns = ['*.dat']
 
 
 # -- Options for HTML output -------------------------------------------------
