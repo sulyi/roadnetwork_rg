@@ -1,10 +1,4 @@
-.. roadnetwork_rg documentation master file, created by
-   sphinx-quickstart on Wed Jun  2 07:47:04 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to roadnetwork_rg's documentation!
-==========================================
+# roadnetwork_rg
 
 This python package implements a map generator that connects cities with a *sensible* road network.
 
@@ -15,23 +9,11 @@ The generated road network is close to a minimal spanning tree but allows loops,
 * a complete graph of the shortest roads connecting the cities is created,
 * a heuristic is applied to filter roads.
 
-TODO
-----
+## TODO
 
 * Fine-tune heuristic: currently it is merely a greedy algorithm with exit condition of
   filtered graph being continuous.
 
-Contents:
----------
+## see also:
 
-.. toctree::
-   :maxdepth: 2
-
-   modules
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+* [Documentation](http://sulyi.github.io/roadnetwork_rg)

@@ -1,9 +1,9 @@
 roadnetwork_rg
 ==============
 
-WIP
+Here is an example of a generated world:
 
-TODO: add readme
+.. image:: _static/example.png
 
 .. toctree::
    :maxdepth: 4
