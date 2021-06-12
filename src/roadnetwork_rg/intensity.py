@@ -179,10 +179,11 @@ class AdaptivePotentialFunction(MarkovChainMonteCarloPotentialFunction):
         A monopole is a collection of values the function is updated by superposing them over
         existing values. A monopole :math:`m` is of a super-Gaussian distribution thus:
 
-            :math:`m(x_0, y_0, z) \\sim e^{-{\\left( \\frac{{(x - x_0)}^2 + {(y - y_0)}^2}{2 z^2} \\right)}^p},`
+            :math:`m(x_0, y_0, z) \\sim e^{-{\\left( \
+                \\frac{{(x - x_0)}^2 + {(y - y_0)}^2}{2 z^2} \\right)}^p},`
 
-            where :math:`p = { \\frac{1}{3}}`, :math:`x_0, y_0` is the coordinates of the monopole's origin and
-            `value` is :math:`(x, y, z)`.
+            where :math:`p = { \\frac{1}{3}}`, :math:`x_0, y_0` is the coordinates of the monopole's
+            origin and `value` is :math:`(x, y, z)`.
 
 
         :param value: It is the candidate where the potential function being updated.

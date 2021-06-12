@@ -109,11 +109,11 @@ class WorldConfig:
 
 @dataclass(frozen=True)
 class HeightMapConfig:
-    """It is a boilerplate used by :class:`HeightMap`.
+    """It is a boilerplate used by :class:`.HeightMap`.
 
     :param size: It is the size of height map, needs to be positive positive (corresponds to
-        :attr:`chunk_size` attribute of :class:`WorldConfig`). Actual value used is the smallest
-        power of two larger or equal to this.
+        `chunk_size` attribute of :class:`WorldConfig`). Actual value used is the smallest power of
+        two larger or equal to this.
     :type size: :class:`int`
     :param height: It is the amount of displacement in first step, needs to be in [0, 1] (inclusive)
         range.

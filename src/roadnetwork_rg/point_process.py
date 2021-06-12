@@ -113,7 +113,7 @@ class PointProcess(Iterator[T]):
         self._next = self._generator()
 
     def __next__(self) -> T:
-        """It is the override of :meth:`~collections.abc.Iterator.__next__` method.
+        """It is the override of :meth:`iterator.__next__` method.
 
         :return: They are points from private generator.
         :rtype: :const:`T`
@@ -122,7 +122,7 @@ class PointProcess(Iterator[T]):
         return next(self._next)
 
     def __iter__(self) -> Iterator[T]:
-        """Override of :meth:`~collections.abc.Iterator.__iter__` method.
+        """Override of :meth:`iterator.__iter__` method.
 
         :return: Its own ``self``.
         :rtype: :class:`~collections.abc.Iterator` [:const:`T`]

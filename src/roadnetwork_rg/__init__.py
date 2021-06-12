@@ -28,9 +28,9 @@ Modules include:
 
 __all__ = ("Datafile", "DatafileDecodeError", "DatafileEncodingError", "HeightMap",
            "HeightMapConfig", "PixelPath", "PointType", "SeedType", "WorldChunk", "WorldChunkData",
-           "WorldConfig", "WorldData", "WorldDataInconsistencyError", "WorldGenerator", "WorldRenderOptions",
-           "colour_palette", "default_render_options", "default_world_config", "filter_roads", "intensity",
-           "get_safe_seed", "pathfinder", "point_process")
+           "WorldConfig", "WorldData", "WorldDataInconsistencyError", "WorldGenerator",
+           "WorldRenderOptions", "colour_palette", "default_render_options", "default_world_config",
+           "filter_roads", "intensity", "get_safe_seed", "pathfinder", "point_process")
 
 from . import intensity, pathfinder, point_process, _version
 from .common import (HeightMapConfig, PixelPath, PointType, SeedType, WorldChunkData, WorldConfig,
