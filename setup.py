@@ -54,7 +54,7 @@ setup(
     package_dir={'': SRC,
                  NAME: '%s/%s' % (SRC, NAME)},
     url='https://github.com/sulyi/roadnetwork_rg',
-    license='',  # FIXME: add license
+    license='GPLv3',
     platforms=['Linux'],
     author='Ákos Sülyi',
     author_email='sulyi.gbox@gmail.com',
