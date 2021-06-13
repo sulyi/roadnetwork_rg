@@ -31,8 +31,9 @@ def get_version(version_file):
     return ver_ns["__version__"] if not rev else ''.join((ver_ns["__version__"], 'rc', rev))
 
 
-NAME = 'roadnetwork_rg'
 SRC = 'src'
+NAME = 'roadnetwork_rg'
+DATA = '%s.%s' % (NAME, 'data')
 
 version = get_version(os.path.join(SRC, NAME, '_version.py'))
 
@@ -46,13 +47,14 @@ requires = ['Pillow', 'numpy']
 setup(
     name=NAME,
     version=version,
-    packages=[NAME],
+    packages=[NAME, DATA],
     package_data={
-        NAME: ['data/colourmap.palette'],
+        DATA: ['colourmap.palette'],  # just in case manifest is lost
     },
     include_package_data=True,
     package_dir={'': SRC,
-                 NAME: '%s/%s' % (SRC, NAME)},
+                 NAME: '%s/%s' % (SRC, NAME),
+                 DATA: '%s/%s/%s' % (SRC, NAME, 'data')},
     url='https://github.com/sulyi/roadnetwork_rg',
     license='GPLv3',
     platforms=['Linux'],
