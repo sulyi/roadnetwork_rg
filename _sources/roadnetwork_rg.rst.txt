@@ -33,38 +33,28 @@ Module contents
    :private-members:
    :show-inheritance:
 
-   .. FIXME: find a better way!
 
-   :class:`.Datafile`
+.. FIXME: add automation for this
+.. autosummary::
 
-   :class:`.DatafileDecodeError`
+   ~datafile.Datafile
+   ~datafile.DatafileDecodeError
+   ~datafile.DatafileEncodingError
+   ~height_map.HeightMap
+   ~common.HeightMapConfig
+   ~common.PixelPath
+   ~common.PointType
+   ~common.SeedType
+   ~world.WorldChunk
+   ~common.WorldChunkData
+   ~common.WorldConfig
+   ~common.WorldData
+   ~world.WorldDataInconsistencyError
+   ~world.WorldGenerator
+   ~common.WorldRenderOptions
+   ~data.colour_palette
+   ~world.default_render_options
+   ~world.default_world_config
+   ~world.filter_roads
+   ~common.get_safe_seed
 
-   :class:`.DatafileEncodingError`
-
-   :class:`.HeightMap`
-
-   :class:`.HeightMapConfig`
-
-   :class:`.PixelPath`
-
-   :attr:`.PointType`
-
-   :data:`.SeedType`
-
-   :class:`.WorldChunk`
-
-   :class:`.WorldChunkData`
-
-   :class:`.WorldConfig`
-
-   :class:`.WorldData`
-
-   :class:`.WorldGenerator`
-
-   :class:`.WorldRenderOptions`
-
-   :data:`.colour_palette`
-
-   :data:`.default_render_options`
-
-   :data:`.default_world_config`
