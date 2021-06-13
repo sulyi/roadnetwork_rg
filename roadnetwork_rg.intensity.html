@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>roadnetwork_rg.intensity module &#8212; roadnetwork_rg 0.1.0rc1 documentation</title>
+    <title>roadnetwork_rg.intensity module &#8212; roadnetwork_rg 0.1.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bizstyle.css" />
     
@@ -40,8 +40,9 @@
         <li class="right" >
           <a href="roadnetwork_rg.height_map.html" title="roadnetwork_rg.height_map module"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">roadnetwork_rg 0.1.0rc1 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="roadnetwork_rg.html" accesskey="U">roadnetwork_rg package</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">roadnetwork_rg 0.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >roadnetwork_rg</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="roadnetwork_rg.html" accesskey="U">roadnetwork_rg package</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.intensity module</a></li> 
       </ul>
     </div>  
@@ -91,7 +92,7 @@ thinning points offered by the point process as candidates.</p>
 <dd><p>It is gives the value of the potential function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>value</strong> (<em>:attr`.PointType`</em>) – It is the point where the function is computed.</p>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.PointType" title="roadnetwork_rg.common.PointType"><code class="xref py py-data docutils literal notranslate"><span class="pre">PointType</span></code></a>) – It is the point where the function is computed.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>It is the calculated value.</p>
@@ -114,14 +115,15 @@ thinning points offered by the point process as candidates.</p>
 <dd><p>It updates the function based on whether the candidate is accepted or rejected.</p>
 <p>Also updates the monopole cache if the monopole has not been previously calculated.
 A monopole is a collection of values the function is updated by superposing them over
-existing values. A monopole <em>m</em> is of a super-Gaussian distribution thus:</p>
+existing values. A monopole <img class="math" src="_images/math/e9bc7da808d33a16a8347f27a519bd067186aa66.png" alt="m"/> is of a super-Gaussian distribution thus:</p>
 <blockquote>
-<div><p><em>m</em> (<em>x0</em>, <em>y0</em>, <em>z</em>) ~ <strong>e</strong> ** (-((<em>x0</em> ** 2 + <em>y0</em> ** 2) / (2 * <em>z</em> ** 2)) ** <em>p</em>),
-where <em>p</em> = 1 / 3 and <cite>value</cite> = (<em>x</em>, <em>y</em>, <em>z</em>).</p>
+<div><p><img class="math" src="_images/math/7bcd88e75d362a8798bf0fdfa4f8344adacc32e9.png" alt="m(x_0, y_0, z) \sim e^{-{\left(                 \frac{{(x - x_0)}^2 + {(y - y_0)}^2}{2 z^2} \right)}^p},"/></p>
+<p>where <img class="math" src="_images/math/a6facdf77d246d0a69028608414b9d5c8021b944.png" alt="p = { \frac{1}{3}}"/>, <img class="math" src="_images/math/9eb41a1996c2c457c1ce9e6e8273ae130e782713.png" alt="x_0, y_0"/> is the coordinates of the monopole’s
+origin and <cite>value</cite> is <img class="math" src="_images/math/7bc9b1d09f06174302e9375ccd7d6bf2f26b5fc4.png" alt="(x, y, z)"/>.</p>
 </div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>value</strong> (<code class="xref py py-attr docutils literal notranslate"><span class="pre">PointType</span></code>) – It is the candidate where the potential function being updated.</p>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.PointType" title="roadnetwork_rg.common.PointType"><code class="xref py py-data docutils literal notranslate"><span class="pre">PointType</span></code></a>) – It is the candidate where the potential function being updated.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -138,8 +140,8 @@ where <em>p</em> = 1 / 3 and <cite>value</cite> = (<em>x</em>, <em>y</em>, <em>z
 <span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">potential</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roadnetwork_rg/intensity.html#ExponentialZCompositeFunction.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roadnetwork_rg.intensity.ExponentialZCompositeFunction.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>It computes the product the following arithmetics:</p>
 <blockquote>
-<div><p><cite>potential</cite> * <cite>kernel</cite> ** <em>z</em>,
-where <cite>value</cite> is (<em>x</em>, <em>y</em>, <em>z</em>).</p>
+<div><p><img class="math" src="_images/math/117d2c5e09d0646ac66ad88a88cfe1b4db530aa2.png" alt="{\left( potential \cdot kernel \right)} ^ z"/>,</p>
+<p>where <cite>value</cite> is <img class="math" src="_images/math/7bc9b1d09f06174302e9375ccd7d6bf2f26b5fc4.png" alt="(x, y, z)"/>.</p>
 </div></blockquote>
 <p>See also: <a class="reference internal" href="#roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction.get" title="roadnetwork_rg.intensity.MarkovChainMonteCarloCompositeFunction.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MarkovChainMonteCarloCompositeFunction.get()</span></code></a></p>
 </dd></dl>
@@ -161,7 +163,7 @@ function and computes a value based on them according the implemented arithmetic
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<code class="xref py py-attr docutils literal notranslate"><span class="pre">PointType</span></code>) – It is the point at where the function is calculated.</p></li>
+<li><p><strong>value</strong> (<a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.PointType" title="roadnetwork_rg.common.PointType"><code class="xref py py-data docutils literal notranslate"><span class="pre">PointType</span></code></a>) – It is the point at where the function is calculated.</p></li>
 <li><p><strong>kernel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – It is the value of the kernel function at the point <cite>value</cite>.</p></li>
 <li><p><strong>potential</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – It is the value of the potential function at the point <cite>value</cite>.</p></li>
 </ul>
@@ -254,7 +256,7 @@ It provides an interface used by <a class="reference internal" href="#roadnetwor
 <dd><p>It should implemented the function arithmetics.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>value</strong> (<em>:attr`.PointType`</em>) – It is the point where the function is computed.</p>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.PointType" title="roadnetwork_rg.common.PointType"><code class="xref py py-data docutils literal notranslate"><span class="pre">PointType</span></code></a>) – It is the point where the function is computed.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>It is the calculated value.</p>
@@ -271,7 +273,7 @@ It provides an interface used by <a class="reference internal" href="#roadnetwor
 <dd><p>It updates the function based on whether the candidate is accepted or rejected.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>value</strong> (<code class="xref py py-attr docutils literal notranslate"><span class="pre">PointType</span></code>) – It is the candidate where the potential function being updated.</p>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.PointType" title="roadnetwork_rg.common.PointType"><code class="xref py py-data docutils literal notranslate"><span class="pre">PointType</span></code></a>) – It is the candidate where the potential function being updated.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -291,7 +293,7 @@ process. It is differ from parent class by having an <a class="reference interna
 <dd><p>It should be the expected value of the implemented arithmetics.</p>
 <p>This allows <a class="reference internal" href="#roadnetwork_rg.intensity.SpatialPoissonPointProcessIntensityFunction" title="roadnetwork_rg.intensity.SpatialPoissonPointProcessIntensityFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialPoissonPointProcessIntensityFunction</span></code></a> to scale
 <a class="reference internal" href="#roadnetwork_rg.intensity.SpatialPoissonPointProcessIntensityFunction.rate" title="roadnetwork_rg.intensity.SpatialPoissonPointProcessIntensityFunction.rate"><code class="xref py py-attr docutils literal notranslate"><span class="pre">rate</span></code></a> so that the generated point
-process remain <em>similar</em> to a Poison point process.</p>
+process has same density.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>It is the expected value of the composite function.</p>
@@ -342,7 +344,7 @@ and kernel functions.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>It is calculated based on the value set by <cite>rate</cite> during initialization, and the
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">get_expected</span></code> attribute of
+<a class="reference internal" href="#roadnetwork_rg.intensity.SpatialPoissonPointProcessCompositeFunction.expected" title="roadnetwork_rg.intensity.SpatialPoissonPointProcessCompositeFunction.expected"><code class="xref py py-attr docutils literal notranslate"><span class="pre">expected</span></code></a> attribute of
 <cite>composite_func</cite>.</p>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -364,6 +366,14 @@ It also provides an interface used by <a class="reference internal" href="#roadn
 <dt class="sig sig-object py" id="roadnetwork_rg.intensity.SpatialPoissonPointProcessPotentialFunction.expected">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">expected</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#roadnetwork_rg.intensity.SpatialPoissonPointProcessPotentialFunction.expected" title="Permalink to this definition">¶</a></dt>
 <dd><p>It is the expected value of the potential function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>It is calculated during initialization.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -372,7 +382,7 @@ It also provides an interface used by <a class="reference internal" href="#roadn
 <dd><p>It should implemented the function arithmetics.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>value</strong> (<em>:attr`.PointType`</em>) – It is the point where the function is computed.</p>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.PointType" title="roadnetwork_rg.common.PointType"><code class="xref py py-data docutils literal notranslate"><span class="pre">PointType</span></code></a>) – It is the point where the function is computed.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>It is the calculated value.</p>
@@ -389,7 +399,7 @@ It also provides an interface used by <a class="reference internal" href="#roadn
 <dd><p>It updates the function based on whether the candidate is accepted or rejected.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>value</strong> (<code class="xref py py-attr docutils literal notranslate"><span class="pre">PointType</span></code>) – It is the candidate where the potential function being updated.</p>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference internal" href="roadnetwork_rg.common.html#roadnetwork_rg.common.PointType" title="roadnetwork_rg.common.PointType"><code class="xref py py-data docutils literal notranslate"><span class="pre">PointType</span></code></a>) – It is the candidate where the potential function being updated.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -447,8 +457,9 @@ It also provides an interface used by <a class="reference internal" href="#roadn
         <li class="right" >
           <a href="roadnetwork_rg.height_map.html" title="roadnetwork_rg.height_map module"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">roadnetwork_rg 0.1.0rc1 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="roadnetwork_rg.html" >roadnetwork_rg package</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">roadnetwork_rg 0.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >roadnetwork_rg</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="roadnetwork_rg.html" >roadnetwork_rg package</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.intensity module</a></li> 
       </ul>
     </div>

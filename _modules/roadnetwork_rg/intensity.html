@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>roadnetwork_rg.intensity &#8212; roadnetwork_rg 0.1.0rc1 documentation</title>
+    <title>roadnetwork_rg.intensity &#8212; roadnetwork_rg 0.1.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
     
@@ -31,7 +31,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">roadnetwork_rg 0.1.0rc1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">roadnetwork_rg 0.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.intensity</a></li> 
       </ul>
@@ -76,7 +76,7 @@
         <span class="sd">&quot;&quot;&quot;It should implemented the function arithmetics.</span>
 
 <span class="sd">        :param value: It is the point where the function is computed.</span>
-<span class="sd">        :type value: :attr`.PointType`</span>
+<span class="sd">        :type value: :data:`.PointType`</span>
 <span class="sd">        :return: It is the calculated value.</span>
 <span class="sd">        :rtype: :class:`float`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -87,7 +87,7 @@
         <span class="sd">&quot;&quot;&quot;It updates the function based on whether the candidate is accepted or rejected.</span>
 
 <span class="sd">        :param value: It is the candidate where the potential function being updated.</span>
-<span class="sd">        :type value: :attr:`.PointType`</span>
+<span class="sd">        :type value: :data:`.PointType`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div></div>
@@ -108,7 +108,11 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">expected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;It is the expected value of the potential function.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;It is the expected value of the potential function.</span>
+
+<span class="sd">        :return: It is calculated during initialization.</span>
+<span class="sd">        :rtype: :class:`float`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
@@ -125,7 +129,7 @@
         <span class="sd">&quot;&quot;&quot;The arithmetics used should be implemented by this.</span>
 
 <span class="sd">        :param value: It is the point at where the function is calculated.</span>
-<span class="sd">        :type value: :attr:`.PointType`</span>
+<span class="sd">        :type value: :data:`.PointType`</span>
 <span class="sd">        :param kernel: It is the value of the kernel function at the point `value`.</span>
 <span class="sd">        :type kernel: :class:`float`</span>
 <span class="sd">        :param potential: It is the value of the potential function at the point `value`.</span>
@@ -155,7 +159,7 @@
 
 <span class="sd">        This allows :class:`.SpatialPoissonPointProcessIntensityFunction` to scale</span>
 <span class="sd">        :attr:`~.SpatialPoissonPointProcessIntensityFunction.rate` so that the generated point</span>
-<span class="sd">        process remain *similar* to a Poison point process.</span>
+<span class="sd">        process has same density.</span>
 
 <span class="sd">        :return: It is the expected value of the composite function.</span>
 <span class="sd">        :rtype: :class:`float`</span>
@@ -204,7 +208,7 @@
         <span class="sd">&quot;&quot;&quot;It is gives the value of the potential function.</span>
 
 <span class="sd">        :param value: It is the point where the function is computed.</span>
-<span class="sd">        :type value: :attr`.PointType`</span>
+<span class="sd">        :type value: :data:`.PointType`</span>
 <span class="sd">        :return: It is the calculated value.</span>
 <span class="sd">        :rtype: :class:`float`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -218,13 +222,17 @@
 
 <span class="sd">        Also updates the monopole cache if the monopole has not been previously calculated.</span>
 <span class="sd">        A monopole is a collection of values the function is updated by superposing them over</span>
-<span class="sd">        existing values. A monopole *m* is of a super-Gaussian distribution thus:</span>
+<span class="sd">        existing values. A monopole :math:`m` is of a super-Gaussian distribution thus:</span>
 
-<span class="sd">            *m* (*x0*, *y0*, *z*) ~ **e** ** (-((*x0* ** 2 + *y0* ** 2) / (2 * *z* ** 2)) ** *p*),</span>
-<span class="sd">            where *p* = 1 / 3 and `value` = (*x*, *y*, *z*).</span>
+<span class="sd">            :math:`m(x_0, y_0, z) \\sim e^{-{\\left( \</span>
+<span class="sd">                \\frac{{(x - x_0)}^2 + {(y - y_0)}^2}{2 z^2} \\right)}^p},`</span>
+
+<span class="sd">            where :math:`p = { \\frac{1}{3}}`, :math:`x_0, y_0` is the coordinates of the monopole&#39;s</span>
+<span class="sd">            origin and `value` is :math:`(x, y, z)`.</span>
+
 
 <span class="sd">        :param value: It is the candidate where the potential function being updated.</span>
-<span class="sd">        :type value: :attr:`.PointType`</span>
+<span class="sd">        :type value: :data:`.PointType`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">value</span>
@@ -258,8 +266,10 @@
 <div class="viewcode-block" id="ExponentialZCompositeFunction.get"><a class="viewcode-back" href="../../roadnetwork_rg.intensity.html#roadnetwork_rg.intensity.ExponentialZCompositeFunction.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">potential</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;It computes the product the following arithmetics:</span>
 
-<span class="sd">            `potential` * `kernel` ** *z*,</span>
-<span class="sd">            where `value` is (*x*, *y*, *z*).</span>
+<span class="sd">            :math:`{\\left( potential \\cdot kernel \\right)} ^ z`,</span>
+
+<span class="sd">            where `value` is :math:`(x, y, z)`.</span>
+
 
 <span class="sd">        See also: :meth:`.MarkovChainMonteCarloCompositeFunction.get()`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -351,7 +361,7 @@
         <span class="sd">&quot;&quot;&quot;It is the expected number of points generated.</span>
 
 <span class="sd">        :return: It is calculated based on the value set by `rate` during initialization, and the</span>
-<span class="sd">            :attr:`~.SpatialPoissonPointProcessCompositeFunction.get_expected` attribute of</span>
+<span class="sd">            :attr:`~.SpatialPoissonPointProcessCompositeFunction.expected` attribute of</span>
 <span class="sd">            `composite_func`.</span>
 <span class="sd">        :rtype: :class:`float`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -389,7 +399,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">roadnetwork_rg 0.1.0rc1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">roadnetwork_rg 0.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.intensity</a></li> 
       </ul>

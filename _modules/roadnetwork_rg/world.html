@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>roadnetwork_rg.world &#8212; roadnetwork_rg 0.1.0rc1 documentation</title>
+    <title>roadnetwork_rg.world &#8212; roadnetwork_rg 0.1.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
     
@@ -31,7 +31,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">roadnetwork_rg 0.1.0rc1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">roadnetwork_rg 0.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.world</a></li> 
       </ul>
@@ -74,12 +74,12 @@
     <span class="sd">&quot;&quot;&quot;Selects cheapest road until all target are connected.</span>
 
 <span class="sd">    :param targets: It is a list of points to be connected.</span>
-<span class="sd">    :type targets: :class:`list` [:attr:`.PointType`, ...]</span>
+<span class="sd">    :type targets: :class:`list` [:data:`.PointType`, ...]</span>
 <span class="sd">    :param paths: It is a dictionary of available paths.</span>
-<span class="sd">    :type paths: :class:`dict` [:class:`tuple` [:attr:`.PointType`, :attr:`.PointType`],</span>
+<span class="sd">    :type paths: :class:`dict` [:class:`tuple` [:data:`.PointType`, :data:`.PointType`],</span>
 <span class="sd">        :class:`.PixelPath`]</span>
 <span class="sd">    :return: It is a set of keys corresponding to selected paths.</span>
-<span class="sd">    :rtype: :class:`set` [:class:`tuple` [:attr:`.PointType`, :attr:`.PointType`], ...]</span>
+<span class="sd">    :rtype: :class:`set` [:class:`tuple` [:data:`.PointType`, :data:`.PointType`], ...]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">sorted_paths</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">path</span><span class="p">:</span> <span class="n">paths</span><span class="p">[</span><span class="n">path</span><span class="p">]</span><span class="o">.</span><span class="n">cost</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">lookup</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">}</span>
@@ -116,6 +116,10 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">break</span>
     <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="WorldDataInconsistencyError"><a class="viewcode-back" href="../../roadnetwork_rg.world.html#roadnetwork_rg.world.WorldDataInconsistencyError">[docs]</a><span class="k">class</span> <span class="nc">WorldDataInconsistencyError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;WorldData is unsafe&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="WorldGenerator"><a class="viewcode-back" href="../../roadnetwork_rg.world.html#roadnetwork_rg.world.WorldGenerator">[docs]</a><span class="k">class</span> <span class="nc">WorldGenerator</span><span class="p">:</span>
@@ -222,7 +226,6 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_chunks</span> <span class="o">=</span> <span class="p">{(</span><span class="n">chunk</span><span class="o">.</span><span class="n">offset_x</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">offset_y</span><span class="p">):</span> <span class="n">chunk</span> <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">chunks</span><span class="p">}</span>
-        <span class="c1"># FIXME: add selected paths to io</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_selected_paths</span> <span class="o">=</span> <span class="p">{</span>
             <span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">offset_x</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">offset_y</span><span class="p">):</span> <span class="n">filter_roads</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">cities</span><span class="p">,</span>
                                                            <span class="n">chunk</span><span class="o">.</span><span class="n">pixel_paths</span><span class="p">)</span>
@@ -233,8 +236,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_safe_seed</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">safe_seed</span>
 
         <span class="k">if</span> <span class="n">dirty</span><span class="p">:</span>
-            <span class="c1"># FIXME: add specific exception</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Some error occurred during loading file&quot;</span><span class="p">)</span></div>
+            <span class="k">raise</span> <span class="n">WorldDataInconsistencyError</span><span class="p">(</span><span class="s2">&quot;Error loading file&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="WorldGenerator.write"><a class="viewcode-back" href="../../roadnetwork_rg.world.html#roadnetwork_rg.world.WorldGenerator.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">],</span> <span class="n">key</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Writes generated data to file.</span>
@@ -295,18 +297,32 @@
                  <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">offset_y</span><span class="p">)</span><span class="o">.</span><span class="n">offset_y</span> <span class="o">-</span> <span class="n">min_y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">chunk_size</span>
         <span class="p">)</span>
         <span class="n">atlas_im</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGBA&#39;</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
-        <span class="n">draw_im</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGBA&#39;</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
 
-        <span class="n">draw</span> <span class="o">=</span> <span class="n">ImageDraw</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="n">draw_im</span><span class="p">)</span>
+        <span class="n">draw</span> <span class="o">=</span> <span class="n">ImageDraw</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="n">atlas_im</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chunks</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">cx</span> <span class="o">=</span> <span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">offset_x</span> <span class="o">-</span> <span class="n">min_x</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">chunk_size</span>
             <span class="n">cy</span> <span class="o">=</span> <span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">offset_y</span> <span class="o">-</span> <span class="n">min_y</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">chunk_size</span>
 
             <span class="c1"># concatenate height maps</span>
-            <span class="n">atlas_im</span><span class="o">.</span><span class="n">paste</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_render_height_map</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">options</span><span class="p">),</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">show_height_map</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">colour_height_map</span><span class="p">:</span>
+                    <span class="n">image</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">height_map</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">)</span>
+                    <span class="n">image</span><span class="o">.</span><span class="n">putpalette</span><span class="p">(</span><span class="n">colour_palette</span><span class="p">)</span>
+                    <span class="n">atlas_im</span><span class="o">.</span><span class="n">paste</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">atlas_im</span><span class="o">.</span><span class="n">paste</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">height_map</span><span class="p">,</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">))</span>
+
             <span class="c1"># overlay potential field</span>
-            <span class="n">atlas_im</span><span class="o">.</span><span class="n">alpha_composite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_render_potential_map</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">options</span><span class="p">),</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">show_potential_map</span><span class="p">:</span>
+                <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGBA&#39;</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">potential_map</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">image</span><span class="o">.</span><span class="n">putalpha</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">potential_map</span><span class="p">)</span>
+                <span class="n">atlas_im</span><span class="o">.</span><span class="n">alpha_composite</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">))</span>
+
+            <span class="c1"># draw roads</span>
+            <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">show_roads</span><span class="p">:</span>
+                <span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_render_draw_roads</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selected_paths</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                <span class="n">atlas_im</span><span class="o">.</span><span class="n">paste</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">),</span> <span class="n">mask</span><span class="o">=</span><span class="n">image</span><span class="p">)</span>
 
             <span class="c1"># place cities</span>
             <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">show_cities</span><span class="p">:</span>
@@ -328,47 +344,19 @@
                     <span class="n">fill</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__text_color</span>
                 <span class="p">)</span>
 
-            <span class="c1"># draw roads</span>
-            <span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_render_draw_roads</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selected_paths</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">options</span><span class="p">)</span>
-            <span class="n">draw_im</span><span class="o">.</span><span class="n">paste</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">),</span> <span class="n">mask</span><span class="o">=</span><span class="n">image</span><span class="p">)</span>
-
-        <span class="n">atlas_im</span><span class="o">.</span><span class="n">paste</span><span class="p">(</span><span class="n">draw_im</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">draw_im</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">atlas_im</span></div>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_render_height_map</span><span class="p">(</span><span class="n">chunk</span><span class="p">:</span> <span class="n">WorldChunkData</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="n">WorldRenderOptions</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">show_height_map</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">colour_height_map</span><span class="p">:</span>
-                <span class="n">image</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">height_map</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">)</span>
-                <span class="n">image</span><span class="o">.</span><span class="n">putpalette</span><span class="p">(</span><span class="n">colour_palette</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">image</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">height_map</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGBA&#39;</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">height_map</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">image</span>
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_render_potential_map</span><span class="p">(</span><span class="n">chunk</span><span class="p">:</span> <span class="n">WorldChunkData</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="n">WorldRenderOptions</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">show_potential_map</span><span class="p">:</span>
-            <span class="n">alpha</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGBA&#39;</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">potential_map</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-            <span class="n">alpha</span><span class="o">.</span><span class="n">putalpha</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">potential_map</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">alpha</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGBA&#39;</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">height_map</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">alpha</span>
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_render_draw_roads</span><span class="p">(</span><span class="n">chunk</span><span class="p">:</span> <span class="n">WorldChunkData</span><span class="p">,</span> <span class="n">selected_paths</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">PointType</span><span class="p">,</span> <span class="n">PointType</span><span class="p">]],</span>
-                           <span class="n">options</span><span class="p">:</span> <span class="n">WorldRenderOptions</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_render_draw_roads</span><span class="p">(</span><span class="n">chunk</span><span class="p">:</span> <span class="n">WorldChunkData</span><span class="p">,</span>
+                           <span class="n">selected_paths</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">PointType</span><span class="p">,</span> <span class="n">PointType</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">:</span>
+        <span class="c1"># NOTE: avoiding `Image.Image.putpixel`</span>
+        <span class="n">path_data</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">height_map</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">chunk</span><span class="o">.</span><span class="n">height_map</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">selected_paths</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">point_x</span><span class="p">,</span> <span class="n">point_y</span> <span class="ow">in</span> <span class="n">chunk</span><span class="o">.</span><span class="n">pixel_paths</span><span class="p">[</span><span class="n">path</span><span class="p">]</span><span class="o">.</span><span class="n">pixels</span><span class="p">:</span>
+                <span class="n">path_data</span><span class="p">[</span><span class="n">point_x</span> <span class="o">+</span> <span class="n">point_y</span> <span class="o">*</span> <span class="n">chunk</span><span class="o">.</span><span class="n">height_map</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">255</span>
         <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGBA&#39;</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">height_map</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">show_roads</span><span class="p">:</span>
-            <span class="c1"># NOTE: avoiding `Image.Image.putpixel`</span>
-            <span class="n">path_data</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">height_map</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">chunk</span><span class="o">.</span><span class="n">height_map</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">selected_paths</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">point_x</span><span class="p">,</span> <span class="n">point_y</span> <span class="ow">in</span> <span class="n">chunk</span><span class="o">.</span><span class="n">pixel_paths</span><span class="p">[</span><span class="n">path</span><span class="p">]</span><span class="o">.</span><span class="n">pixels</span><span class="p">:</span>
-                    <span class="n">path_data</span><span class="p">[</span><span class="n">point_x</span> <span class="o">+</span> <span class="n">point_y</span> <span class="o">*</span> <span class="n">chunk</span><span class="o">.</span><span class="n">height_map</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">255</span>
-            <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGBA&#39;</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">height_map</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-            <span class="n">image</span><span class="o">.</span><span class="n">putalpha</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">frombytes</span><span class="p">(</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">height_map</span><span class="o">.</span><span class="n">size</span><span class="p">,</span>
-                                           <span class="nb">bytes</span><span class="p">(</span><span class="n">path_data</span><span class="p">)))</span>
+        <span class="n">image</span><span class="o">.</span><span class="n">putalpha</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">frombytes</span><span class="p">(</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">height_map</span><span class="o">.</span><span class="n">size</span><span class="p">,</span>
+                                       <span class="nb">bytes</span><span class="p">(</span><span class="n">path_data</span><span class="p">)))</span>
         <span class="k">return</span> <span class="n">image</span>
 
 <div class="viewcode-block" id="WorldGenerator.clear_potential_cache"><a class="viewcode-back" href="../../roadnetwork_rg.world.html#roadnetwork_rg.world.WorldGenerator.clear_potential_cache">[docs]</a>    <span class="nd">@staticmethod</span>
@@ -485,7 +473,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">roadnetwork_rg 0.1.0rc1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">roadnetwork_rg 0.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.world</a></li> 
       </ul>
