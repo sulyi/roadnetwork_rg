@@ -7,7 +7,7 @@ from setuptools import setup
 
 
 def get_revision():
-    # NOTE: Use annotated (or signed) tags with names void of '-' to mark releases
+    # XXX: Use annotated (or signed) tags with names void of '-' to mark releases
     try:
         tag = subprocess.check_output([
             'git', 'describe', '--long', '--dirty=-dev0'
