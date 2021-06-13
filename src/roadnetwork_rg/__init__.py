@@ -24,8 +24,6 @@ Modules include:
 
 """
 
-# TODO: check doc
-
 __all__ = ("Datafile", "DatafileDecodeError", "DatafileEncodingError", "HeightMap",
            "HeightMapConfig", "PixelPath", "PointType", "SeedType", "WorldChunk", "WorldChunkData",
            "WorldConfig", "WorldData", "WorldDataInconsistencyError", "WorldGenerator",

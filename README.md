@@ -1,4 +1,4 @@
-# roadnetwork_rg
+# roadnetwork_rg #
 
 This python package implements a map generator that connects cities with a *sensible* road network.
 
@@ -9,11 +9,6 @@ The generated road network is close to a minimal spanning tree but allows loops,
 * a complete graph of the shortest roads connecting the cities is created,
 * a heuristic is applied to filter roads.
 
-## TODO
-
-* Fine-tune heuristic: currently it is merely a greedy algorithm with exit condition of
-  filtered graph being continuous.
-
-## see also:
+## see also: ##
 
 * [Documentation](http://sulyi.github.io/roadnetwork_rg)
