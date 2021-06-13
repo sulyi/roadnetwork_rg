@@ -126,7 +126,7 @@ then
   then
     # check if origin exists
     git config --get remote.origin.url >/dev/null &&
-      git pull origin $BRANCH_NAME ||
+      git pull  --ff-only origin $BRANCH_NAME ||
       echo -e '\nMissing remote 'origin' ... skipping pull\n'
   else
     git pull origin $BRANCH_NAME
@@ -140,7 +140,7 @@ then
   git reset --hard
   git ls-files -z --others --exclude-standard --exclude=/$DOCBUILD/ |
     xargs -0 rm -rf
-  cp -r $DOCBUILD/* . && rm -rf $DOCBUILD
+  cp -r $DOCBUILD/. . && rm -rf $DOCBUILD
   git add .
   git clean -fd  # remove empty directories, not that they matter
   git commit -am "Rebuild from $GITVERSION"
