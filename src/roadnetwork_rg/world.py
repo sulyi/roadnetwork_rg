@@ -41,35 +41,36 @@ def filter_roads(targets: List[PointType, ...], paths: Dict[Tuple[PointType, Poi
     available = 1
     q = {0: targets.copy()}
     result = set()
-    while True:
-        cheapest = sorted_paths.pop()
-        result.add(cheapest)
-        if lookup[cheapest[0]] == 0 and lookup[cheapest[1]] == 0:
-            q[available] = [*cheapest]
-            q[0].remove(cheapest[0])
-            q[0].remove(cheapest[1])
-            lookup[cheapest[0]] = available
-            lookup[cheapest[1]] = available
-            available += 1
-            if not q[0]:
-                q.pop(0)
-        elif lookup[cheapest[0]] == 0 or lookup[cheapest[1]] == 0:
-            source, target = cheapest if lookup[cheapest[0]] == 0 else reversed(cheapest)
-            q[0].remove(source)
-            q[lookup[target]].append(source)
-            lookup[source] = lookup[target]
-            if not q[0]:
-                q.pop(0)
-        elif lookup[cheapest[0]] != lookup[cheapest[1]]:
-            target, source = sorted(cheapest, key=lookup.get)
-            q_index = lookup[source]
-            q[lookup[target]].extend(q[lookup[source]])
-            for city in q[lookup[source]]:
-                lookup[city] = lookup[target]
-            q.pop(q_index)
+    if sorted_paths:
+        while True:
+            cheapest = sorted_paths.pop()
+            result.add(cheapest)
+            if lookup[cheapest[0]] == 0 and lookup[cheapest[1]] == 0:
+                q[available] = [*cheapest]
+                q[0].remove(cheapest[0])
+                q[0].remove(cheapest[1])
+                lookup[cheapest[0]] = available
+                lookup[cheapest[1]] = available
+                available += 1
+                if not q[0]:
+                    q.pop(0)
+            elif lookup[cheapest[0]] == 0 or lookup[cheapest[1]] == 0:
+                source, target = cheapest if lookup[cheapest[0]] == 0 else reversed(cheapest)
+                q[0].remove(source)
+                q[lookup[target]].append(source)
+                lookup[source] = lookup[target]
+                if not q[0]:
+                    q.pop(0)
+            elif lookup[cheapest[0]] != lookup[cheapest[1]]:
+                target, source = sorted(cheapest, key=lookup.get)
+                q_index = lookup[source]
+                q[lookup[target]].extend(q[lookup[source]])
+                for city in q[lookup[source]]:
+                    lookup[city] = lookup[target]
+                q.pop(q_index)
 
-        if len(q) == 1:
-            break
+            if len(q) == 1:
+                break
     return result
 
 
