@@ -253,8 +253,7 @@ class WorldGenerator:
                  key=lambda item: item.offset_y).offset_y - min_y + 1) * self._config.chunk_size
         )
         atlas_im = Image.new('RGBA', size)
-
-        draw = ImageDraw.Draw(atlas_im)
+        draw_im = Image.new('RGBA', size)
 
         for key, chunk in self._chunks.items():
             cx = (chunk.offset_x - min_x) * self._config.chunk_size
@@ -283,13 +282,14 @@ class WorldGenerator:
             # place cities
             if options.show_cities:
                 for x, y, z in chunk.cities:
-                    draw.ellipse((cx + x - self.__city_r - z, cy + y - self.__city_r - z,
-                                  cx + x + self.__city_r + z, cy + y + self.__city_r + z),
-                                 fill=self.__city_colour, outline=self.__city_border, width=1)
+                    ImageDraw.Draw(draw_im).ellipse(
+                        (cx + x - self.__city_r - z, cy + y - self.__city_r - z,
+                         cx + x + self.__city_r + z, cy + y + self.__city_r + z),
+                        fill=self.__city_colour, outline=self.__city_border, width=1)
 
             # put message in top left corner
             if options.show_debug:
-                draw.multiline_text(
+                ImageDraw.Draw(draw_im).multiline_text(
                     (cx, cy),
                     '\n'.join((
                         f"count: {len(chunk.cities)}",
@@ -300,6 +300,7 @@ class WorldGenerator:
                     fill=self.__text_color
                 )
 
+        atlas_im.paste(draw_im, mask=draw_im)
         return atlas_im
 
     @staticmethod
