@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>roadnetwork_rg.world &#8212; roadnetwork_rg 0.1.0 documentation</title>
+    <title>roadnetwork_rg.world &#8212; roadnetwork_rg 0.1.0rc2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
     
@@ -31,7 +31,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">roadnetwork_rg 0.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">roadnetwork_rg 0.1.0rc2 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.world</a></li> 
       </ul>
@@ -86,35 +86,36 @@
     <span class="n">available</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">q</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">targets</span><span class="o">.</span><span class="n">copy</span><span class="p">()}</span>
     <span class="n">result</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">cheapest</span> <span class="o">=</span> <span class="n">sorted_paths</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-        <span class="n">result</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cheapest</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">lookup</span><span class="p">[</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">lookup</span><span class="p">[</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">q</span><span class="p">[</span><span class="n">available</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">cheapest</span><span class="p">]</span>
-            <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="n">lookup</span><span class="p">[</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">available</span>
-            <span class="n">lookup</span><span class="p">[</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">available</span>
-            <span class="n">available</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                <span class="n">q</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">lookup</span><span class="p">[</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">lookup</span><span class="p">[</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">source</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">cheapest</span> <span class="k">if</span> <span class="n">lookup</span><span class="p">[</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">cheapest</span><span class="p">)</span>
-            <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
-            <span class="n">q</span><span class="p">[</span><span class="n">lookup</span><span class="p">[</span><span class="n">target</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
-            <span class="n">lookup</span><span class="p">[</span><span class="n">source</span><span class="p">]</span> <span class="o">=</span> <span class="n">lookup</span><span class="p">[</span><span class="n">target</span><span class="p">]</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                <span class="n">q</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">lookup</span><span class="p">[</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">!=</span> <span class="n">lookup</span><span class="p">[</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">1</span><span class="p">]]:</span>
-            <span class="n">target</span><span class="p">,</span> <span class="n">source</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cheapest</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">lookup</span><span class="o">.</span><span class="n">get</span><span class="p">)</span>
-            <span class="n">q_index</span> <span class="o">=</span> <span class="n">lookup</span><span class="p">[</span><span class="n">source</span><span class="p">]</span>
-            <span class="n">q</span><span class="p">[</span><span class="n">lookup</span><span class="p">[</span><span class="n">target</span><span class="p">]]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="n">lookup</span><span class="p">[</span><span class="n">source</span><span class="p">]])</span>
-            <span class="k">for</span> <span class="n">city</span> <span class="ow">in</span> <span class="n">q</span><span class="p">[</span><span class="n">lookup</span><span class="p">[</span><span class="n">source</span><span class="p">]]:</span>
-                <span class="n">lookup</span><span class="p">[</span><span class="n">city</span><span class="p">]</span> <span class="o">=</span> <span class="n">lookup</span><span class="p">[</span><span class="n">target</span><span class="p">]</span>
-            <span class="n">q</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">q_index</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sorted_paths</span><span class="p">:</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">cheapest</span> <span class="o">=</span> <span class="n">sorted_paths</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cheapest</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">lookup</span><span class="p">[</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">lookup</span><span class="p">[</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">q</span><span class="p">[</span><span class="n">available</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">cheapest</span><span class="p">]</span>
+                <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">lookup</span><span class="p">[</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">available</span>
+                <span class="n">lookup</span><span class="p">[</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">available</span>
+                <span class="n">available</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">q</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">lookup</span><span class="p">[</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">lookup</span><span class="p">[</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">source</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">cheapest</span> <span class="k">if</span> <span class="n">lookup</span><span class="p">[</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">cheapest</span><span class="p">)</span>
+                <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+                <span class="n">q</span><span class="p">[</span><span class="n">lookup</span><span class="p">[</span><span class="n">target</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+                <span class="n">lookup</span><span class="p">[</span><span class="n">source</span><span class="p">]</span> <span class="o">=</span> <span class="n">lookup</span><span class="p">[</span><span class="n">target</span><span class="p">]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">q</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">lookup</span><span class="p">[</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">!=</span> <span class="n">lookup</span><span class="p">[</span><span class="n">cheapest</span><span class="p">[</span><span class="mi">1</span><span class="p">]]:</span>
+                <span class="n">target</span><span class="p">,</span> <span class="n">source</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cheapest</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">lookup</span><span class="o">.</span><span class="n">get</span><span class="p">)</span>
+                <span class="n">q_index</span> <span class="o">=</span> <span class="n">lookup</span><span class="p">[</span><span class="n">source</span><span class="p">]</span>
+                <span class="n">q</span><span class="p">[</span><span class="n">lookup</span><span class="p">[</span><span class="n">target</span><span class="p">]]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="n">lookup</span><span class="p">[</span><span class="n">source</span><span class="p">]])</span>
+                <span class="k">for</span> <span class="n">city</span> <span class="ow">in</span> <span class="n">q</span><span class="p">[</span><span class="n">lookup</span><span class="p">[</span><span class="n">source</span><span class="p">]]:</span>
+                    <span class="n">lookup</span><span class="p">[</span><span class="n">city</span><span class="p">]</span> <span class="o">=</span> <span class="n">lookup</span><span class="p">[</span><span class="n">target</span><span class="p">]</span>
+                <span class="n">q</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">q_index</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">break</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">break</span>
     <span class="k">return</span> <span class="n">result</span></div>
 
 
@@ -297,8 +298,7 @@
                  <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">offset_y</span><span class="p">)</span><span class="o">.</span><span class="n">offset_y</span> <span class="o">-</span> <span class="n">min_y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">chunk_size</span>
         <span class="p">)</span>
         <span class="n">atlas_im</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGBA&#39;</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
-
-        <span class="n">draw</span> <span class="o">=</span> <span class="n">ImageDraw</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="n">atlas_im</span><span class="p">)</span>
+        <span class="n">draw_im</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGBA&#39;</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chunks</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">cx</span> <span class="o">=</span> <span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">offset_x</span> <span class="o">-</span> <span class="n">min_x</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">chunk_size</span>
@@ -327,13 +327,14 @@
             <span class="c1"># place cities</span>
             <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">show_cities</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">chunk</span><span class="o">.</span><span class="n">cities</span><span class="p">:</span>
-                    <span class="n">draw</span><span class="o">.</span><span class="n">ellipse</span><span class="p">((</span><span class="n">cx</span> <span class="o">+</span> <span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__city_r</span> <span class="o">-</span> <span class="n">z</span><span class="p">,</span> <span class="n">cy</span> <span class="o">+</span> <span class="n">y</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__city_r</span> <span class="o">-</span> <span class="n">z</span><span class="p">,</span>
-                                  <span class="n">cx</span> <span class="o">+</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__city_r</span> <span class="o">+</span> <span class="n">z</span><span class="p">,</span> <span class="n">cy</span> <span class="o">+</span> <span class="n">y</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__city_r</span> <span class="o">+</span> <span class="n">z</span><span class="p">),</span>
-                                 <span class="n">fill</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__city_colour</span><span class="p">,</span> <span class="n">outline</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__city_border</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">ImageDraw</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="n">draw_im</span><span class="p">)</span><span class="o">.</span><span class="n">ellipse</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">cx</span> <span class="o">+</span> <span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__city_r</span> <span class="o">-</span> <span class="n">z</span><span class="p">,</span> <span class="n">cy</span> <span class="o">+</span> <span class="n">y</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__city_r</span> <span class="o">-</span> <span class="n">z</span><span class="p">,</span>
+                         <span class="n">cx</span> <span class="o">+</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__city_r</span> <span class="o">+</span> <span class="n">z</span><span class="p">,</span> <span class="n">cy</span> <span class="o">+</span> <span class="n">y</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__city_r</span> <span class="o">+</span> <span class="n">z</span><span class="p">),</span>
+                        <span class="n">fill</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__city_colour</span><span class="p">,</span> <span class="n">outline</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__city_border</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
             <span class="c1"># put message in top left corner</span>
             <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">show_debug</span><span class="p">:</span>
-                <span class="n">draw</span><span class="o">.</span><span class="n">multiline_text</span><span class="p">(</span>
+                <span class="n">ImageDraw</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="n">draw_im</span><span class="p">)</span><span class="o">.</span><span class="n">multiline_text</span><span class="p">(</span>
                     <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">),</span>
                     <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span>
                         <span class="sa">f</span><span class="s2">&quot;count: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">cities</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
@@ -344,6 +345,7 @@
                     <span class="n">fill</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__text_color</span>
                 <span class="p">)</span>
 
+        <span class="n">atlas_im</span><span class="o">.</span><span class="n">paste</span><span class="p">(</span><span class="n">draw_im</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">draw_im</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">atlas_im</span></div>
 
     <span class="nd">@staticmethod</span>
@@ -473,7 +475,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">roadnetwork_rg 0.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">roadnetwork_rg 0.1.0rc2 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">roadnetwork_rg.world</a></li> 
       </ul>
