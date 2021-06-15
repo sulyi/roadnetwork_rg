@@ -2,6 +2,10 @@
 set -euo pipefail
 
 # TODO: add options to set options in runtime
+
+# FIXME: usage of porcelain git commands:
+#  add, checkout, clean, commit, describe, pull, reset
+
 REMOTE=origin
 
 VENV=vgh-pagesenv
