@@ -63,6 +63,12 @@ require_clean_work_tree()
   fi
 }
 
+cleanup()
+{
+  echo -e "\nCleaning up..."
+  rm -r $VENV
+}
+
 # MAIN
 
 # do setup (read arguments)
@@ -103,6 +109,8 @@ done
 [ $AUTO -eq 0 ] && require_clean_work_tree "create $BRANCH_NAME"
 
 virtualenv $VENV
+trap cleanup EXIT
+
 source $VENV/bin/activate
 pip install -r requirements.txt
 
@@ -148,9 +156,7 @@ else
   echo "Failed to locate build directory"
 fi
 
-# clean up
-# TODO: move to trap
-rm -r $VENV
+cleanup
 
 echo -e "\n\nBuilding *$BRANCH_NAME* was successful," \
         "\nplease consider squashing before pushing!\n"
