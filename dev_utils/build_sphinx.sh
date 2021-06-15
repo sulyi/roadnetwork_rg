@@ -136,6 +136,8 @@ echo -e "\nPackage version $PACKAGEVERSION is tagged as $GITVERSION by git\n"
 
 python setup.py install
 
+echo
+
 # build doc
 cd $DOCSRC
 make clean && make html
