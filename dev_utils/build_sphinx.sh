@@ -2,6 +2,7 @@
 set -euo pipefail
 
 # TODO: add options to set options in runtime
+REMOTE=origin
 
 VENV=vgh-pagesenv
 
@@ -131,9 +132,9 @@ cd $DOCSRC
 make clean && make html
 cd -
 
-# create/update branch
 if git show-ref --verify --quiet "refs/heads/$BRANCH_NAME"
 then
+  # update branch
   git checkout $BRANCH_NAME
   if [ $AUTO -eq 0 ]
   then
@@ -149,12 +150,14 @@ then
     git pull  --ff-only origin $BRANCH_NAME
   fi
 else
+  # create branch
   git checkout --orphan $BRANCH_NAME
 fi
 
 if [ -d "$DOCBUILD" ]
 then
   git reset --hard
+  # FIXME: keep more
   git ls-files -z --others --exclude-standard --exclude=/$DOCBUILD/ | \
     tee >(xargs -0 echo "Removing") | xargs -0 rm -rf
   cp -r $DOCBUILD/. . && rm -rf $DOCBUILD
