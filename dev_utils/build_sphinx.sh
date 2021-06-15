@@ -109,6 +109,10 @@ done
 
 [ $AUTO -eq 0 ] && require_clean_work_tree "Build documentation"
 
+BACK_NAME=$(git symbolic-ref -q HEAD)
+BACK_NAME=${BACK_NAME##refs/heads/}
+BACK_NAME=${BACK_NAME:-HEAD}  # shouldn't happen unless AUTO
+
 virtualenv $VENV
 trap 'cleanup; git checkout "$BACK_NAME"' ERR
 
