@@ -8,7 +8,7 @@ from typing import List, Dict, Tuple, Set
 from .common import PointType, PixelPath
 
 
-# TODO: update __init__, __init__.__all__, doc autosummary, toctree submodules
+# TODO: doc autosummary, toctree submodules
 
 
 def greedy(targets: List[PointType, ...], paths: Dict[Tuple[PointType, PointType], PixelPath]

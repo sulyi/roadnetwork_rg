@@ -28,16 +28,16 @@ __all__ = ("Datafile", "DatafileDecodeError", "DatafileEncodingError", "HeightMa
            "HeightMapConfig", "PixelPath", "PointType", "SeedType", "WorldChunk", "WorldChunkData",
            "WorldConfig", "WorldData", "WorldDataInconsistencyError", "WorldGenerator",
            "WorldRenderOptions", "colour_palette", "default_render_options", "default_world_config",
-           "filter_roads", "intensity", "get_safe_seed", "pathfinder", "point_process")
+           "heuristic", "intensity", "get_safe_seed", "pathfinder", "point_process")
 
-from . import intensity, pathfinder, point_process, _version
+from . import heuristic, intensity, pathfinder, point_process, _version
 from .common import (HeightMapConfig, PixelPath, PointType, SeedType, WorldChunkData, WorldConfig,
                      WorldData, WorldRenderOptions, get_safe_seed)
 from .data import colour_palette
 from .datafile import Datafile, DatafileDecodeError, DatafileEncodingError
 from .height_map import HeightMap
 from .world import (WorldChunk, WorldDataInconsistencyError, WorldGenerator, default_render_options,
-                    default_world_config, filter_roads)
+                    default_world_config)
 
 __datafile_version__ = Datafile.get_version()
 """Version of :class:`.Datafile` file format"""
